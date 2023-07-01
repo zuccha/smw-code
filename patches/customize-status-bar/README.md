@@ -30,16 +30,16 @@ So, why make another patch that modifies the status bar?
 
 I wanted a status bar that has the following features:
 
-1. All original features in minimal style;
-2. Alter visibility of each element (score, Yoshi coins, time, lives, coins,
-   bonus stars, item box) individually
-3. Allow level-specific customization of each element;
+1. All original features in minimal style.
+2. Alter visibility of each element (score, dragon coins, time, lives, coins,
+   bonus stars, item box) individually.
+3. Allow level-specific customization of each element.
 4. Conditional visibility of some elements (e.g., hide time indicator if time
-   limit is set to 0);
+   limit is set to 0).
 5. Dynamic positioning of elements (i.e., if one element in one group is not
-   visible, the others shift to fill the gap);
-6. Custom coin limit
-7. Disabling the item box (or modify its position)
+   visible, the others shift to fill the gap).
+6. Custom coin limit.
+7. Disabling the item box (or modify its position).
 
 Let's cover each aspect individually.
 

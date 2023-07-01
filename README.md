@@ -4,4 +4,4 @@ A collection of SMW ASM and resources.
 
 ## Patches
 
-- [Customize Status Bar](./patches)
+- [Customize Status Bar](./patches/customize-status-bar)
