@@ -2,7 +2,7 @@
 
 Yet another patch for customizing the status bar.
 
-## Table of contents
+## Table of Contents
 
 1. [Motivation](#motivation)
    1. [Minimal style](#1-minimal-style)
@@ -70,14 +70,14 @@ status bar easily via defines. You can disable useless components on the fly
 
 ### 3. Level-specific customization
 
-The hack provides a set of settings that allow to configure the status bar
+The patch provides a set of settings that allow to configure the status bar
 globally. However, if you feel the need to enable/disable/tweak the behavior of
 the sidebar for a specific level, you can just do that!
 
 ![Status Bar with score](./docs/sb-transition.gif)
 
 Global configuration is done via the settings you find in
-"configuration/global.asm", while per-level customization is handled through
+`configuration/global.asm`, while per-level customization is handled through
 tables in `configuration/levels.asm`. I suggest you first check out the global
 settings (a more detailed explanation on what each setting does is provided
 there), and then the levels file.
@@ -93,7 +93,7 @@ only when they are relevant. In particular
 
 For instance, with
 
-```
+```asm
 !TimeVisibility = 2
 ```
 
@@ -114,12 +114,12 @@ Status bar elements are organized in clusters:
 - Group 2: Dragon Coins and Score
 - Item Box
 
-![Yoshi's house](./docs/slots.png)
+![Yoshi's house](./docs/sb-slots.png)
 
 Every group controls its set of elements to display in positions called "slots".
 Elements within a group are ordered by priority via settings. For instance
 
-```
+```asm
 !Group1Order = !Lives, !BonusStars, !Time, !Coins
 ```
 
@@ -145,7 +145,7 @@ is greater than zero. Then:
 
 The same applies for score and dragon coins. If the score is not visible, dragon
 coins will shift to the top line of the status bar. You can check
-[this example](#2-alter-visibility-of-each-element).
+[this example](#2-elements-visibility).
 
 By default slots for each groups are drawn close to each other, but you can
 actually place each slot wherever you want.
@@ -156,15 +156,15 @@ It is possible to set a custom coin limit for each level by setting the value in
 a table in `configuration/levels.asm`. By default each level has a limit of 100
 coins like in vanilla (the 100th will collect a life).
 
-You can also control whether you want the counter to reset and/or adding a life
+You can also control whether you want the counter to reset and/or add a life
 when reaching the limit.
 
-### Disable the item box
+### 7. Disable the item box
 
 Besides making the power up in the item box visible or invisible, it is also
 possible to disable the item box entirely
 
-```
+```asm
 !PowerUpVisibility = 2
 ```
 
@@ -179,9 +179,9 @@ It is also possible to change the horizontal position of the item box. The
 change will affect both the position of the item box in the status bar and the
 position form where the item will fall when taking damage or pressing select.
 
-| ![Shifted item box](./docs/sb-no-item-box.gif) |
-| :--------------------------------------------: |
-|                Shifted item box                |
+| ![Shifted item box](./docs/sb-shifted-item-box.gif) |
+| :-------------------------------------------------: |
+|                  Shifted item box                   |
 
 ## Usage
 
@@ -217,7 +217,7 @@ compatible yet.
 
 ### Patching
 
-Run Asar with "customize_status_bar.asm".
+Run Asar with `customize_status_bar.asm`.
 
 `customize_status_bar.asm` has to be in the same folder as `code`,
 `configuration`, and `modules` folders.
@@ -261,7 +261,7 @@ another patch that modifies it was previously applied (and not reverted).
 
 ## Limitations
 
-The current patch suffffers from the following limitations:
+The current patch suffers from the following limitations:
 
 1. It is not possible to use the left-most tile of the second row of the status
    bar.
