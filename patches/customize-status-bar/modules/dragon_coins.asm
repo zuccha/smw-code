@@ -43,10 +43,10 @@ AreDragonCoinsVisible:
 ; Render
 ;-------------------------------------------------------------------------------
 
-; Draw collected dragon coinson status bar.
+; Draw collected dragon coins on status bar.
 ; It expects the address for the position to be in A 16-bit.
 ShowDragonCoins:
-    ; Backup X/Y, move A into Y, and set A 8-bit.
+    ; Backup X/Y, push A onto the stack, and set A 8-bit.
     PHX : PHY : PHA : SEP #$30
 
     ; Determine how many coins to draw. $1422, the amount collected during
@@ -56,8 +56,8 @@ ShowDragonCoins:
         ; Always show coins - Ensure coins are show even when entering a level
         ; where all coins have been collected.
         LDA $1422 : STA $00
-        %are_dragon_coins_collected() : BEQ .draw ; If all coins have been collected...
-        LDA #$05 : STA $00                        ; ...show 5 coins as collected.
+        %are_dragon_coins_collected() : BEQ .draw ; If all coins have been collected
+        LDA #$05 : STA $00                        ; Then show 5 coins as collected
     elseif !DragonCoinsVisibility == 2
         ; Show coins only when not all have been collected (vanilla) - Don't
         ; draw any coin (collected or not) if five have been collected.
@@ -72,17 +72,17 @@ ShowDragonCoins:
     endif
 
     ; Draw one coin for each collected coin and one empty coin for the rest.
-    ; The formula is as follows: #Collected = $00, $NotCollected #$05 - $00.
+    ; The formula is as follows: #Collected = $00, #NotCollected = #$05 - $00.
 .draw
     REP #$10 : PLY : LDX #$0000                      ; Dragon coin index
     ; Collected coins.
 -   TXA : CMP $00 : BCS +                            ; If index < collected dragon coins...
-    CMP #$05 : BCS +                                 ; ...and it's lower than 5
+    CMP #$05 : BCS +                                 ; ...and index < 5
     LDA.b #!DragonCoinsCollectedSymbol : STA $0000,y ; Then draw a coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -
-    ; Non-collected coins.
-+   CMP #$05 : BCS .return                           ; If it's lower than 5
++   ; Non-collected coins.
+-   CMP #$05 : BCS .return                           ; If index < 5
     LDA.b #!DragonCoinsMissingSymbol : STA $0000,y   ; Then draw a missing coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -

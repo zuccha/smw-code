@@ -30,7 +30,7 @@ AreBonusStarsVisible:
 ; Draw bonus stars counter on status bar.
 ; It expects the address for the position to be in A 16-bit.
 ShowBonusStars:
-    ; Backup X/Y, move A into Y, and set A/X/Y to 8-bit
+    ; Backup X/Y, move A into Y, and set A/X/Y to 8-bit.
     PHX : PHY : PHA : SEP #$30
 
     ; Check bonus stars amount and setup bonus game if necessary.
@@ -40,7 +40,7 @@ ShowBonusStars:
     LDA $0F48|!addr,x : SEC             ; ...subtract 100 ($64) stars.
     SBC #$64 : STA.W $0F48|!addr,x      ; ...
 
-    ; Draw bonus stars
+    ; Draw bonus stars.
 +   LDA $0F48|!addr,x : REP #$10 : PLY               ; Load bonus stars for current player
     %draw_counter_with_two_digits(!BonusStarsSymbol) ; and draw them
 

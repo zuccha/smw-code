@@ -28,17 +28,17 @@ IsScoreVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw score counter on status bar.
-; It expects the address for the position to be in A 16-bit.
+; It expects the address for the position to be in A (16-bit).
 ShowScore:
-    ; Backup X/Y, move A into Y, and set A 8-bit
+    ; Backup X/Y, move A into X, and set A (8-bit).
     PHX : PHY : TAX : SEP #$20
 
     ; Draw last hardcoded zero, before we start incrementing X.
     LDA #$00 : STA $0006,x : PHX
 
     ; This part draws the three-bytes hexadecimal number as six decimal digits.
-    ;   00 00 FF => 00 00 00 02 05 05
-    ;   0F 32 4F => 09 09 09 09 09 09
+    ;   00 00 FF => 000255
+    ;   0F 32 4F => 999999
     ; Taken (and slightly adapted) from the original code, I don't really
     ; understand what the formula is for the conversion. I suggest to take a
     ; look at the original code at address $009012.
