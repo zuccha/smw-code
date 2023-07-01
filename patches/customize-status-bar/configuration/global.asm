@@ -1,4 +1,18 @@
 ;-------------------------------------------------------------------------------
+; General
+;-------------------------------------------------------------------------------
+
+; Enable or disable level-specific configuration. Level configuration requires
+; three tables of 512 bytes each, for a total of 1,526 bytes, which is quite a
+; lot. If you don't need level-spefic customization and are worried about free
+; space usage, you can turn this off. If this is turned off, the patch will
+; account only for global settings, ignoring everything in "levels.asm".
+; Possible values:
+;   0 = Disabled
+;   1 = Enabled
+!EnableLevelConfiguration = 1
+
+;-------------------------------------------------------------------------------
 ; Bonus Stars
 ;-------------------------------------------------------------------------------
 
@@ -54,6 +68,10 @@
 ;   0 = Don't reset counter
 ;   1 = Reset counter (vanilla)
 !ResetCoinsIfCoinLimitReached = 1
+
+; Coin limit. Used only if !EnableLevelConfiguration is turned off.
+; Default value: $64 (100) (vanilla).
+!CoinsLimit = $64
 
 
 ;-------------------------------------------------------------------------------

@@ -19,9 +19,9 @@
 
 ; AreCoinsVisible if visibility is set to 2.
 macro are_coins_visible_mode_2()
-    %lda_level_byte(CoinLimitTable) : CMP #$00 : BEQ + ; If coin limit is not zero
-    REP #$20 : LDA #$0001 : BRA ++                     ; Then return 1
-+   REP #$20 : LDA #$0000                              ; Else return 0
+    %lda_coins_limit() : CMP #$00 : BEQ + ; If coin limit is not zero
+    REP #$20 : LDA #$0001 : BRA ++        ; Then return 1
++   REP #$20 : LDA #$0000                 ; Else return 0
 ++
 endmacro
 
@@ -42,11 +42,11 @@ ShowCoins:
     PHX : PHY : TAY : SEP #$20
 
     ; Increase coin count if necessary.
-    LDA $13CC|!addr : BEQ +                   ; If there is a "coin increase"
-    DEC $13CC|!addr                           ; Then decrease it.
-    %lda_level_byte(CoinLimitTable) : STA $00 ; If the limit of coins...
-    DEC A : CMP $0DBF|!addr : BCC +           ; ...has not been reached yet
-    INC $0DBF|!addr                           ; Then increase coin count by 1.
+    LDA $13CC|!addr : BEQ +         ; If there is a "coin increase"
+    DEC $13CC|!addr                 ; Then decrease it.
+    %lda_coins_limit() : STA $00    ; If the limit of coins...
+    DEC A : CMP $0DBF|!addr : BCC + ; ...has not been reached yet
+    INC $0DBF|!addr                 ; Then increase coin count by 1
 
     ; Skip ahead if coin limit has not been reached.
     LDA $00 : CMP $0DBF|!addr : BNE +

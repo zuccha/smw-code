@@ -46,10 +46,12 @@ HexToDec:
 ; - %check_visibility(!TimeVisibility, 1, 3, check_time_mode_2)
 ; - %check_visibility_simple(!PowerUpVisibility, 2, 1)
 macro check_visibility(global_setting, group, position, check_mode_2)
-    SEP #$20 : %lda_level_byte(Group<group>VisibilityTable)
-    AND #%11000000>>(<position>*2) : BEQ .mode0
-    CMP #%01000000>>(<position>*2) : BEQ .mode1
-    CMP #%10000000>>(<position>*2) : BEQ .mode2
+    if !EnableLevelConfiguration == 1
+        SEP #$20 : %lda_level_byte(Group<group>VisibilityTable)
+        AND #%11000000>>(<position>*2) : BEQ .mode0
+        CMP #%01000000>>(<position>*2) : BEQ .mode1
+        CMP #%10000000>>(<position>*2) : BEQ .mode2
+    endif
 
     REP #$20
     if <global_setting> == 2
@@ -69,9 +71,11 @@ endmacro
 ; Like check_visibility, but if flag is 10 ($02), it behaves like a global
 ; setting.
 macro check_visibility_simple(global_setting, group, position)
-    SEP #$20 : %lda_level_byte(Group<group>VisibilityTable)
-    AND #%11000000>>(<position>*2) : BEQ .mode0
-    CMP #%01000000>>(<position>*2) : BEQ .mode1
+    if !EnableLevelConfiguration == 1
+        SEP #$20 : %lda_level_byte(Group<group>VisibilityTable)
+        AND #%11000000>>(<position>*2) : BEQ .mode0
+        CMP #%01000000>>(<position>*2) : BEQ .mode1
+    endif
 
     REP #$20
     if <global_setting> == 1
@@ -146,4 +150,14 @@ endmacro
 macro lda_level_byte(level_table)
     SEP #$20 : PHX : LDX $010B|!addr
     LDA.l <level_table>,x : PLX
+endmacro
+
+; Load the coins' limit for a given level (or global if level configuration is
+; disabled) into A (8-bit).
+macro lda_coins_limit()
+    if !EnableLevelConfiguration == 1
+        %lda_level_byte(CoinsLimitTable)
+    else
+        SEP #$20 : LDA !CoinsLimit
+    endif
 endmacro
