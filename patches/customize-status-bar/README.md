@@ -12,6 +12,7 @@ Yet another patch for customizing the status bar.
    5. [Dynamic positioning](#5-dynamic-positioning)
    6. [Custom coin limit](#6-custom-coin-limit)
    7. [Disable the item box](#7-disable-the-item-box)
+   8. [Custom message for all dragon coins](#7-custom-message-for-all-dragon-coins)
 2. [Usage](#usage)
    1. [Folder structure](#folder-structure)
    2. [Compatibility](#compatibility)
@@ -40,6 +41,7 @@ I wanted a status bar that has the following features:
    visible, the others shift to fill the gap).
 6. Custom coin limit.
 7. Disabling the item box (or modify its position).
+8. Display a custom message when collecting all dragon coins.
 
 Let's cover each aspect individually.
 
@@ -182,6 +184,26 @@ position form where the item will fall when taking damage or pressing select.
 | ![Shifted item box](./docs/sb-shifted-item-box.gif) |
 | :-------------------------------------------------: |
 |                  Shifted item box                   |
+
+8. Custom message for all dragon coins
+
+You can show a custom message to display in the status bar when all dragon coins
+are collected (instead of just seeing all five coins)
+
+```asm
+!UseCustomDragonCoinsCollectedGraphics = 1
+```
+
+![All dragon coins collected](./docs/sb-dragon-coins-default.gif)
+
+You can also customise the message by using the graphic tiles in `GFX28`.
+
+```asm
+;                                      D    O    N    E    !
+!CustomDragonCoinsCollectedGraphics = $0D, $18, $17, $0e, $28, $FC, $FC
+```
+
+![All dragon coins collected](./docs/sb-dragon-coins-custom.gif)
 
 ## Usage
 
