@@ -1,0 +1,584 @@
+<html>
+  <head>
+    <style>
+      body {
+        max-width: 600px;
+        margin: 3em auto;
+      }
+      img {
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+        display: block;
+      }
+      table {
+        max-width: 100%;
+        margin: auto;
+      }
+      table td {
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="customize-status-bar">Customize Status Bar</h1>
+    <p>Yet another patch for customizing the status bar.</p>
+    <h2 id="table-of-contents">Table of Contents</h2>
+    <ol>
+      <li>
+        <a href="#motivation">Motivation</a>
+        <ol>
+          <li><a href="#1-minimalistic-style">Minimalistic style</a></li>
+          <li><a href="#2-elements-visibility">Elements&#39; visibility</a></li>
+          <li>
+            <a href="#3-level-specific-customization"
+              >Level-specific customization</a
+            >
+          </li>
+          <li>
+            <a href="#4-conditional-visibility">Conditional visibility</a>
+          </li>
+          <li><a href="#5-dynamic-positioning">Dynamic positioning</a></li>
+          <li><a href="#6-custom-coin-limit">Custom coin limit</a></li>
+          <li><a href="#7-disable-the-item-box">Disable the item box</a></li>
+          <li>
+            <a href="#7-custom-message-for-all-dragon-coins"
+              >Custom message for all dragon coins</a
+            >
+          </li>
+        </ol>
+      </li>
+      <li>
+        <a href="#usage">Usage</a>
+        <ol>
+          <li><a href="#folder-structure">Folder structure</a></li>
+          <li><a href="#compatibility">Compatibility</a></li>
+          <li><a href="#patching">Patching</a></li>
+          <li><a href="#global-configuration">Global configuration</a></li>
+          <li><a href="#level-configuration">Level configuration</a></li>
+          <li><a href="#custom-graphics">Custom graphics</a></li>
+          <li><a href="#revert-patch">Revert patch</a></li>
+        </ol>
+      </li>
+      <li><a href="#limitations">Limitations</a></li>
+      <li><a href="#hijacks">Hijacks</a></li>
+      <li><a href="#credits">Credits</a></li>
+      <li><a href="#changelog">Changelog</a></li>
+    </ol>
+    <h2 id="motivation">Motivation</h2>
+    <p>So, why make another patch that modifies the status bar?</p>
+    <p>I wanted a status bar that has the following features:</p>
+    <ol>
+      <li>All original features in a minimalistic style.</li>
+      <li>
+        Alter visibility of each element (score, dragon coins, time, lives,
+        coins, bonus stars, item box) individually.
+      </li>
+      <li>Allow level-specific customization of each element.</li>
+      <li>
+        Conditional visibility of some elements (e.g., hide time indicator if
+        time limit is set to 0).
+      </li>
+      <li>
+        Dynamic positioning of elements (i.e., if one element in one group is
+        not visible, the others shift to fill the gap).
+      </li>
+      <li>Custom coin limit.</li>
+      <li>Disabling the item box (or modify its position).</li>
+      <li>Display a custom message when collecting all dragon coins.</li>
+    </ol>
+    <p>Let&#39;s cover each aspect individually.</p>
+    <h3 id="1-minimalistic-style">1. Minimalistic style</h3>
+    <p>
+      The patch presents all elements of the original SMW status bar in a more
+      minimalistic style.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img
+              src="./docs/sb-full.png"
+              alt="Status Bar with all elements and custom graphics"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">All elements, less clutter</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Goodbye nasty graphics that crowd your screen!</p>
+    <p>
+      <strong
+        >N.B.: The patch comes with a modified <em>GFX28</em> with (imo)
+        prettier graphics for some elements. Usage is completely
+        optional.</strong
+      >
+    </p>
+    <h3 id="2-elements-visibility">2. Elements&#39; visibility</h3>
+    <p>
+      This patch allows to control the visibility of the different elements of
+      the status bar easily via defines. You can disable useless components on
+      the fly
+    </p>
+    <pre><code class="language-asm">!ScoreVisibility = 0
+</code></pre>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img src="./docs/sb-full.png" alt="Status Bar with score" />
+          </th>
+          <th align="center">
+            <img src="./docs/sb-no-score.png" alt="Status Bar with score" />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">Before</td>
+          <td align="center">After</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="3-level-specific-customization">3. Level-specific customization</h3>
+    <p>
+      The patch provides a set of settings that allow to configure the status
+      bar globally. However, if you feel the need to enable/disable/tweak the
+      behavior of the sidebar for a specific level, you can just do that!
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img src="./docs/sb-transition.gif" alt="Status Bar with score" />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">The sublevel has only time configured</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Global configuration is done via the settings you find in
+      <em>configuration/global.asm</em>, while per-level customization is
+      handled through tables in <em>configuration/levels.asm</em>. I suggest you
+      first check out the global settings (a more detailed explanation on what
+      each setting does is provided there), and then the levels file.
+    </p>
+    <h3 id="4-conditional-visibility">4. Conditional visibility</h3>
+    <p>
+      With a specific global setting flag, you can make some of the elements
+      appear only when they are relevant. In particular
+    </p>
+    <ul>
+      <li>
+        Time: The time indicator will appear only in levels where a time limit
+        is set.
+      </li>
+      <li>
+        Coins: The coin indicator will appear only if the
+        <a href="#custom-coin-limit">coin limit</a> is greater than zero.
+      </li>
+    </ul>
+    <p>For instance, with</p>
+    <pre><code class="language-asm">!TimeVisibility = 2
+</code></pre>
+    <p>we get</p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img src="./docs/sb-no-time.gif" alt="Yoshi&#39;s house" />
+          </th>
+          <th align="center">
+            <img src="./docs/sb-time.gif" alt="Yoshi&#39;s Island 2" />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            Yoshi&#39;s House has no time limit, so no indicator in the status
+            bar
+          </td>
+          <td align="center">
+            Yoshi&#39;s Island 2 has a time limit, visible in the top-right
+            corner
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      For these specific cases, you don&#39;t even need to customize the
+      settings for individual levels!
+    </p>
+    <h3 id="5-dynamic-positioning">5. Dynamic positioning</h3>
+    <p>Status bar elements are organized in clusters:</p>
+    <ul>
+      <li>Group 1: Bonus Stars, Coins, Lives, and Time</li>
+      <li>Group 2: Dragon Coins and Score</li>
+      <li>Item Box</li>
+    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th align="center"><img src="./docs/sb-slots.png" alt="Slots" /></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">All groups and slots</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Every group controls its set of elements to display in positions called
+      &quot;slots&quot;. Elements within a group are ordered by priority via
+      settings. For instance
+    </p>
+    <pre><code class="language-asm">!Group1Order = !Lives, !BonusStars, !Time, !Coins
+</code></pre>
+    <p>
+      By default, in group 1 the lives indicator has the highest priority, and
+      the coins the lowest. But what does this mean?
+    </p>
+    <p>
+      Visible elements will be positioned in slots in increasing order. In the
+      example above, the life counter is the first element, so it is drawn in
+      slot 1, bonus stars are drawn in slot 2, and so on. This is useful because
+      if some element is not visible, those that follow will shift to take its
+      place, so to avoid holes in your status bar.
+    </p>
+    <p>
+      Let&#39;s suppose we configured the time indicator to appear only if the
+      time limit is greater than zero. Then we have different positions for the
+      coin indicator if we have all elements
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img
+              src="./docs/sb-zoom-time.png"
+              alt="Yoshi&#39;s Island status bar zoom"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            In Yoshi&#39;s Island 1 all elements of the status bar are visible
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Or if we remove the time</p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img
+              src="./docs/sb-zoom-no-time.png"
+              alt="Yoshi&#39;s House status bar zoom"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            In Yoshi&#39;s House the time limit is zero, so the time doesn&#39;t
+            appear and the coin indicator (which has lower priority) shifts to
+            take its place
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The same applies for score and dragon coins. If the score is not visible,
+      dragon coins will shift to the top line of the status bar. You can check
+      <a href="#2-elements-visibility">this example</a>.
+    </p>
+    <p>
+      By default slots for each groups are drawn close to each other, but you
+      can actually place each slot wherever you want.
+    </p>
+    <h3 id="6-custom-coin-limit">6. Custom coin limit</h3>
+    <p>
+      It is possible to set a custom coin limit for each level by setting the
+      value in a table in <em>configuration/levels.asm</em>. By default each
+      level has a limit of 100 coins like in vanilla (the 100th will collect a
+      life).
+    </p>
+    <p>
+      You can also control whether you want the counter to reset and/or add a
+      life when reaching the limit.
+    </p>
+    <h3 id="7-disable-the-item-box">7. Disable the item box</h3>
+    <p>
+      Besides making the power up in the item box visible or invisible, it is
+      also possible to disable the item box entirely
+    </p>
+    <pre><code class="language-asm">!PowerUpVisibility = 2
+</code></pre>
+    <p>
+      With this setting, collecting an additional power up won&#39;t store it in
+      the item box. Power ups cannot be dropped when taking damage or by
+      pressing select.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img src="./docs/sb-no-item-box.gif" alt="Disabled item box" />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">Disabled item box</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      It is also possible to change the horizontal position of the item box. The
+      change will affect both the position of the item box in the status bar and
+      the position form where the item will fall when taking damage or pressing
+      select.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img src="./docs/sb-shifted-item-box.gif" alt="Shifted item box" />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">Shifted item box</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="8-custom-message-for-all-dragon-coins">
+      8. Custom message for all dragon coins
+    </h3>
+    <p>
+      You can show a custom message to display in the status bar when all dragon
+      coins are collected (instead of just seeing all five coins)
+    </p>
+    <pre><code class="language-asm">!UseCustomDragonCoinsCollectedGraphics = 1
+</code></pre>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img
+              src="./docs/sb-dragon-coins-default.gif"
+              alt="All dragon coins collected with default text"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            The &quot;ALL!&quot; text appears upon collecting the 5th coin
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      You can also customise the message by using the graphic tiles in
+      <em>GFX28</em>.
+    </p>
+    <pre><code class="language-asm">;                                      D    O    N    E    !
+!CustomDragonCoinsCollectedGraphics = $0D, $18, $17, $0E, $28, $FC, $FC
+</code></pre>
+    <table>
+      <thead>
+        <tr>
+          <th align="center">
+            <img
+              src="./docs/sb-dragon-coins-custom.gif"
+              alt="All dragon coins collected with custom text"
+            />
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            The &quot;DONE!&quot; text appears upon collecting the 5th coin
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="usage">Usage</h2>
+    <p>
+      In this section you will find the instructions on how to apply, configure,
+      and restore the patch.
+    </p>
+    <h3 id="folder-structure">Folder structure</h3>
+    <p>The patch contains the following files and folders:</p>
+    <ul>
+      <li>
+        <em>customize_status_bar.asm</em>: Main file of the patch. It is the
+        file that needs to be given to Asar to apply the patch.
+      </li>
+      <li>
+        <em>customize_status_bar_restore.asm</em>: Restore file of the patch. It
+        is the file that needs to be given to Asar to revert the all changes
+        made by the patch.
+      </li>
+      <li><em>README.md</em>: This file.</li>
+      <li>
+        <em>code</em>: Folder containing generic code for the patch. You
+        probably don&#39;t want to touch anything in there.
+      </li>
+      <li>
+        <em>configuration/global.asm</em>: File containing global settings for
+        the status bar. You can modify its contents to customize the status bar.
+        It also contains detailed explanation on what each setting does.
+      </li>
+      <li>
+        <em>configuration/levels.asm</em>: File containing settings for specific
+        levels. You can modify its contents to customize the status bar. It also
+        contains detailed explanation on how level customization works.
+      </li>
+      <li>
+        <em>docs</em>: Folder containing images and resource for this guide.
+      </li>
+      <li>
+        <em>graphics/GFX28.bin</em>: Modified version of <em>GFX28</em>. Usage
+        is optional.
+      </li>
+      <li>
+        <em>modules</em>: Folder containing code for individual elements of the
+        status bar. You probably don&#39;t want to touch anything in there.
+      </li>
+    </ul>
+    <h3 id="compatibility">Compatibility</h3>
+    <p>
+      This patch is compatible with standard SMW hacks. It has not been made
+      SA-1 compatible yet.
+    </p>
+    <h3 id="patching">Patching</h3>
+    <p>Run Asar with <em>customize_status_bar.asm</em>.</p>
+    <p>
+      <em>customize_status_bar.asm</em> has to be in the same folder as
+      <em>code</em>, <em>configuration</em>, and <em>modules</em> folders.
+    </p>
+    <h3 id="global-configuration">Global configuration</h3>
+    <p>
+      You can configure the behavior of the status bar globally by modifying the
+      values in <em>configuration/global.asm</em>. For every setting there is an
+      extensive explanation on what it does and what values it accepts.
+    </p>
+    <h3 id="level-configuration">Level configuration</h3>
+    <p>
+      You can configure level-specific behaviors that override global settings
+      in <em>configuration/levels.asm</em>.
+    </p>
+    <h3 id="custom-graphics">Custom graphics</h3>
+    <p>
+      The patch comes with a modified version of <em>GFX28.bin</em>, that you
+      can use. The changes are:
+    </p>
+    <ol>
+      <li>Lower the clock tile (<code>$76</code>) by one pixel.</li>
+      <li>
+        Replace the first part of the &quot;TIME&quot; text (<code>$3D</code>)
+        with an empty coin that can be used to display missing dragon coins
+        (instead of a blank space).
+      </li>
+      <li>
+        Replace the middle part of the &quot;TIME&quot; text (<code>$3E</code>)
+        with a heart that can be used in front of the lives counter.
+      </li>
+      <li>
+        Replace the last part of the &quot;TIME&quot; text (<code>$3F</code>)
+        with a star that can be used in front of the bonus stars counter.
+      </li>
+    </ol>
+    <p><strong>Using the modified version is entirely optional.</strong></p>
+    <p>
+      To use the modified version, simply replace the
+      <em>Graphics/GFX28.bin</em> file in your ROM hack folder with
+      <em>graphics/GFX28.bin</em> present in this patch.
+    </p>
+    <h3 id="revert-patch">Revert patch</h3>
+    <p>
+      To undo the changes applied by the patch, run Asar with
+      <em>customize_status_bar_restore.asm</em>. This file doesn&#39;t have any
+      dependencies.
+    </p>
+    <p>
+      Reverting the patch should restore the vanilla version of the status bar,
+      unless another patch that modifies it was previously applied (and not
+      reverted).
+    </p>
+    <h2 id="limitations">Limitations</h2>
+    <p>The current patch suffers from the following limitations:</p>
+    <ol>
+      <li>
+        It is not possible to use the left-most tile of the second row of the
+        status bar.
+      </li>
+      <li>
+        The color palettes for every tile in the status bar are static and
+        cannot be customized dynamically.
+      </li>
+      <li>
+        It is not possible to change dynamically the visibility/order of
+        elements in the status bar (e.g., via RAM addresses). This might be
+        implemented in the future.
+      </li>
+    </ol>
+    <h2 id="hijacks">Hijacks</h2>
+    <p>The patch hijacks the original code in three points:</p>
+    <ol>
+      <li>
+        <code>$008E6F-$008E73</code> (5 bytes): Inject the custom status bar
+        routine in the old status bar code.
+      </li>
+      <li>
+        <code>$028008</code> (1 byte): Prevent item in item box from falling.
+        See
+        <a
+          href="https://www.smwcentral.net/?p=memorymap&game=smw&region=rom&address=028008&context="
+          >this</a
+        >.
+      </li>
+      <li>
+        <code>$028052</code> (1 byte): Override item box horizontal position.
+        See
+        <a
+          href="https://www.smwcentral.net/?p=memorymap&game=smw&region=rom&address=028008&context="
+          >this</a
+        >.
+      </li>
+    </ol>
+    <h2 id="credits">Credits</h2>
+    <p>
+      This patch was developed by zuccha, based on
+      <a href="https://www.smwcentral.net/?p=section&a=details&id=26018"
+        >HammerBrother&#39;s tutorial</a
+      >
+      on the sidebar.
+    </p>
+    <p>Credits are optional.</p>
+    <h2 id="changelog">Changelog</h2>
+    <h3 id="100---2023-06-24">[1.0.0] - 2023-06-24</h3>
+    <p>Initial Release</p>
+  </body>
+</html>
