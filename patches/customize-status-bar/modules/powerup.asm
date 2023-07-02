@@ -16,6 +16,9 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
+; Check if power up is visible.
+; @return A (16-bit): #$0000 if power up is not visible, #$0001 otherwise.
+; @return Z: 1 if power up is not visible, 0 otherwise.
 IsPowerUpVisible:
     %check_visibility_simple(!PowerUpVisibility, 2, 1)
 
@@ -25,14 +28,16 @@ IsPowerUpVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw power up on status bar.
+; @param A (16-bit): Slot position.
 ShowPowerUp:
-    ; Backup X/Y, move A into Y, and set A 8-bit.
+    ; Backup X/Y, move A into Y, and set all registers to 8-bit.
     PHX : PHY : SEP #$30
 
     ; Slightly modified version of routine found at $009079 to draw the power up
     ; sprite.
+    ; FIXME: Invoke original routine instead?
     LDX #$E0                             ; Default power up sprite is feather
-    BIT $0D9B : BVC +                    ; If ???
+    BIT $0D9B : BVC +                    ; If Reznor's, Morton's, or Roy's battle mode
     LDX #$00                             ; Then set power up sprite to none
     LDA $0D9B : CMP #$C1 : BEQ +         ; If not Bowser's battle mode
     LDA #$F0 : STA $0201,x               ; Then set power up sprite as unused (out of screen)

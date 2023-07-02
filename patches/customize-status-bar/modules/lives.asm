@@ -17,8 +17,9 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
-; Set Z flag to 0 if lives are visible, 1 otherwise.
-; It expects A 16-bit.
+; Check if lives are visible.
+; @return A (16-bit): #$0000 if lives are not visible, #$0001 otherwise.
+; @return Z: 1 if lives are not visible, 0 otherwise.
 AreLivesVisible:
     %check_visibility_simple(!LivesVisibility, 1, 1)
 
@@ -28,7 +29,7 @@ AreLivesVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw lives counter on status bar.
-; It expects the address for the position to be in A 16-bit.
+; @param A (16-bit): Slot position.
 ShowLives:
     ; Backup X/Y, move A into Y, and set A 8-bit.
     PHX : PHY : TAY : SEP #$20

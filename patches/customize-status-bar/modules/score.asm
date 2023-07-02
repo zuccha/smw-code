@@ -17,8 +17,9 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
-; Set Z flag to 0 if dragon coins are visible, 1 otherwise.
-; It expects A 16-bit.
+; Check if score is visible.
+; @return A (16-bit): #$0000 if score is not visible, #$0001 otherwise.
+; @return Z: 1 if score is not visible, 0 otherwise.
 IsScoreVisible:
     %check_visibility_simple(!ScoreVisibility, 2, 2)
 
@@ -28,7 +29,7 @@ IsScoreVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw score counter on status bar.
-; It expects the address for the position to be in A (16-bit).
+; @param A (16-bit): Slot position.
 ShowScore:
     ; Backup X/Y, move A into X, and set A (8-bit).
     PHX : PHY : TAX : SEP #$20

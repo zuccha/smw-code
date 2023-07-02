@@ -18,15 +18,19 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
-; AreCoinsVisible if visibility is set to 2.
+; Check if time is visible. If any of the three time digits (hundreds, tens, and
+; units) is greater than zero, then it is visible.
+; @return A (16-bit): #$0000 if time is not visible, #$0001 otherwise.
 macro is_time_visible_mode_2()
     LDA #$0000 : SEP #$20
     LDA $0F31|!addr : ORA $0F32|!addr : ORA $0F33|!addr
     REP #$20
 endmacro
 
-; Set Z flag to 0 if time is visible, 1 otherwise.
-; It expects A 16-bit.
+; Check if time is visible.
+; @param A (16-bit): Slot position.
+; @return A (16-bit): #$0000 if time is not visible, #$0001 otherwise.
+; @return Z: 1 if time is not visible, 0 otherwise.
 IsTimeVisible:
     %check_visibility(!TimeVisibility, 1, 3, is_time_visible_mode_2)
 
@@ -36,7 +40,7 @@ IsTimeVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw time counter on status bar.
-; It expects the address for the position to be in A 16-bit.
+; @param A (16-bit): Slot position.
 ShowTime:
     ; Backup X/Y, move A into Y, and set A 8-bit
     PHX : PHY : TAY : SEP #$20

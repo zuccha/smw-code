@@ -38,6 +38,7 @@ AreDragonCoinsCollected:
 ; is greater than 0), we still render the indicator (empty) to prevent shifts in
 ; the UI.
 ; @return A (16-bit): #$0000 if dragon coins are not visible, #$0001 otherwise.
+; @return Z: 1 if dragon coins are not visible, 1 otherwise.
 macro are_dragon_coins_visible_mode_2()
     PHX : PHY                           ; Save X/Y as they are used by AreDragonCoinsCollected
     SEP #$20 : LDA $1422 : BNE +        ; If coins = 0...
@@ -49,6 +50,7 @@ endmacro
 
 ; Check if dragon coins are visible.
 ; @return A (16-bit): #$0000 if dragon coins are not visible, #$0001 otherwise.
+; @return Z: 1 if dragon coins are not visible, 0 otherwise.
 AreDragonCoinsVisible:
     %check_visibility(!DragonCoinsVisibility, 2, 3, are_dragon_coins_visible_mode_2)
 

@@ -12,6 +12,7 @@
 ;   1 = Enabled
 !EnableLevelConfiguration = 1
 
+
 ;-------------------------------------------------------------------------------
 ; Bonus Stars
 ;-------------------------------------------------------------------------------
@@ -237,6 +238,8 @@
 ; - graphics: Hex address (e.g., $1A) in graphics file GFX28 to be used for the
 ;   8x8 tile. $FC means empty.
 ; - palette: Configuration for the color palette, formatted as %YXPCCCTT.
+; To better understand how this works, I suggest you check out HammerBrother's
+; tutorial on the status bar: https://www.smwcentral.net/?p=section&a=details&id=26018
 !ColorEmpty = %00000000
 !ColorGold  = %00111100
 !ColorWhite = %00111000

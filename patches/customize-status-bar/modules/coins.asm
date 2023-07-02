@@ -17,7 +17,9 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
-; AreCoinsVisible if visibility is set to 2.
+; Check if coins are visible when !CoinsVisibility = 2.
+; @return A (16-bit): #$0000 if coins are not visible, #$0001 otherwise.
+; @return Z: 1 if coins are not visible, 1 otherwise.
 macro are_coins_visible_mode_2()
     %lda_coins_limit() : CMP #$00 : BEQ + ; If coin limit is not zero
     REP #$20 : LDA #$0001 : BRA ++        ; Then return 1
@@ -25,8 +27,9 @@ macro are_coins_visible_mode_2()
 ++
 endmacro
 
-; Set Z flag to 0 if coins are visible, 1 otherwise.
-; It expects A 16-bit. 11 00 00 00
+; Check if coins are visible.
+; @return A (16-bit): #$0000 if coins are not visible, #$0001 otherwise.
+; @return Z: 1 if coins are not visible, 0 otherwise.
 AreCoinsVisible:
     %check_visibility(!CoinsVisibility, 1, 0, are_coins_visible_mode_2)
 
@@ -36,7 +39,7 @@ AreCoinsVisible:
 ;-------------------------------------------------------------------------------
 
 ; Handle increasing coins and draw coin counter on status bar.
-; It expects the address for the position to be in A 16-bit.
+; @param A (16-bit): Slot position.
 ShowCoins:
     ; Backup X/Y, move A into Y, and set A 8-bit.
     PHX : PHY : TAY : SEP #$20
