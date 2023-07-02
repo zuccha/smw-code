@@ -87,7 +87,7 @@ init:
 RTL
 ```
 
-and set the following line in "list.txt" under the "gamemode" label:
+and set the following line in `list.txt` under the _gamemode_ label:
 
 ```
 0D gm0D.asm
