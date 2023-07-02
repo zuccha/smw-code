@@ -140,6 +140,26 @@
 ; "TIME" text, no longer used.
 !DragonCoinsMissingSymbol = $FC
 
+; Show custom graphics if all dragon coins have been collected. The graphics
+; can be configured using !DragonCoinsCollectedGraphics.
+; Possible values:
+;   0 = Disabled (vanilla)
+;   - If !DragonCoinsVisibility = 1: You will see 5 coins.
+;   - If !DragonCoinsVisibility = 2: You will see nothing.
+;   1 = Enabled
+;   - If !DragonCoinsVisibility = 1: You will see !DragonCoinsCollectedGraphics.
+;   - If !DragonCoinsVisibility = 2: You will see !DragonCoinsCollectedGraphics
+;   if you collected the coins in the current level attempt, otherwise the
+;   indicator will not be visible at all (it will not occupy the slot).
+!UseCustomDragonCoinsCollectedGraphics = 0
+
+; List of graphics tiles to show when all coins have been collected in a level.
+; This only applies if !UseCustomDragonCoinsCollectedGraphics = 1.
+; Every element is a 8x8 tile in GFX28, $FC is an empty space.
+; The list must have exactly 7 elements!
+; Default value: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ")
+!CustomDragonCoinsCollectedGraphics = $0A, $15, $15, $28, $FC, $FC, $FC
+
 
 ;-------------------------------------------------------------------------------
 ; Score
@@ -203,7 +223,7 @@
 ; Group 2
 ;-------------------------------------------------------------------------------
 
-; Group 2 consists of: Dragon Coins and Score. Slot size: 6x1. Notice that even
+; Group 2 consists of: Dragon Coins and Score. Slot size: 7x1. Notice that even
 ; if the Power Up per-level visibility is controlled in "Group2VisibilityTable",
 ; Power Up is not actually in group 2, its setting is stored there just to be
 ; space efficient.

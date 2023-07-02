@@ -59,6 +59,26 @@ AreDragonCoinsVisible:
 ; Render
 ;-------------------------------------------------------------------------------
 
+; Draw the custom graphics for when all dragon coins are collected.
+; @param Y (16-bit): Slot position
+; $param $00 (8-bit): The amount of collected coins.
+; @branch .return: If collected coins >= 5.
+; @branch +: If collected coins < 5.
+macro draw_dragon_coins_custom_collected_graphics()
+    if !UseCustomDragonCoinsCollectedGraphics = 1
+        LDA $00 : CMP #$05 : BCC + ; Skip if dragon coins are less than 5
+        !i #= 0
+        while !i < 7
+            LDA.l CustomDragonCoinsCollectedGraphicsTable+!i : STA $000!i,y
+            !i #= !i+1
+        endif
+        BRA .return
+    endif
+endmacro
+
+; Table listing the custom graphics for the "all coins collected" message.
+CustomDragonCoinsCollectedGraphicsTable: db !CustomDragonCoinsCollectedGraphics
+
 ; Draw collected dragon coins on status bar.
 ; @param A (16-bit): Slot position.
 ShowDragonCoins:
@@ -87,10 +107,15 @@ ShowDragonCoins:
                                     ; Else draw coins
     endif
 
+.draw
+    ; The slot position is on the stack.
+    REP #$10 : PLY
+    ; Draw custom collected graphics if necessary. If draw, this will skip ahead
+    ; to .return, otherwise it will continue normally.
+    %draw_dragon_coins_custom_collected_graphics()
     ; Draw one coin for each collected coin and one empty coin for the rest.
     ; The formula is as follows: #Collected = $00, #NotCollected = #$05 - $00.
-.draw
-    REP #$10 : PLY : LDX #$0000                      ; Dragon coin index
++   LDX #$0000                                       ; Dragon coins index
     ; Collected coins.
 -   TXA : CMP $00 : BCS +                            ; If index < collected dragon coins...
     CMP #$05 : BCS +                                 ; ...and index < 5
@@ -102,14 +127,21 @@ ShowDragonCoins:
     LDA.b #!DragonCoinsMissingSymbol : STA $0000,y   ; Then draw a missing coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -
+    RTL
 
-    ; Draw five empty spaces (to make sure that we overwrite any previous
-    ; drawing of the coins).
 .skip
-    REP #$10 : PLY : LDA.b #$FC
-    STA $0000,y : STA $0001,y : STA $0002,y : STA $0003,y : STA $0004,y
+    ; The slot position is on the stack.
+    REP #$10 : PLY
+    ; Draw custom collected graphics if necessary. If draw, this will skip ahead
+    ; to .return, otherwise it will continue normally.
+    %draw_dragon_coins_custom_collected_graphics()
+    ; Draw empty spaces to erase the indicator.
++   LDA.b #$FC
+    STA $0000,y : STA $0001,y : STA $0002,y : STA $0003,y
+    STA $0004,y : STA $0005,y : STA $0006,y
+    RTS
 
-    ; Restore X/Y, set A 16-bit, and return.
 .return
+    ; Restore X/Y, set A 16-bit, and return.
     REP #$20 : PLY : PLX
     RTS
