@@ -18,23 +18,37 @@
 ; Visibility Checks
 ;-------------------------------------------------------------------------------
 
-; Set Z flag to 0 if all dragon coins are collected, to 1 otherwise.
-; See https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1F2F&context=)
-macro are_dragon_coins_collected()
+; Check if dragon coins have been collected for a specific level.
+; Note that this checks the flag and not the coin count!
+; For an explanation on how the check works, see this explanation:
+;   https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1F2F&context=
+; @return Z: 0 if all coins have been collected, 1 otherwise.
+AreDragonCoinsCollected:
     SEP #$30
     LDA $13BF : LSR : LSR : LSR : TAY
     LDA $13BF : AND #$07 : TAX
     LDA $1F2F,y : AND $0DA8A6,x
-endmacro
+    RTS
 
-; Dragon coins slot is always visible in mode 2, simply put, the coins are not
-; shown on screen if all have been collected (handled by ShowDragonCoins).
+; Check if dragon coins are visible when !DragonCoinsVisibility = 2.
+; If the dragon coin count is 0 (meaning either all or none have been collected)
+; and the "dragon coin collected" flag is present, it means player collected all
+; dragon coins in a previous level attempt, so we don't show the indicator. If
+; the coins have been collected in the current level attempt (dragon coin count
+; is greater than 0), we still render the indicator (empty) to prevent shifts in
+; the UI.
+; @return A (16-bit): #$0000 if dragon coins are not visible, #$0001 otherwise.
 macro are_dragon_coins_visible_mode_2()
-    LDA #$0001
+    PHX : PHY                           ; Save X/Y as they are used by AreDragonCoinsCollected
+    SEP #$20 : LDA $1422 : BNE +        ; If coins = 0...
+    JSR AreDragonCoinsCollected : BEQ + ; ...and all have been collected
+    REP #$30 : LDA #$0000 : BRA ++      ; Then the indicator is not visible
++   REP #$30 : LDA #$0001               ; Else the indicator is visible
+++  PLY : PLX : AND #$0001              ; Restore X/Y and the flags matching A
 endmacro
 
-; Set Z flag to 0 if dragon coins are visible, 1 otherwise.
-; It expects A 16-bit.
+; Check if dragon coins are visible.
+; @return A (16-bit): #$0000 if dragon coins are not visible, #$0001 otherwise.
 AreDragonCoinsVisible:
     %check_visibility(!DragonCoinsVisibility, 2, 3, are_dragon_coins_visible_mode_2)
 
@@ -44,7 +58,7 @@ AreDragonCoinsVisible:
 ;-------------------------------------------------------------------------------
 
 ; Draw collected dragon coins on status bar.
-; It expects the address for the position to be in A 16-bit.
+; @param A (16-bit): Slot position.
 ShowDragonCoins:
     ; Backup X/Y, push A onto the stack, and set A 8-bit.
     PHX : PHY : PHA : SEP #$30
@@ -56,19 +70,19 @@ ShowDragonCoins:
         ; Always show coins - Ensure coins are show even when entering a level
         ; where all coins have been collected.
         LDA $1422 : STA $00
-        %are_dragon_coins_collected() : BEQ .draw ; If all coins have been collected
-        LDA #$05 : STA $00                        ; Then show 5 coins as collected
+        JSR AreDragonCoinsCollected : BEQ .draw ; If all coins have been collected
+        LDA #$05 : STA $00                      ; Then show 5 coins as collected
     elseif !DragonCoinsVisibility == 2
         ; Show coins only when not all have been collected (vanilla) - Don't
         ; draw any coin (collected or not) if five have been collected.
         ; Effectively, this makes the coins disappear from the status bar once
         ; the fifth one has been collected during the current level attempt.
-        LDA $1422 : STA $00           ; If collected coins:
-        CMP #$05 : BCS .skip          ; >= 5 (all collected in current level attempt): don't draw coins
-        LDA $1422 : BNE .draw         ; > 0 (some are collected): draw coins (useful to prevent table check)
-        %are_dragon_coins_collected() ; all collected in previous level attempt...
-        BNE .skip                     ; ...don't draw coins
-                                      ; else: draw coins
+        LDA $1422 : STA $00         ; If collected coins:
+        CMP #$05 : BCS .skip        ; >= 5 (all collected in current level attempt) then don't draw coins
+        LDA $1422 : BNE .draw       ; > 0 (some are collected) then draw coins
+        JSR AreDragonCoinsCollected ; All collected in previous level attempt...
+        BNE .skip                   ; ...Then don't draw coins
+                                    ; Else draw coins
     endif
 
     ; Draw one coin for each collected coin and one empty coin for the rest.
