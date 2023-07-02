@@ -29,7 +29,7 @@
 ; The value is the position of the 8x8 tile in "GFX28".
 ; Default: $64 (star). If you are using the modified GFX28 bundled with this
 ; patch, you can also use $3F (star, alternative), which replaces the second
-;  part of the "TIME" text, no longer used.
+; part of the "TIME" text, no longer used.
 !BonusStarsSymbol = $64
 
 
