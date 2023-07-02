@@ -127,7 +127,6 @@ ShowDragonCoins:
     LDA.b #!DragonCoinsMissingSymbol : STA $0000,y   ; Then draw a missing coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -
-    RTL
 
 .skip
     ; The slot position is on the stack.
@@ -139,7 +138,6 @@ ShowDragonCoins:
 +   LDA.b #$FC
     STA $0000,y : STA $0001,y : STA $0002,y : STA $0003,y
     STA $0004,y : STA $0005,y : STA $0006,y
-    RTS
 
 .return
     ; Restore X/Y, set A 16-bit, and return.
