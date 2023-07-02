@@ -281,6 +281,8 @@ changes are:
    used in front of the lives counter.
 4. Replace the last part of the "TIME" text (`$3F`) with a star that can be used
    in front of the bonus stars counter.
+5. Replace the corner of the item box (`$3A`) with a checkmark that can be used
+   to mark when all dragon coins have been collected.
 
 **Using the modified version is entirely optional.**
 

@@ -157,7 +157,10 @@
 ; This only applies if !UseCustomDragonCoinsCollectedGraphics = 1.
 ; Every element is a 8x8 tile in GFX28, $FC is an empty space.
 ; The list must have exactly 7 elements!
-; Default value: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ")
+; Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   "). If you are using the
+; modified GFX28 bundled with this patch, you can also use
+; `$2E, $2E, $2E, $2E, $2E, $3A, $FC`, where $2E are the coin symbol and $3A is
+; a checkmark that replaces the corner of the item box in the graphics file.
 !CustomDragonCoinsCollectedGraphics = $0A, $15, $15, $28, $FC, $FC, $FC
 
 
