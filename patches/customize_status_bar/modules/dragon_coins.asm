@@ -85,30 +85,39 @@ ShowDragonCoins:
     ; Backup X/Y, push A onto the stack, and set A 8-bit.
     PHX : PHY : PHA : SEP #$30
 
-    ; Determine how many coins to draw. $1422, the amount collected during
-    ; the level (0 if all are collected when level starts). We store the amount
-    ; of coins to display in $00.
-    if !DragonCoinsVisibility == 1
-        ; Always show coins - Ensure coins are show even when entering a level
-        ; where all coins have been collected.
-        LDA $1422 : STA $00
-        JSR AreDragonCoinsCollected : BEQ .draw ; If all coins have been collected
-        LDA #$05 : STA $00                      ; Then show 5 coins as collected
-    elseif !DragonCoinsVisibility == 2
-        ; Show coins only when not all have been collected (vanilla) - Don't
-        ; draw any coin (collected or not) if five have been collected.
-        ; Effectively, this makes the coins disappear from the status bar once
-        ; the fifth one has been collected during the current level attempt.
-        LDA $1422 : STA $00         ; If collected coins:
-        CMP #$05 : BCS .skip        ; >= 5 (all collected in current level attempt) then don't draw coins
-        LDA $1422 : BNE .draw       ; > 0 (some are collected) then draw coins
-        JSR AreDragonCoinsCollected ; All collected in previous level attempt...
-        BNE .skip                   ; ...Then don't draw coins
-                                    ; Else draw coins
+    ; Level settings.
+    if !EnableLevelConfiguration == 1
+        %lda_level_byte(Group1VisibilityTable)
+        AND #%00000011
+        CMP #%00000001 : BEQ .mode1
+        CMP #%00000010 : BEQ .mode2
     endif
 
+    ; Global settings.
+    if !DragonCoinsVisibility == 2 : BRA .mode2
+
+.mode1
+    ; Always show coins - Ensure coins are shown even when entering a level
+    ; where all coins have been collected.
+    LDA $1422 : STA $00
+    JSR AreDragonCoinsCollected : BEQ .draw ; If all coins have been collected
+    LDA #$05 : STA $00 : BRA .draw          ; Then show 5 coins as collected
+
+.mode2
+    ; Show coins only when not all have been collected (vanilla) - Don't
+    ; draw any coin (collected or not) if five have been collected.
+    ; Effectively, this makes the coins disappear from the status bar once
+    ; the fifth one has been collected during the current level attempt.
+    LDA $1422 : STA $00         ; If collected coins:
+    CMP #$05 : BCS .skip        ; >= 5 (all collected in current level attempt) then don't draw coins
+    LDA $1422 : BNE .draw       ; > 0 (some are collected) then draw coins
+    JSR AreDragonCoinsCollected ; All collected in previous level attempt...
+    BNE .skip                   ; ...Then don't draw coins
+                                ; Else draw coins
+
+
 .draw
-    ; The slot position is on the stack.
+    ; Slot position is on the stack, $00 holds the amount of collected coins.
     REP #$10 : PLY
     ; Draw custom collected graphics if necessary. If draw, this will skip ahead
     ; to .return, otherwise it will continue normally.
@@ -118,12 +127,12 @@ ShowDragonCoins:
 +   LDX #$0000                                       ; Dragon coins index
     ; Collected coins.
 -   TXA : CMP $00 : BCS +                            ; If index < collected dragon coins...
-    CMP #$05 : BCS +                                 ; ...and index < 5
+    CMP #$05 : BCS .return                           ; ...and index < 5
     LDA.b #!DragonCoinsCollectedSymbol : STA $0000,y ; Then draw a coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -
 +   ; Non-collected coins.
--   CMP #$05 : BCS .return                           ; If index < 5
+-   CPX #$0005 : BCS .return                         ; If index < 5
     LDA.b #!DragonCoinsMissingSymbol : STA $0000,y   ; Then draw a missing coin
     INX : INY                                        ; Go to next coin and next drawing position
     BRA -
