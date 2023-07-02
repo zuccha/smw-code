@@ -24,6 +24,7 @@ Yet another patch for customizing the status bar.
 3. [Limitations](#limitations)
 4. [Hijacks](#hijacks)
 5. [Credits](#credits)
+6. [Changelog](#changelog)
 
 ## Motivation
 
@@ -311,3 +312,9 @@ This patch was developed by zuccha, based on
 on the sidebar.
 
 Credits are optional.
+
+## Changelog
+
+### [1.0.0] - 2023-06-24
+
+Initial Release
