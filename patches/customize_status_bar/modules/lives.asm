@@ -10,38 +10,35 @@
 ; Methods Definition
 ;-------------------------------------------------------------------------------
 
-!Lives = AreLivesVisible, ShowLives
+!Lives = HandleLives
 
 
 ;-------------------------------------------------------------------------------
-; Visibility Checks
-;-------------------------------------------------------------------------------
-
-; Check if lives are visible.
-; @return A (16-bit): #$0000 if lives are not visible, #$0001 otherwise.
-; @return Z: 1 if lives are not visible, 0 otherwise.
-AreLivesVisible:
-    %check_visibility_simple(!LivesVisibility, 1, 1)
-
-
-;-------------------------------------------------------------------------------
-; Render
+; Handler
 ;-------------------------------------------------------------------------------
 
 ; Draw lives counter on status bar.
 ; @param A (16-bit): Slot position.
-ShowLives:
-    ; Backup X/Y, move A into Y, and set A 8-bit.
-    PHX : PHY : TAY : SEP #$20
+; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
+; @return Z: 0 if the indicator has been drawn, 1 otherwise.
+HandleLives:
+    ; Backup registers and check visibility.
+    PHX : PHY : PHA ; Stack: X, Y, Slot <-
+    %check_visibility(!LivesVisibility, 1, 1)
 
+.visibility1
     ; Clamp amount of lives.
-    LDA $0DBE : BMI +    ; If amount of lives is not negative...
-    CMP #$62 : BCC +     ; ...and is greater or equal than 98 ($62)
-    LDA #$62 : STA $0DBE ; Set lives to 98
+    SEP #$20 : LDA $0DBE|!addr : BMI + ; If amount of lives is not negative...
+    CMP #$62 : BCC +                   ; ...and is greater or equal than 98 ($62)
+    LDA #$62 : STA $0DBE|!addr         ; Set lives to 98
 
     ; Draw lives.
-+   INC A : %draw_counter_with_two_digits(!LivesSymbol)
++   PLY ; Stack: X, Y <-
+    INC A : %draw_counter_with_two_digits(!LivesSymbol)
 
-    ; Restore X/Y, set A 16-bit, and return.
-    REP #$20 : PLY : PLX
-    RTS
+    ; Return
+    %return_handler_visible()
+
+.visibility0
+.visibility2
+    %return_handler_hidden()

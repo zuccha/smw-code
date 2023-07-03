@@ -10,57 +10,64 @@
 ; Methods Definition
 ;-------------------------------------------------------------------------------
 
-!Coins = AreCoinsVisible, ShowCoins
+!Coins = HandleCoins
 
 
 ;-------------------------------------------------------------------------------
-; Visibility Checks
+; Utils
 ;-------------------------------------------------------------------------------
 
-; Check if coins are visible when !CoinsVisibility = 2.
-; @return A (16-bit): #$0000 if coins are not visible, #$0001 otherwise.
-; @return Z: 1 if coins are not visible, 1 otherwise.
-macro are_coins_visible_mode_2()
-    %lda_coins_limit() : CMP #$00 : BEQ + ; If coin limit is not zero
-    REP #$20 : LDA #$0001 : BRA ++        ; Then return 1
-+   REP #$20 : LDA #$0000                 ; Else return 0
-++
+; Load the coins' limit for a given level (or global if level configuration is
+; disabled) into A (8-bit).
+; @return A (8-bit): Coins limit.
+macro lda_coins_limit()
+    if !EnableLevelConfiguration == 1
+        %lda_level_byte(CoinsLimitTable)
+    else
+        LDA #!CoinsLimit
+    endif
 endmacro
 
-; Check if coins are visible.
-; @return A (16-bit): #$0000 if coins are not visible, #$0001 otherwise.
-; @return Z: 1 if coins are not visible, 0 otherwise.
-AreCoinsVisible:
-    %check_visibility(!CoinsVisibility, 1, 0, are_coins_visible_mode_2)
-
 
 ;-------------------------------------------------------------------------------
-; Render
+; Handler
 ;-------------------------------------------------------------------------------
 
 ; Handle increasing coins and draw coin counter on status bar.
 ; @param A (16-bit): Slot position.
-ShowCoins:
-    ; Backup X/Y, move A into Y, and set A 8-bit.
-    PHX : PHY : TAY : SEP #$20
+; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
+; @return Z: 0 if the indicator has been drawn, 1 otherwise.
+HandleCoins:
+    ; Backup registers and check visibility.
+    PHX : PHY : PHA ; Stack: X, Y, Slot <-
+    %check_visibility(!CoinsVisibility, 1, 0)
 
+.visibility2
+    ; If coin limit is zero, then coins are not visible
+    SEP #$20 : %lda_coins_limit() : BEQ .visibility0
+
+.visibility1
     ; Increase coin count if necessary.
-    LDA $13CC|!addr : BEQ +         ; If there is a "coin increase"
-    DEC $13CC|!addr                 ; Then decrease it.
-    %lda_coins_limit() : STA $00    ; If the limit of coins...
-    DEC A : CMP $0DBF|!addr : BCC + ; ...has not been reached yet
-    INC $0DBF|!addr                 ; Then increase coin count by 1
+    SEP #$20
+    LDA $13CC|!addr : BEQ +      ; If there is a "coin increase"
+    DEC $13CC|!addr              ; Then decrease it.
+    %lda_coins_limit() : STA !T0 ; Load coins limit
+    CMP $0DBF|!addr : BEQ +      ; If coins count != coins limit
+    INC $0DBF|!addr              ; Then increase coins count by 1
 
     ; Skip ahead if coin limit has not been reached.
-    LDA $00 : CMP $0DBF|!addr : BNE +
+    LDA !T0 : CMP $0DBF|!addr : BNE +
 
     ; Limit reached, add life and reset counter if necessary.
-    if !AddLifeIfCoinLimitReached : INC $18E4
-    if !ResetCoinsIfCoinLimitReached : LDA $0DBF : SEC : SBC $00 : STA $0DBF
+    if !AddLifeIfCoinLimitReached : INC $18E4|!addr
+    if !ResetCoinsIfCoinLimitReached : LDA $0DBF|!addr : SEC : SBC !T0 : STA $0DBF|!addr
 
     ; Draw the coin counter on the status bar.
-+   LDA $0DBF|!addr : %draw_counter_with_two_digits(!CoinsSymbol)
++   PLY ; Stack: X, Y <-
+    LDA $0DBF|!addr : %draw_counter_with_two_digits(!CoinsSymbol)
 
-    ; Restore X/Y, set A 16-bit, and return.
-    REP #$20 : PLY : PLX
-    RTS
+    ; Return
+    %return_handler_visible()
+
+.visibility0
+    %return_handler_hidden()

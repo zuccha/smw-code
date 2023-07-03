@@ -214,12 +214,11 @@
 ; Static Configuration" below). The address represents the first of the four
 ; tiles that the group 1 element occupies. The first tile is used for the symbol
 ; and the other three for the digits of the counter.
-; N.B.: Suffix each address with "|!addr" to ensure SA-1 compatibility!
 ; N.B.: The color palette of each tile cannot be controlled dynamically. By
 ; default, it is set to be GWWW, that is gold for the symbol (tile 0) and white
 ; for the digits (tiles 1-3). The palette is configured the same way for all
 ; slots in the "Status Bar Static Configuration" down below.
-!Group1Slots = $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
+!Group1Slots = $0F11, $0F2C, $0F0C, $0F27
 
 
 ;-------------------------------------------------------------------------------
@@ -242,11 +241,10 @@
 ; The value is the RAM address for the status bar tiles (check "Status Bar
 ; Static Configuration" below). The address represents the first of the six
 ; tiles that the group 2 element occupies.
-; N.B.: Suffix each address with "|!addr" to ensure SA-1 compatibility!
 ; N.B.: The color palette of each tile cannot be controlled dynamically. By
 ; default, all siz tiles are set to gold. The palette is configured the same way
 ; for all slots in the "Status Bar Static Configuration" down below.
-!Group2Slots = $0EF9|!addr, $0F15|!addr
+!Group2Slots = $0EF9, $0F15
 
 
 ;-------------------------------------------------------------------------------

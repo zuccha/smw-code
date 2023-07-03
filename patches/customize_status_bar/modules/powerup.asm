@@ -9,57 +9,54 @@
 ; Methods Definition
 ;-------------------------------------------------------------------------------
 
-!PowerUp = IsPowerUpVisible, ShowPowerUp
+!PowerUp = HandlePowerUp
 
 
 ;-------------------------------------------------------------------------------
-; Visibility Checks
-;-------------------------------------------------------------------------------
-
-; Check if power up is visible.
-; @return A (16-bit): #$0000 if power up is not visible, #$0001 otherwise.
-; @return Z: 1 if power up is not visible, 0 otherwise.
-IsPowerUpVisible:
-    %check_visibility_simple(!PowerUpVisibility, 2, 1)
-
-
-;-------------------------------------------------------------------------------
-; Render
+; Handler
 ;-------------------------------------------------------------------------------
 
 ; Draw power up on status bar.
-; @param A (16-bit): Slot position.
-ShowPowerUp:
-    ; Backup X/Y, move A into Y, and set all registers to 8-bit.
-    PHX : PHY : SEP #$30
+; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
+; @return Z: 0 if the indicator has been drawn, 1 otherwise.
+HandlePowerUp:
+    ; Backup registers and check visibility.
+    PHX : PHY ; Stack: X, Y <-
+    %check_visibility(!PowerUpVisibility, 2, 1)
 
+.visibility1
     ; Slightly modified version of routine found at $009079 to draw the power up
     ; sprite.
     ; FIXME: Invoke original routine instead?
-    LDX #$E0                             ; Default power up sprite is feather
-    BIT $0D9B : BVC +                    ; If Reznor's, Morton's, or Roy's battle mode
-    LDX #$00                             ; Then set power up sprite to none
-    LDA $0D9B : CMP #$C1 : BEQ +         ; If not Bowser's battle mode
-    LDA #$F0 : STA $0201,x               ; Then set power up sprite as unused (out of screen)
-+   STX $01                              ; Save sprite number in $01 for later use
-    LDX $0DC2 : BEQ .return              ; If there is a power up in the item box
-    LDA.l PowerUpPal1,x : STA $00        ; Then load palette for current power up
-    CPX #$03 : BNE +                     ; If power up is Star
-    LDA $13 : LSR : AND #$03 : TAX       ; Then every second frame change the palette
-    LDA.l PowerUpPal2,x : STA $00        ; of the star in the item box (store in $00)
-+   LDY $01                              ; Set power up...
-    LDA #!PowerUpPositionX : STA $0200,y ; ...X position
-    LDA #$0F : STA $0201,y               ; ...Y position
-    LDA #$30 : ORA $00 : STA $0203,y     ; ...palette
-    LDX $0DC2 : LDA.l PowerUpTile,x      ; ...tile
-    STA $0202,y                          ;
-    TYA : LSR : LSR : TAY                ; Divide power up sprite by 4...
-    LDA #$02 : STA $0420,y               ; ...and set it's size to $02
+    SEP #$30 : LDX #$E0                        ; Default power up sprite is feather
+    BIT $0D9B|!addr : BVC +                    ; If Reznor's, Morton's, or Roy's battle mode
+    LDX #$00                                   ; Then set power up sprite to none
+    LDA $0D9B|!addr : CMP #$C1 : BEQ +         ; If not Bowser's battle mode
+    LDA #$F0 : STA $0201|!addr,x               ; Then set power up sprite as unused (out of screen)
++   STX !T1                                    ; Save sprite number in !T1 for later use
+    LDX $0DC2|!addr : BEQ .return              ; If there is a power up in the item box
+    LDA.l PowerUpPal1,x : STA !T0              ; Then load palette for current power up
+    CPX #$03 : BNE +                           ; If power up is Star
+    LDA $13|!addr : LSR : AND #$03 : TAX       ; Then every second frame change the palette
+    LDA.l PowerUpPal2,x : STA !T0              ; of the star in the item box (store in $00)
++   LDY !T1                                    ; Set power up...
+    LDA #!PowerUpPositionX : STA $0200|!addr,y ; ...X position
+    LDA #$0F : STA $0201|!addr,y               ; ...Y position
+    LDA #$30 : ORA !T0 : STA $0203|!addr,y     ; ...palette
+    LDX $0DC2|!addr : LDA.l PowerUpTile,x      ; ...tile
+    STA $0202|!addr,y                          ;
+    TYA : LSR : LSR : TAY                      ; Divide power up sprite by 4...
+    LDA #$02 : STA $0420|!addr,y               ; ...and set it's size to $02
 
-    ; Restore X/Y, set A 16-bit, and return.
 .return
     REP #$30 : PLY : PLX
     RTS
+
+.visibility0
+.visibility2
+    REP #$30 : PLY : PLX
+    RTS
+
 
 ; Palette for mushroom, feather, and flower.
 PowerUpPal1: db $02,$08,$0A,$00,$04
