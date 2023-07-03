@@ -41,13 +41,6 @@
 ; - %check_visibility(!BonusStarsVisibility, 1, 2)
 ; - %check_visibility(!PowerUpVisibility, 2, 1)
 macro check_visibility(global_setting, group, position)
-    if !EnableLevelConfiguration == 1
-        SEP #$20 : %lda_level_byte(Group<group>VisibilityTable)
-        AND #%11000000>>(<position>*2) : BEQ .visibility0
-        CMP #%01000000>>(<position>*2) : BEQ .visibility1
-        CMP #%10000000>>(<position>*2) : BEQ .visibility2
-    endif
-
     if <global_setting> == 2
         BRA .visibility2
     elseif <global_setting> == 1
@@ -116,17 +109,4 @@ macro return_handler_visible()
     REP #$30 : PLY : PLX
     LDA #$0001
     RTS
-endmacro
-
-
-;-------------------------------------------------------------------------------
-; LDA Level Byte
-;-------------------------------------------------------------------------------
-
-; Access the byte positioned at the current level's index in a given table.
-; @param <level_table>: A table with a list of bytes, one for each level.
-; @return A (8-bit): The byte for the level.
-macro lda_level_byte(level_table)
-    SEP #$20 : PHX : LDX $010B|!addr
-    LDA.l <level_table>,x : PLX
 endmacro

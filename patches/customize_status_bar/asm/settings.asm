@@ -1,25 +1,8 @@
 ;-------------------------------------------------------------------------------
-; General
-;-------------------------------------------------------------------------------
-
-; Enable or disable level-specific configuration. Level configuration requires
-; three tables of 512 bytes each, for a total of 1,526 bytes, which is quite a
-; lot. If you don't need level-spefic customization and are worried about free
-; space usage, you can turn this off. If this is turned off, the patch will
-; account only for global settings, ignoring everything in "levels.asm".
-; Values:
-;   0 = Disabled
-;   1 = Enabled
-!EnableLevelConfiguration = 1
-
-
-;-------------------------------------------------------------------------------
 ; Bonus Stars
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the bonus stars counter in the status bar.
-; For level-specific settings, check "Group1VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
@@ -70,12 +53,7 @@
 ; Coins
 ;-------------------------------------------------------------------------------
 
-; N.B.: The coin limit can be configured per-level in "CoinLimitTable" in
-; "configuration/levels.asm", the default vanilla value is $63 (99).
-
 ; Global setting for showing the coins counter in the status bar.
-; For level-specific settings, check "Group1VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
@@ -124,8 +102,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the lives counter in the status bar.
-; For level-specific settings, check "Group1VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
@@ -145,8 +121,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the time counter in the status bar.
-; For level-specific settings, check "Group1VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
@@ -185,8 +159,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the dragon coins counter in the status bar.
-; For level-specific settings, check "Group2VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always
@@ -238,8 +210,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the score counter in the status bar.
-; For level-specific settings, check "Group2VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
@@ -251,8 +221,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Global setting for showing the power up in the item box in the status bar.
-; For level-specific settings, check "Group2VisibilityTable" in
-; "configuration/levels.asm".
 ; Values:
 ;   0 = Hidden if present in the item box, items can still be stored and dropped
 ;   1 = Visible if present in the item box (vanilla)
