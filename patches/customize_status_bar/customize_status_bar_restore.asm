@@ -4,10 +4,10 @@
 
 ; Revert changes applied by `customize_status_bar.asm`.
 
-; Restore the original status bar routine by resuming display the time.
-org $008E6F
-    LDA $0F31
-    STA $0F25
+; Restore the original status bar routine.
+org $008E1A
+    LDA $1493
+    ORA $9D
 
 ; Restore default X position for the item box, where the item starts falling
 ; from.

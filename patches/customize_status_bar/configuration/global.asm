@@ -27,9 +27,11 @@
 
 ; Symbol in front of the bonus stars counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Default: $64 (star). If you are using the modified GFX28 bundled with this
-; patch, you can also use $3F (star, alternative), which replaces the second
-; part of the "TIME" text, no longer used.
+; Values: $00-$7F/$FC.
+; Default: $64 (star).
+; If you are using the modified GFX28 bundled with this patch, you can also use
+; $3F (star, alternative), which replaces the second part of the "TIME" text, no
+; longer used.
 !BonusStarsSymbol = $64
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
@@ -42,7 +44,8 @@
 !AlwaysCheckBonusStars = 0
 
 ; Bonus stars limit. If reached, the bonus game is triggered.
-; Default value: $64 (100) (vanilla).
+; Values: $00-$FF.
+; Default: $64 (100) (vanilla).
 !BonusStarsLimit = $64
 
 ; Whether the bonus game should start after the level if the bonus stars limit
@@ -50,8 +53,8 @@
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
 ; !ResetBonusStarsIfBonusStarsLimitReached.
 ; Values:
-;   0 = Don't start bonus game after level
-;   1 = Start bonus game after level (vanilla)
+;   0 = Don't add bonus stars when completing level
+;   1 = Add bonus stars when completing level (vanilla)
 !StartBonusGameIfBonusStarsLimitReached = 1
 
 ; Whether the game should reset the counter when the coin limit is reached.
@@ -81,28 +84,30 @@
 
 ; Symbol in front of the coins counter.
 ; The value is the position of the 8x8 tile in "GFX28".
+; Values: $00-$7F/$FC.
 ; Default: $2E (coin).
 !CoinsSymbol = $2E
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
-; shown in the status bar (!BonusStarsVisibility = 0). If the bonus stars reach
-; a specific threshold (default 100), the bonus game starts after the level.
-; N.B.: This has not effect if !BonusStarsVisibility = 1.
+; shown in the status bar (!CoinsVisibility = 0). If the bonus stars reach a
+; specific threshold (default 100), the bonus game starts after the level.
+; N.B.: This has not effect if !CoinsVisibility = 1.
 ; Values:
 ;   0 = Don't check bonus stars if indicator is disabled in status bar.
 ;   1 = Check bonus stars even if indicator is disabled in status bar.
 !AlwaysCheckCoins = 0
 
 ; Coin limit. When the limit is reached, the vanilla game adds a life.
-; Default value: $64 (100) (vanilla).
+; Values: $00-$FF.
+; Default: $64 (100) (vanilla).
 !CoinsLimit = $64
 
 ; Whether the game should add a life when the coin limit is reached.
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
 ; !ResetCoinsIfCoinsLimitReached.
 ; Values:
-;   0 = Don't add life
-;   1 = Add life (vanilla)
+;   0 = Don't increase coins
+;   1 = Increase coins (vanilla)
 !AddLifeIfCoinsLimitReached = 1
 
 ; Whether the game should reset the counter when the coin limit is reached.
@@ -128,9 +133,10 @@
 
 ; Symbol in front of the lives counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Default: $26 (x). If you are using the modified GFX28 bundled with this
-; patch, you can also use $3E (heart), which replaces the second part of the
-; "TIME" text, no longer used.
+; Values: $00-$7F/$FC.
+; Default: $26 (x).
+; If you are using the modified GFX28 bundled with this patch, you can also use
+; $3E (heart), which replaces the second part of the "TIME" text, no longer used.
 !LivesSymbol = $26
 
 
@@ -149,9 +155,29 @@
 
 ; Symbol in front of the time counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Default: $76 (clock). If you are using the modified GFX28 bundled with this
-; patch, the clock graphic has been lowered by 1 px, which is much better ;).
+; Values: $00-$7F/$FC.
+; Default: $76 (clock).
+; If you are using the modified GFX28 bundled with this patch, the clock graphic
+; has been lowered by 1 px, which is much better ;).
 !TimeSymbol = $76
+
+; Whether the time is always checked, even if the indicator is not shown in the
+; status bar (!TimeVisibility = 0). If the timer reaches zero, the player will
+; be killed.
+; N.B.: This has not effect if !TimeVisibility = 1.
+; Values:
+;   0 = Don't decrease timer
+;   1 = Decrease timer
+!AlwaysCheckTime = 0
+
+; Frequency for decreasing the timer. The timer will decrease every
+; !TimeFrequency frames.
+; Values: $00-$FE.
+; Default: $28 (vanilla).
+; You can set this value to $3C (60) to make the timer decrease every second (if
+; the game runs at 60 FPS).
+; N.B.: Don't use $FF as it is a reserved value (why would you use that anyway).
+!TimeFrequency = $28
 
 
 ;-------------------------------------------------------------------------------
@@ -169,14 +195,17 @@
 
 ; Symbol for collected dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
+; Values: $00-$7F/$FC.
 ; Default: $2E (coin).
 !DragonCoinsCollectedSymbol = $2E
 
 ; Symbol for missing dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Default: $FC (empty). If you are using the modified GFX28 bundled with this
-; patch, you can also use $3D (empty coin), which replaces the first part of the
-; "TIME" text, no longer used.
+; Values: $00-$7F/$FC.
+; Default: $FC (empty).
+; If you are using the modified GFX28 bundled with this patch, you can also use
+; $3D (empty coin), which replaces the first part of the "TIME" text, no longer
+; used.
 !DragonCoinsMissingSymbol = $FC
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
@@ -196,8 +225,9 @@
 ; This only applies if !UseCustomDragonCoinsCollectedGraphics = 1.
 ; Every element is a 8x8 tile in GFX28, $FC is an empty space.
 ; The list must have exactly 7 elements!
-; Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   "). If you are using the
-; modified GFX28 bundled with this patch, you can also use
+; Values: $00-$7F/$FC, $00-$7F/$FC, $00-$7F/$FC, $00-$7F/$FC, $00-$7F/$FC, $00-$7F/$FC, $00-$7F/$FC.
+; Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ").
+; If you are using the modified GFX28 bundled with this patch, you can also use
 ; `$2E, $2E, $2E, $2E, $2E, $3A, $FC`, where $2E are the coin symbol and $3A is
 ; a checkmark that replaces the corner of the item box in the graphics file.
 !CustomDragonCoinsCollectedGraphics = $0A, $15, $15, $28, $FC, $FC, $FC
@@ -257,6 +287,8 @@
 ; default, it is set to be GWWW, that is gold for the symbol (tile 0) and white
 ; for the digits (tiles 1-3). The palette is configured the same way for all
 ; slots in the "Status Bar Static Configuration" down below.
+; Values: $0EF9-$0F11/$0F15-$0F2C
+; Default: $0F11, $0F2C, $0F0C, $0F27
 !Group1Slots = $0F11, $0F2C, $0F0C, $0F27
 
 
@@ -283,6 +315,8 @@
 ; N.B.: The color palette of each tile cannot be controlled dynamically. By
 ; default, all siz tiles are set to gold. The palette is configured the same way
 ; for all slots in the "Status Bar Static Configuration" down below.
+; Values: $0EF9-$0F0E/$0F15-$0F29
+; Default: $0EF9, $0F15
 !Group2Slots = $0EF9, $0F15
 
 

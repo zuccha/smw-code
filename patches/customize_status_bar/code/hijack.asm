@@ -2,9 +2,9 @@
 ; HIJACK
 ;===============================================================================
 
-; Hijack after the original game decreases the time counter. We rewrite all the
-; other parts in freespace to avoid conflicts with other patches.
-org $008E6F
+; Hijack at the beginning of the original status bar routine. Rewrite all the
+; parts in freespace to avoid conflicts with other patches.
+org $008E1A
     autoclean JSL CustomizeStatusBar
     RTS
 
