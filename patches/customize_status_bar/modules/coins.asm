@@ -59,8 +59,8 @@ HandleCoins:
     LDA !T0 : CMP $0DBF|!addr : BNE +
 
     ; Limit reached, add life and reset counter if necessary.
-    if !AddLifeIfCoinLimitReached : INC $18E4|!addr
-    if !ResetCoinsIfCoinLimitReached : LDA $0DBF|!addr : SEC : SBC !T0 : STA $0DBF|!addr
+    if !AddLifeIfCoinsLimitReached : INC $18E4|!addr
+    if !ResetCoinsIfCoinsLimitReached : LDA $0DBF|!addr : SEC : SBC !T0 : STA $0DBF|!addr
 
     ; Draw the coin counter on the status bar.
 +   PLY ; Stack: X, Y <-

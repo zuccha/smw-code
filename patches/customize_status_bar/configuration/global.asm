@@ -7,7 +7,7 @@
 ; lot. If you don't need level-spefic customization and are worried about free
 ; space usage, you can turn this off. If this is turned off, the patch will
 ; account only for global settings, ignoring everything in "levels.asm".
-; Possible values:
+; Values:
 ;   0 = Disabled
 ;   1 = Enabled
 !EnableLevelConfiguration = 1
@@ -20,7 +20,7 @@
 ; Global setting for showing the bonus stars counter in the status bar.
 ; For level-specific settings, check "Group1VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
 !BonusStarsVisibility = 1
@@ -31,6 +31,36 @@
 ; patch, you can also use $3F (star, alternative), which replaces the second
 ; part of the "TIME" text, no longer used.
 !BonusStarsSymbol = $64
+
+; Whether the bonus stars amount is always checked, even if the indicator is not
+; shown in the status bar (!BonusStarsVisibility = 0). If the bonus stars reach
+; a specific threshold (default 100), the bonus game starts after the level.
+; N.B.: This has not effect if !BonusStarsVisibility = 1.
+; Values:
+;   0 = Don't check bonus stars if indicator is disabled in status bar.
+;   1 = Check bonus stars even if indicator is disabled in status bar.
+!AlwaysCheckBonusStars = 0
+
+; Bonus stars limit. If reached, the bonus game is triggered.
+; Default value: $64 (100) (vanilla).
+!BonusStarsLimit = $64
+
+; Whether the bonus game should start after the level if the bonus stars limit
+; is reached.
+; N.B.: This doesn't control whether the limit is reset, for that refer to
+; !ResetBonusStarsIfBonusStarsLimitReached.
+; Values:
+;   0 = Don't start bonus game after level
+;   1 = Start bonus game after level (vanilla)
+!StartBonusGameIfBonusStarsLimitReached = 1
+
+; Whether the game should reset the counter when the coin limit is reached.
+; N.B.: This doesn't control whether the bonus game will start, for that refer
+; to !StartBonusGameIfBonusStarsLimitReached.
+; Values:
+;   0 = Don't reset counter
+;   1 = Reset counter (vanilla)
+!ResetBonusStarsIfBonusStarsLimitReached = 1
 
 
 ;-------------------------------------------------------------------------------
@@ -43,7 +73,7 @@
 ; Global setting for showing the coins counter in the status bar.
 ; For level-specific settings, check "Group1VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
 ;   2 = If limit > 0 (see "CoinLimitTable" in "configuration/levels.asm")
@@ -56,19 +86,19 @@
 
 ; Whether the game should add a life when the coin limit is reached.
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
-; !ResetCoinsIfCoinLimitReached.
-; Possible values:
+; !ResetCoinsIfCoinsLimitReached.
+; Values:
 ;   0 = Don't add life
 ;   1 = Add life (vanilla)
-!AddLifeIfCoinLimitReached = 1
+!AddLifeIfCoinsLimitReached = 1
 
 ; Whether the game should reset the counter when the coin limit is reached.
 ; N.B.: This doesn't control whether a life is added, for that refer to
-; !AddLifeIfCoinLimitReached.
-; Possible values:
+; !AddLifeIfCoinsLimitReached.
+; Values:
 ;   0 = Don't reset counter
 ;   1 = Reset counter (vanilla)
-!ResetCoinsIfCoinLimitReached = 1
+!ResetCoinsIfCoinsLimitReached = 1
 
 ; Coin limit. Used only if !EnableLevelConfiguration is turned off.
 ; Default value: $64 (100) (vanilla).
@@ -82,7 +112,7 @@
 ; Global setting for showing the lives counter in the status bar.
 ; For level-specific settings, check "Group1VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
 !LivesVisibility = 1
@@ -102,7 +132,7 @@
 ; Global setting for showing the time counter in the status bar.
 ; For level-specific settings, check "Group1VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
 ;   2 = If limit > 0 (via Lunar Magic)
@@ -122,7 +152,7 @@
 ; Global setting for showing the dragon coins counter in the status bar.
 ; For level-specific settings, check "Group2VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always
 ;   2 = If not all coins have been collected (vanilla)
@@ -142,7 +172,7 @@
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
 ; can be configured using !DragonCoinsCollectedGraphics.
-; Possible values:
+; Values:
 ;   0 = Disabled (vanilla)
 ;   - If !DragonCoinsVisibility = 1: You will see 5 coins.
 ;   - If !DragonCoinsVisibility = 2: You will see nothing.
@@ -171,7 +201,7 @@
 ; Global setting for showing the score counter in the status bar.
 ; For level-specific settings, check "Group2VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Never
 ;   1 = Always (vanilla)
 !ScoreVisibility = 1
@@ -184,7 +214,7 @@
 ; Global setting for showing the power up in the item box in the status bar.
 ; For level-specific settings, check "Group2VisibilityTable" in
 ; "configuration/levels.asm".
-; Possible values:
+; Values:
 ;   0 = Hidden if present in the item box, items can still be stored and dropped
 ;   1 = Visible if present in the item box (vanilla)
 ;   2 = Items cannot be stored and dropped
@@ -205,7 +235,7 @@
 
 ; Order in which group 1 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; Possible values: !BonusStars, !Coins, !Lives, !Time.
+; Values: !BonusStars, !Coins, !Lives, !Time.
 ; N.B.: Make sure to leave a space after every comma!
 !Group1Order = !Lives, !BonusStars, !Time, !Coins
 
@@ -233,7 +263,7 @@
 
 ; Order in which group 2 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; Possible values: !DragonCoins, !Score.
+; Values: !DragonCoins, !Score.
 ; N.B.: Make sure to leave a space after every comma!
 !Group2Order = !Score, !DragonCoins
 

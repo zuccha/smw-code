@@ -28,12 +28,7 @@ HandleBonusStars:
 
 .visibility1
     ; Check bonus stars amount and setup bonus game if necessary.
-    SEP #$30
-    LDX $0DB3|!addr : LDA $0F48|!addr,x ; Get bonus stars for current player
-    CMP #$64 : BCC +                    ; If they are greater or equal than 100...
-    LDA #$FF : STA $1425|!addr          ; Then start bonus game when level ends, and...
-    LDA $0F48|!addr,x : SEC             ; ...subtract 100 ($64) stars
-    SBC #$64 : STA.W $0F48|!addr,x      ; ...
+    JSR CheckBonusStars ; X (8-bit) contains the current player (0 = Mario, 1 = Luigi)
 
     ; Draw bonus stars.
 +   LDA $0F48|!addr,x : REP #$10 : PLY               ; Load bonus stars for current player
@@ -44,4 +39,22 @@ HandleBonusStars:
 
 .visibility0
 .visibility2
+    if !AlwaysCheckBonusStars == 1 : JSR CheckBonusStars
     %return_handler_hidden()
+
+CheckBonusStars:
+    SEP #$30
+    LDX $0DB3|!addr : LDA $0F48|!addr,x ; Get bonus stars for current player
+    CMP.b #!BonusStarsLimit : BCC +     ; If they are greater or equal than !BonusStarsLimit...
+if !StartBonusGameIfBonusStarsLimitReached
+    LDA #$FF : STA $1425|!addr          ; Then start bonus game when level ends, and...
+endif
+if !ResetBonusStarsIfBonusStarsLimitReached = 1
+    LDA $0F48|!addr,x                   ; ...subtract !BonusStarsLimit stars
+    SEC : SBC.b #!BonusStarsLimit
+    STA $0F48|!addr,x
+else
+    LDA.b #!BonusStarsLimit             ; ...prevent value from exceeding limit
+    STA $0F48|!addr,x
+endif
++   RTS
