@@ -84,6 +84,19 @@
 ; Default: $2E (coin).
 !CoinsSymbol = $2E
 
+; Whether the bonus stars amount is always checked, even if the indicator is not
+; shown in the status bar (!BonusStarsVisibility = 0). If the bonus stars reach
+; a specific threshold (default 100), the bonus game starts after the level.
+; N.B.: This has not effect if !BonusStarsVisibility = 1.
+; Values:
+;   0 = Don't check bonus stars if indicator is disabled in status bar.
+;   1 = Check bonus stars even if indicator is disabled in status bar.
+!AlwaysCheckCoins = 0
+
+; Coin limit. When the limit is reached, the vanilla game adds a life.
+; Default value: $64 (100) (vanilla).
+!CoinsLimit = $64
+
 ; Whether the game should add a life when the coin limit is reached.
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
 ; !ResetCoinsIfCoinsLimitReached.
@@ -99,10 +112,6 @@
 ;   0 = Don't reset counter
 ;   1 = Reset counter (vanilla)
 !ResetCoinsIfCoinsLimitReached = 1
-
-; Coin limit. Used only if !EnableLevelConfiguration is turned off.
-; Default value: $64 (100) (vanilla).
-!CoinsLimit = $64
 
 
 ;-------------------------------------------------------------------------------

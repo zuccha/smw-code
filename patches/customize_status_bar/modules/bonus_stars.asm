@@ -46,15 +46,15 @@ CheckBonusStars:
     SEP #$30
     LDX $0DB3|!addr : LDA $0F48|!addr,x ; Get bonus stars for current player
     CMP.b #!BonusStarsLimit : BCC +     ; If they are greater or equal than !BonusStarsLimit...
-if !StartBonusGameIfBonusStarsLimitReached
-    LDA #$FF : STA $1425|!addr          ; Then start bonus game when level ends, and...
-endif
-if !ResetBonusStarsIfBonusStarsLimitReached = 1
-    LDA $0F48|!addr,x                   ; ...subtract !BonusStarsLimit stars
-    SEC : SBC.b #!BonusStarsLimit
-    STA $0F48|!addr,x
-else
-    LDA.b #!BonusStarsLimit             ; ...prevent value from exceeding limit
-    STA $0F48|!addr,x
+    if !StartBonusGameIfBonusStarsLimitReached
+        LDA #$FF : STA $1425|!addr      ; Then start bonus game when level ends, and...
+    endif
+    if !ResetBonusStarsIfBonusStarsLimitReached = 1
+        LDA $0F48|!addr,x               ; ...subtract !BonusStarsLimit stars
+        SEC : SBC.b #!BonusStarsLimit
+        STA $0F48|!addr,x
+    else
+        LDA.b #!BonusStarsLimit         ; ...prevent value from exceeding limit
+        STA $0F48|!addr,x
 endif
 +   RTS

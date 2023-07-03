@@ -14,22 +14,6 @@
 
 
 ;-------------------------------------------------------------------------------
-; Utils
-;-------------------------------------------------------------------------------
-
-; Load the coins' limit for a given level (or global if level configuration is
-; disabled) into A (8-bit).
-; @return A (8-bit): Coins limit.
-macro lda_coins_limit()
-    if !EnableLevelConfiguration == 1
-        %lda_level_byte(CoinsLimitTable)
-    else
-        LDA #!CoinsLimit
-    endif
-endmacro
-
-
-;-------------------------------------------------------------------------------
 ; Handler
 ;-------------------------------------------------------------------------------
 
@@ -44,30 +28,43 @@ HandleCoins:
 
 .visibility2
     ; If coin limit is zero, then coins are not visible
-    SEP #$20 : %lda_coins_limit() : BEQ .visibility0
+    SEP #$20 : LDA.b #!CoinsLimit : BEQ .visibility0
 
 .visibility1
-    ; Increase coin count if necessary.
-    SEP #$20
-    LDA $13CC|!addr : BEQ +      ; If there is a "coin increase"
-    DEC $13CC|!addr              ; Then decrease it.
-    %lda_coins_limit() : STA !T0 ; Load coins limit
-    CMP $0DBF|!addr : BEQ +      ; If coins count != coins limit
-    INC $0DBF|!addr              ; Then increase coins count by 1
-
-    ; Skip ahead if coin limit has not been reached.
-    LDA !T0 : CMP $0DBF|!addr : BNE +
-
-    ; Limit reached, add life and reset counter if necessary.
-    if !AddLifeIfCoinsLimitReached : INC $18E4|!addr
-    if !ResetCoinsIfCoinsLimitReached : LDA $0DBF|!addr : SEC : SBC !T0 : STA $0DBF|!addr
+    JSR CheckCoins
 
     ; Draw the coin counter on the status bar.
-+   PLY ; Stack: X, Y <-
+    PLY ; Stack: X, Y <-
     LDA $0DBF|!addr : %draw_counter_with_two_digits(!CoinsSymbol)
 
     ; Return
     %return_handler_visible()
 
 .visibility0
+    if !AlwaysCheckCoins == 1 : JSR CheckCoins
     %return_handler_hidden()
+
+CheckCoins:
+    ; Increase coin count if necessary.
+    SEP #$20
+    LDA $13CC|!addr : BEQ + ; If there is a "coin increase"
+    DEC $13CC|!addr         ; Then decrease it.
+    LDA.b #!CoinsLimit      ; Load coins limit
+    CMP $0DBF|!addr : BEQ + ; If coins count != coins limit
+    INC $0DBF|!addr         ; Then increase coins count by 1
+
+    ; Skip ahead if coin limit has not been reached.
+    LDA.b #!CoinsLimit : CMP $0DBF|!addr : BNE +
+
+    ; Limit reached
+    if !AddLifeIfCoinsLimitReached : INC $18E4|!addr ; Add life
+    if !ResetCoinsIfCoinsLimitReached
+        LDA $0DBF|!addr                              ; Decrease by coins limit
+        SEC : SBC.b #!CoinsLimit
+        STA $0DBF|!addr
+    else
+        LDA.b #!CoinsLimit : STA $0F48|!addr,x       ; Don't exceed limit
+    endif
+
+    ; Return
++   RTS
