@@ -20,23 +20,6 @@
 
 
 ;-------------------------------------------------------------------------------
-; Hex To Dec
-;-------------------------------------------------------------------------------
-
-; Convert hexadecimal number to decimal.
-; The tens' digit is stored in X, the units' digit is stored in A.
-; @param A (8-bit): The hexadecimal number to be converted.
-; @return A (8-bit): The low digit of the decimal number.
-; @return X: The high digit of the decimal number.
-HexToDec:
-    LDX #$0000       ; X counts the tens
--   CMP #$0A : BCC + ; If A > $0A (10)...
-    SBC #$0A : INX   ; ...A -= $0A (-= 10), X += 1
-    BRA -            ; Repeat
-+   RTL
-
-
-;-------------------------------------------------------------------------------
 ; Check Visibility
 ;-------------------------------------------------------------------------------
 
@@ -79,18 +62,35 @@ endmacro
 ; Draw Counter With Two Digits
 ;-------------------------------------------------------------------------------
 
+; Draw a one-byte long hexadecimal number as a three-digits decimal.
+; @param A (8-bit): The hexadecimal number to be drawn.
+; @param Y (16-bit): Slot position.
+Draw3DigitsNumber:
+    LDX #$0000                          ; X counts 100s
+-   CMP #$64 : BCC +                    ; While A >= 100
+    SBC #$64 : INX                      ; Subtract 100 increase 100s count
+    BRA -                               ; Repeat
++   PHA : TXA : STA $0001|!addr,y : PLA ; Draw 100s.
+
+    LDX #$0000                          ; X counts 10s
+-   CMP #$0A : BCC +                    ; While A >= 10
+    SBC #$0A : INX                      ; Subtract 10 and increase 10s count
+    BRA -                               ; Repeat
++   PHA : TXA : STA $0002|!addr,y : PLA ; Draw 10s.
+
+    STA $0003|!addr,y                   ; Draw 1s.
+
+    RTL
+
 ; Draw a hexadecimal number lower than $64 (100) as a two-digits decimal number.
 ; The number will be drawn in format "S0TU", where "S" is the symbol, "0" is a
 ; harcoded 0, "T" is the tens' digit, and "U" is the units' digit.
 ; @param A (8-bit): The hexadecimal number.
 ; @param Y (16-bit): Slot position.
 ; @param <symbol>: Symbol to display before the number.
-macro draw_counter_with_two_digits(symbol)
-    JSL.l HexToDec                      ; Get decimal value
-    STA $0003|!addr,y                   ; Units
-    TXA : STA $0002|!addr,y             ; Tens
-    LDA #$00 : STA $0001|!addr,y        ; Hundreds, hardcoded
-    LDA.b #<symbol> : STA $0000|!addr,y ; Symbol
+macro draw_3_digits_number_with_symbol(symbol)
+    JSL.l Draw3DigitsNumber             ; Draw 100s, 10s, and 1s
+    LDA.b #<symbol> : STA $0000|!addr,y ; Draw symbol
 endmacro
 
 
