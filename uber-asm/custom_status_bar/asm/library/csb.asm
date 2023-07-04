@@ -43,7 +43,7 @@ pullpc
 %include_code("generic/hijacks.asm")
 
 ; RAM
-%include_code("generic/ram.asm") ; RAM turns off namespace
+%include_file("ram.asm") ; RAM turns off namespace
 namespace "internal"
 
 ; Utils

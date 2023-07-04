@@ -4,8 +4,58 @@
 
 ; Prepare RAM addresses for usage in the code.
 ; The patch required 33 bytes of free contiguous RAM. Its position can be
-; configured in `settings.asm`.
+; configured down below.
 
+
+;-------------------------------------------------------------------------------
+; Base Address
+;-------------------------------------------------------------------------------
+
+; This patch requires 33 bytes of free contiguous RAM to store settings that can
+; be changed dynamically (mostly used for per-level customization).
+; RAM starts at the address indicated here. Unless you have some conflics with
+; other custom code, you won't need to change it.
+; * Values: Any address in free space.
+; * Default: $7FB700
+!freeram_address = $7FB700
+
+
+;-------------------------------------------------------------------------------
+; Instructions
+;-------------------------------------------------------------------------------
+
+; This file generates labels for all the RAM addresses for CSB. Addresses are
+; always in the shape `ram_<setting_name>`, or `csb_ram_<setting_name>` if
+; used in UberASMTool. The variant `!ram_<setting_name>` with the exclamation
+; mark is also available outside of UberASMTool.
+
+; Example usage in UberASMTool:
+;   STA #$00 : LDA csb_ram_coins_visibility
+
+; Example usage in outside UberASMTool (e.g., GPS):
+;   STA #$00 : LDA csb_ram_coins_visibility
+; or
+;   STA #$00 : LDA !csb_ram_coins_visibility
+
+; If you want to use the addresses for blocks or sprites, copy the contents of,
+; or include, this file in your code.
+; N.B.: If you change !freeram_address here, you'll have to change it in any
+; other file where you copied this one!
+; If you don't feel like copying too much stuff, you can just copy the base
+; address, the `define_ram` macro, and the definitions for the addresses you
+; want (don't change the offset!). For example:
+;   !freeram_address = $7FB700
+;   macro define_ram(offset, name)
+;       !ram_<name> = !freeram_address+<offset>
+;       base !ram_<name>
+;           ram_<name>:
+;       base off
+;   endmacro
+;   %define_ram($07, coins_visibility)
+;   %define_ram($08, coins_symbol)
+
+; For UberASMTool you don't need to do anything, since it is automatically
+; included.
 
 ;-------------------------------------------------------------------------------
 ; Utils
