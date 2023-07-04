@@ -200,7 +200,7 @@ we have all elements
 | :---------------------------------------------------------------: |
 |  In Yoshi's Island 1 all elements of the status bar are visible   |
 
-Or if we remove the time
+and when the timer is missing
 
 |                                      ![Yoshi's House status bar zoom](./docs/assets/sb-zoom-no-time.png)                                       |
 | :--------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -250,9 +250,9 @@ customization of the elements present in the status bar, some of which include:
 4. Control the behavior when coin/bonus stars limit is met
 5. Adjust the frequency of the timer (easy to make it count actual seconds)
 
-| ![Disabled item box](./docs/assets/sb-no-item-box.gif) | ![All dragon coins collected](./docs/assets/sb-dragon-coins-default.gif) | :---------------------------------------------------------------------------------: |
-| :----------------------------------------------------: | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-|                   Disabled item box                    | The "ALL!" text appears upon collecting the 5th coin                     |
+| ![Disabled item box](./docs/assets/sb-no-item-box.gif) | ![All dragon coins collected](./docs/assets/sb-dragon-coins-default.gif) |
+| :----------------------------------------------------: | :----------------------------------------------------------------------: |
+|                   Disabled item box                    |           The "ALL!" text appears upon collecting the 5th coin           |
 
 For a full list of features, check _settings.asm_.
 
