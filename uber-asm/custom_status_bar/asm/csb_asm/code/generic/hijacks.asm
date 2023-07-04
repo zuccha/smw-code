@@ -7,6 +7,7 @@
 ; 2. Retrieve custom item box's horizontal position.
 ; 3. Prevent item box from dropping item if power_up_visibility = 2 (disabled).
 ; 4. Conditionally turn off IRQ (credits KevinM).
+; 5. Overwrite status bar tilemap's tiles and palettes (in `colors.asm`).
 
 
 ;-------------------------------------------------------------------------------

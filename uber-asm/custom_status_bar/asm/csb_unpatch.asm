@@ -18,7 +18,7 @@ org $008DAC
 
 ; Restore the original status bar routine.
 org $008E1F
-    BNE $46
+    BNE $4E
 
 ; Restore default X position for the item box, where the item starts falling
 ; from.
