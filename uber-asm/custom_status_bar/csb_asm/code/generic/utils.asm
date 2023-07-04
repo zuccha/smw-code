@@ -70,10 +70,11 @@ draw_3_digits_number:
 ; harcoded 0, "T" is the tens' digit, and "U" is the units' digit.
 ; @param A (8-bit): The hexadecimal number.
 ; @param Y (16-bit): Slot position.
-; @param <symbol>: Symbol to display before the number.
+; @param <symbol>: Address (label) containing the symbol to display before the
+; number.
 macro draw_3_digits_number_with_symbol(symbol)
-    JSL.l draw_3_digits_number          ; Draw 100s, 10s, and 1s
-    LDA.b #<symbol> : STA $0000|!addr,y ; Draw symbol
+    JSL.l draw_3_digits_number       ; Draw 100s, 10s, and 1s
+    LDA <symbol> : STA $0000|!addr,y ; Draw symbol
 endmacro
 
 

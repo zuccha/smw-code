@@ -34,7 +34,7 @@ handle_lives:
 
     ; Draw lives.
 +   PLY ; Stack: X, Y <-
-    INC A : %draw_3_digits_number_with_symbol(!lives_symbol)
+    INC A : %draw_3_digits_number_with_symbol(ram_lives_symbol)
 
     ; Return
     %return_handler_visible()

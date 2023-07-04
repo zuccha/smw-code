@@ -31,8 +31,8 @@ handle_bonus_stars:
     JSR check_bonus_stars ; X (8-bit) contains the current player (0 = Mario, 1 = Luigi)
 
     ; Draw bonus stars.
-+   LDA $0F48|!addr,x : REP #$10 : PLY                     ; Load bonus stars for current player
-    %draw_3_digits_number_with_symbol(!bonus_stars_symbol) ; and draw them
++   LDA $0F48|!addr,x : REP #$10 : PLY                        ; Load bonus stars for current player
+    %draw_3_digits_number_with_symbol(ram_bonus_stars_symbol) ; and draw them
 
     ; Return
     %return_handler_visible()

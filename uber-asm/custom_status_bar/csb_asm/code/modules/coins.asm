@@ -35,7 +35,7 @@ handle_coins:
 
     ; Draw the coin counter on the status bar.
     PLY ; Stack: X, Y <-
-    LDA $0DBF|!addr : %draw_3_digits_number_with_symbol(!coins_symbol)
+    LDA $0DBF|!addr : %draw_3_digits_number_with_symbol(ram_coins_symbol)
 
     ; Return
     %return_handler_visible()

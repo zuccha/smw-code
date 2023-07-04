@@ -39,7 +39,7 @@ handle_time:
 
     ; Draw time counter on the status bar.
     PLY : SEP #$20                                ; Stack: X, Y <-
-    LDA.b #!time_symbol : STA $0000|!addr,y : INY ; Symbol
+    LDA ram_time_symbol : STA $0000|!addr,y : INY ; Symbol
     LDA $0F31|!addr : STA $0000|!addr,y : INY     ; Hundreds
     LDA $0F32|!addr : STA $0000|!addr,y : INY     ; Tens
     LDA $0F33|!addr : STA $0000|!addr,y           ; Units

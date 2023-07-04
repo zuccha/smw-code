@@ -17,7 +17,8 @@
 ; will make `ram_enable_status_bar` usable in the code as follows:
 ;   LDA ram_enable_status_bar
 macro define_ram_address(offset, name)
-    base !freeram_address+<offset>
+    !ram_<name> = !freeram_address+<offset>
+    base !ram_<name>
         ram_<name>:
     base off
 endmacro
