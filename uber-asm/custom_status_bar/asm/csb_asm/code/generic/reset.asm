@@ -15,7 +15,7 @@ endmacro
 macro reset_ram_table(name, size)
     !i #= 0
     while !i < <size>
-        LDA.b <name>_table+!i : STA ram_<name>+!i
+        LDA.l <name>_table+!i : STA ram_<name>+!i
         !i #= !i+1
     endif
 endmacro

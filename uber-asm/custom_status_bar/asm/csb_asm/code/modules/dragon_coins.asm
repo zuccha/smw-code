@@ -34,22 +34,20 @@ are_dragon_coins_collected:
 ; Draw the custom graphics for when all dragon coins are collected.
 ; @param Y (16-bit): Slot position
 ; $param !T0 (8-bit): The amount of collected coins.
-; @branch .return: If collected coins >= 5.
-; @branch +: If collected coins < 5.
-macro draw_dragon_coins_custom_collected_graphics()
-    if !use_custom_dragon_coins_collected_graphics == 1
-        LDA !T0 : CMP #$05 : BCC + ; Skip if dragon coins are less than 5
-        !i #= 0
-        while !i < 7
-            LDA.l custom_dragon_coins_collected_graphics_table+!i
-            STA $000!i|!addr,y
-            !i #= !i+1
-        endif
-        BRA .return
+; @return Z: 0 if the custom graphics have been drawn, 1 otherwise.
+draw_dragon_coins_custom_collected_graphics:
+    LDA ram_use_custom_dragon_coins_collected_graphics : BEQ +
+    LDA !T0 : CMP #$05 : BCC +
+    !i #= 0
+    while !i < 7
+        LDA ram_custom_dragon_coins_collected_graphics+!i : STA.w $!i,y
+        !i #= !i+1
     endif
-endmacro
+    LDA #$01 : RTS
++   LDA #$00 : RTS
 
 ; Table listing the custom graphics for the "all coins collected" message.
+; This is used when resetting ram_custom_dragon_coins_collected_graphics.
 custom_dragon_coins_collected_graphics_table:
     db !custom_dragon_coins_collected_graphics
 
@@ -76,20 +74,20 @@ handle_dragon_coins:
     ; been collected in a previous attempt (are_dragon_coins_collected -> Z = 0),
     ; then the indicator will not be drawn at all.
     SEP #$20
-    LDA $1422|!addr : STA !T0   ; If coins:
-    CMP #$05 : BCS .skip        ;   >= 5, then don't draw coins (draw an empty indicator)
-    CMP #$00 : BNE .draw        ;   != 0, then draw them
+    LDA $1422|!addr : STA !T0      ; If coins:
+    CMP #$05 : BCS .skip           ;   >= 5, then don't draw coins (draw an empty indicator)
+    CMP #$00 : BNE .draw           ;   != 0, then draw them
     JSR are_dragon_coins_collected ; If all have been collected in a previous attempt
-    BNE .visibility0            ; Then don't show the indicator
-    BRA .draw                   ; Else draw coins
+    BNE .visibility0               ; Then don't show the indicator
+    BRA .draw                      ; Else draw coins
 
 .visibility1
     ; Always show coins - Ensure coins are shown even when entering a level
     ; where all coins have been collected, since $1422 = 0 if coins have been
     ; collected in a previous level attempt.
-    SEP #$20 : LDA $1422|!addr : STA !T0    ; By default, show amount of collected coins
+    SEP #$20 : LDA $1422|!addr : STA !T0       ; By default, show amount of collected coins
     JSR are_dragon_coins_collected : BEQ .draw ; If all coins have been collected
-    LDA #$05 : STA !T0 : BRA .draw          ; Then show 5 coins as collected
+    LDA #$05 : STA !T0 : BRA .draw             ; Then show 5 coins as collected
 
 .visibility0
     %return_handler_hidden()
@@ -97,11 +95,10 @@ handle_dragon_coins:
 .skip
     ; The slot position is on the stack.
     PLY
-    ; Draw custom collected graphics if necessary. If draw, this will skip ahead
-    ; to .return, otherwise it will continue normally.
-    %draw_dragon_coins_custom_collected_graphics()
+    ; Draw custom collected graphics if necessary.
+    JSR draw_dragon_coins_custom_collected_graphics : BNE .return
     ; Draw empty spaces to erase the indicator.
-+   LDA.b #$FC
+    LDA.b #$FC
     !i #= 0
     while !i < 7
         STA $000!i|!addr,y
@@ -112,24 +109,23 @@ handle_dragon_coins:
 .draw
     ; Slot position is on the stack, !T0 holds the amount of collected coins.
     PLY
-    ; Draw custom collected graphics if necessary. If draw, this will skip ahead
-    ; to .return, otherwise it will continue normally.
-    %draw_dragon_coins_custom_collected_graphics()
+    ; Draw custom collected graphics if necessary.
+    JSR draw_dragon_coins_custom_collected_graphics : BNE .return
     ; Draw one coin for each collected coin and one empty coin for the rest.
     ; The formula is as follows: #Collected = $00, #NotCollected = #$05 - $00.
-+   LDX #$0000                         ; Dragon coins index
+    LDX #$0000               ; Dragon coins index
     ; Collected coins.
--   TXA : CMP !T0 : BCS +              ; If index < collected dragon coins...
-    CMP #$05 : BCS .return             ; ...and index < 5
-    LDA.b #!dragon_coins_collected_symbol
-    STA $0000|!addr,y                  ; Then draw a coin
-    INX : INY                          ; Go to next coin and next drawing position
+-   TXA : CMP !T0 : BCS +    ; If index < collected dragon coins...
+    CMP #$05 : BCS .return   ; ...and index < 5
+    LDA ram_dragon_coins_collected_symbol
+    STA $0000|!addr,y        ; Then draw a coin
+    INX : INY                ; Go to next coin and next drawing position
     BRA -
 +   ; Non-collected coins.
--   CPX #$0005 : BCS .return           ; If index < 5
-    LDA.b #!dragon_coins_missing_symbol
-    STA $0000|!addr,y                  ; Then draw a missing coin
-    INX : INY                          ; Go to next coin and next drawing position
+-   CPX #$0005 : BCS .return ; If index < 5
+    LDA ram_dragon_coins_missing_symbol
+    STA $0000|!addr,y        ; Then draw a missing coin
+    INX : INY                ; Go to next coin and next drawing position
     BRA -
 
 .return
