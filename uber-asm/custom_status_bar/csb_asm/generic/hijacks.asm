@@ -4,10 +4,8 @@
 
 pushpc
 
-; Hijack at the beginning of the original status bar routine. Rewrite all the
-; parts in freespace to avoid conflicts with other patches.
-org $008E1A
-    JSL HandleStatusBar
+; Override status bar after UberASMTool's hijack.
+org $008E1F
     RTS
 
 ; Tweak stored power up horizontal position (where it starts falling from).

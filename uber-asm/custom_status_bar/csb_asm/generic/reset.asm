@@ -4,6 +4,6 @@
 
 ; Reset RAM when level starts.
 
-ResetStatusBar:
+reset_ram:
     ; TODO: Implement.
     RTL

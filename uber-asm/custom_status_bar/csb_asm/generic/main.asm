@@ -45,7 +45,7 @@ endmacro
 ;-------------------------------------------------------------------------------
 
 ; Main routine, draw all the elements of the status bar.
-HandleStatusBar:
+main:
     REP #$30          ; A, X, and Y 16-bit
     %handle_group(1)  ; Draw group 1
     %handle_group(2)  ; Draw group 2

@@ -56,5 +56,5 @@ CheckBonusStars:
     else
         LDA.b #!BonusStarsLimit         ; ...prevent value from exceeding limit
         STA $0F48|!addr,x
-endif
+    endif
 +   RTS
