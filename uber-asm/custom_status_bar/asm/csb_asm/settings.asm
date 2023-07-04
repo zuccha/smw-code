@@ -35,14 +35,13 @@
 !freeram_address = $7FB700
 
 ; Whether to enable the status bar or not.
-; When disabled, nothing will render at all and IRQ is disabled, leaving room
-; graphics on layer 3.
+; When disabled, nothing will render.
+; TODO: Disable IRQ and free layer 3.
 ; * Values:
 ;     0 = Disabled
 ;     1 = Enabled
 ; * Default: 1
 ; * RAM: csb_ram_enable_status_bar
-; TODO: Implement feature.
 !enable_status_bar = 1
 
 

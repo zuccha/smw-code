@@ -46,11 +46,14 @@ endmacro
 
 ; Main routine, draw all the elements of the status bar.
 main:
-    REP #$30            ; A, X, and Y 16-bit
-    %handle_group(1)    ; Draw group 1
-    %handle_group(2)    ; Draw group 2
-    JSR handle_power_up ; Draw power up
-    SEP #$30            ; A, X, and Y 8-bit
+    SEP #$30 : LDA ram_enable_status_bar : BNE +
+    RTL
+
++   REP #$30
+    %handle_group(1)
+    %handle_group(2)
+    JSR handle_power_up
+    SEP #$30
     RTL
 
 
