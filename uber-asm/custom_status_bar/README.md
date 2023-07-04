@@ -5,7 +5,7 @@ bar.
 
 ## Table of Contents
 
-1. [Motivation](#motivation)
+1. [Features](#motivation)
    1. [Minimalistic style](#1-minimalistic-style)
    2. [Configurable elements' visibility](#2-configurable-elements-visibility)
    3. [RAM-controlled settings](#3-ram-controlled-settings)
@@ -152,7 +152,7 @@ Configure once and it works for every level!
 | :----------------------------------------------------------------: | :----------------------------------------------------------------: |
 | Yoshi's House has no time limit, so no indicator in the status bar | Yoshi's Island 2 has a time limit, visible in the top-right corner |
 
-Besides the time, you can also hide conditionally coins, as they can be hid if
+Besides the time, you can also hide coins conditionally, as they can be hid if
 the coin limit is zero. However the usefulness of this one is debatable, since
 you still need to specify the coin limit per level through code...
 
@@ -164,7 +164,7 @@ Did you ever got annoyed by elements leaving a hole in the UI when not visible?
 | :----------------------------------------------------: |
 |              Where is the coin indicator?              |
 
-Don't worry, with CSB we got you covered. But a little explanation first.
+Don't worry, CSB got you covered. But a little explanation first.
 
 Status bar elements are organized in clusters:
 
@@ -180,7 +180,7 @@ Every group controls its set of elements to display in positions called "slots".
 Elements within a group are ordered by priority via settings. For instance
 
 ```asm
-!group_1_order = !Lives, !BonusStars, !Time, !Coins
+!group_1_order = !lives, !bonus_stars, !time, !coins
 ```
 
 By default, in group 1 the lives indicator has the highest priority, and the
@@ -200,7 +200,7 @@ we have all elements
 | :---------------------------------------------------------------: |
 |  In Yoshi's Island 1 all elements of the status bar are visible   |
 
-and when the timer is missing
+or if the timer is missing
 
 |                                      ![Yoshi's House status bar zoom](./docs/assets/sb-zoom-no-time.png)                                       |
 | :--------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -210,12 +210,12 @@ The same applies for score and dragon coins. If the score is not visible, dragon
 coins will shift to the top line of the status bar. You can check
 [this example](#2-configurable-elements-visibility).
 
-By default slots for each groups are drawn close to each other, but you can
+By default the slots of each groups are drawn close to each other, but you can
 actually place each slot wherever you want.
 
 ### 7. Disable IRQ and free layer 3
 
-This modification also includes the code from
+CSB also includes the code from
 [KevinM's patch](https://www.smwcentral.net/?p=section&a=details&id=28449) that
 turns off IRQ when the status bar is fully disabled, meaning we can use
 fullscreen layer 3!
@@ -235,9 +235,13 @@ We just need to disable the status bar fully...
 ### 8. UberASMTool
 
 Setting up CSB with UberASMTool is a little more complex than what it would be
-with a simple patch, however the fact that it allows per-level customization
-with easy access to ram addresses to control the state of the status bar is a no
-brainer.
+with a simple patch. However, UberASMTool provides some key advantages:
+
+- Easy per-level customization (not need of huge tables for every setting)
+- Ability to set RAM addresses that can be reset on level load
+- Generation of labels that can be reused in other UberASM code
+
+Without UberASMTool, achieving the same results would be much more difficult!
 
 ### 9. Extra
 
@@ -254,7 +258,7 @@ customization of the elements present in the status bar, some of which include:
 | :----------------------------------------------------: | :----------------------------------------------------------------------: |
 |                   Disabled item box                    |           The "ALL!" text appears upon collecting the 5th coin           |
 
-For a full list of features, check _settings.asm_.
+For a full list of features, check _asm/csb_asm/settings.asm_.
 
 ## Compatibility
 
@@ -275,7 +279,7 @@ The code hijacks the ROM in the following points:
    [this](https://www.smwcentral.net/?p=memorymap&game=smw&region=rom&address=028008&context=).
 6. `$028052` (1 byte): Override item box horizontal position. See
    [this](https://www.smwcentral.net/?p=memorymap&game=smw&region=rom&address=028008&context=).
-7. `$008C81-$008CFE` (63 bytes): The status bar's tilemap
+7. `$008C81-$008CFE` (63 bytes): Alter the status bar's tilemap
 
 The code comes with a _csb_unpatch.asm_ patch that can be applied to revert
 non-UberASMTool-related changes. For more, check
@@ -397,7 +401,7 @@ To remove CSB, follow the instructions in
 
 ## Limitations
 
-The current patch suffers from the following limitations:
+This modification suffers from the following limitations:
 
 1. It is not possible to use the left-most tile of the second row of the status
    bar.
