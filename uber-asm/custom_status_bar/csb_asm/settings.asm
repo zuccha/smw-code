@@ -7,6 +7,27 @@
 
 
 ;-------------------------------------------------------------------------------
+; General
+;-------------------------------------------------------------------------------
+
+; This patch requires 32 bytes of free contiguous RAM to store settings that can
+; be changed dynamically (mostly used for per-level customization).
+; RAM starts at the address indicated here. Unless you have some conflics with
+; other custom code, you won't need to change it.
+!freeram_address = $7FB700
+
+; Whether to enable the status bar or not.
+; When disabled, nothing will render at all and IRQ is disabled, leaving room
+; graphics on layer 3.
+; Values:
+;   0 = Disabled
+;   1 = Enabled
+; Default: 1
+; FIXME: Implement feature.
+!enable_status_bar = 1
+
+
+;-------------------------------------------------------------------------------
 ; Bonus Stars
 ;-------------------------------------------------------------------------------
 
@@ -18,8 +39,8 @@
 
 ; Symbol in front of the bonus stars counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $64 (star).
+; Values: $00-$7F/$FC
+; Default: $64 (star)
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3F (star, alternative), which replaces the second part of the "TIME" text, no
 ; longer used.
@@ -30,13 +51,13 @@
 ; a specific threshold (default 100), the bonus game starts after the level.
 ; N.B.: This has not effect if !bonus_stars_visibility = 1.
 ; Values:
-;   0 = Don't check bonus stars if indicator is disabled in status bar.
-;   1 = Check bonus stars even if indicator is disabled in status bar.
+;   0 = Don't check bonus stars if indicator is disabled in status bar
+;   1 = Check bonus stars even if indicator is disabled in status bar
 !always_check_bonus_stars = 0
 
 ; Bonus stars limit. If reached, the bonus game is triggered.
-; Values: $00-$FF.
-; Default: $64 (100) (vanilla).
+; Values: $00-$FF
+; Default: $64 (100) (vanilla)
 !bonus_stars_limit = $64
 
 ; Whether the bonus game should start after the level if the bonus stars limit
@@ -70,8 +91,8 @@
 
 ; Symbol in front of the coins counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $2E (coin).
+; Values: $00-$7F/$FC
+; Default: $2E (coin)
 !coins_symbol = $2E
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
@@ -79,13 +100,13 @@
 ; specific threshold (default 100), the bonus game starts after the level.
 ; N.B.: This has not effect if !coins_visibility = 1.
 ; Values:
-;   0 = Don't check bonus stars if indicator is disabled in status bar.
-;   1 = Check bonus stars even if indicator is disabled in status bar.
+;   0 = Don't check bonus stars if indicator is disabled in status bar
+;   1 = Check bonus stars even if indicator is disabled in status bar
 !always_check_coins = 0
 
 ; Coin limit. When the limit is reached, the vanilla game adds a life.
-; Values: $00-$FF.
-; Default: $64 (100) (vanilla).
+; Values: $00-$FF
+; Default: $64 (100) (vanilla)
 !coins_limit = $64
 
 ; Whether the game should add a life when the coin limit is reached.
@@ -117,8 +138,8 @@
 
 ; Symbol in front of the lives counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $26 (x).
+; Values: $00-$7F/$FC
+; Default: $26 (x)
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3E (heart), which replaces the second part of the "TIME" text, no longer used.
 !lives_symbol = $26
@@ -137,8 +158,8 @@
 
 ; Symbol in front of the time counter.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $76 (clock).
+; Values: $00-$7F/$FC
+; Default: $76 (clock)
 ; If you are using the modified GFX28 bundled with this patch, the clock graphic
 ; has been lowered by 1 px, which is much better ;).
 !time_symbol = $76
@@ -154,8 +175,8 @@
 
 ; Frequency for decreasing the timer. The timer will decrease every
 ; !time_frequency frames.
-; Values: $00-$FE.
-; Default: $28 (vanilla).
+; Values: $00-$FE
+; Default: $28 (vanilla)
 ; You can set this value to $3C (60) to make the timer decrease every second (if
 ; the game runs at 60 FPS).
 ; N.B.: Don't use $FF as it is a reserved value (why would you use that anyway).
@@ -175,14 +196,14 @@
 
 ; Symbol for collected dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $2E (coin).
+; Values: $00-$7F/$FC
+; Default: $2E (coin)
 !dragon_coins_collected_symbol = $2E
 
 ; Symbol for missing dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
-; Values: $00-$7F/$FC.
-; Default: $FC (empty).
+; Values: $00-$7F/$FC
+; Default: $FC (empty)
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3D (empty coin), which replaces the first part of the "TIME" text, no longer
 ; used.
@@ -192,10 +213,10 @@
 ; can be configured using !DragonCoinsCollectedGraphics.
 ; Values:
 ;   0 = Disabled (vanilla)
-;   - If !dragon_coins_visibility = 1: You will see 5 coins.
-;   - If !dragon_coins_visibility = 2: You will see nothing.
+;   - If !dragon_coins_visibility = 1: You will see 5 coins
+;   - If !dragon_coins_visibility = 2: You will see nothing
 ;   1 = Enabled
-;   - If !dragon_coins_visibility = 1: You will see !custom_dragon_coins_collected_graphics.
+;   - If !dragon_coins_visibility = 1: You will see !custom_dragon_coins_collected_graphics
 ;   - If !dragon_coins_visibility = 2: You will see !custom_dragon_coins_collected_graphics
 ;   if you collected the coins in the current level attempt, otherwise the
 ;   indicator will not be visible at all (it will not occupy the slot).
@@ -206,7 +227,7 @@
 ; Every element is a 8x8 tile in GFX28, $FC is an empty space.
 ; The list must have exactly 7 elements!
 ; Values: $00-$7F/$FC x7
-; Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ").
+; Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ")
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; `$2E, $2E, $2E, $2E, $2E, $3A, $FC`, where $2E are the coin symbol and $3A is
 ; a checkmark that replaces the corner of the item box in the graphics file.
@@ -250,7 +271,7 @@
 
 ; Order in which group 1 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; Values: !bonus_stars, !coins, !lives, !time.
+; Values: !bonus_stars, !coins, !lives, !time
 ; N.B.: Make sure to leave a space after every comma!
 !group1_order = !lives, !bonus_stars, !time, !coins
 
@@ -280,7 +301,7 @@
 
 ; Order in which group 2 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; Values: !dragon_coins, !score.
+; Values: !dragon_coins, !score
 ; N.B.: Make sure to leave a space after every comma!
 !group2_order = !score, !dragon_coins
 

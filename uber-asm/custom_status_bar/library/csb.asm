@@ -25,12 +25,14 @@ pushpc
 ; Settings
 %include_file("settings.asm")
 %include_file("colors.asm")
-%include_file("ram.asm")
 
 ; Hijack
 %include_code("generic/hijacks.asm")
 
 pullpc
+
+; RAM
+%include_code("generic/ram.asm")
 
 ; Utils
 %include_code("generic/reset.asm")
