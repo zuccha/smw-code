@@ -10,7 +10,7 @@
 ; General
 ;-------------------------------------------------------------------------------
 
-; This patch requires 32 bytes of free contiguous RAM to store settings that can
+; This patch requires 33 bytes of free contiguous RAM to store settings that can
 ; be changed dynamically (mostly used for per-level customization).
 ; RAM starts at the address indicated here. Unless you have some conflics with
 ; other custom code, you won't need to change it.

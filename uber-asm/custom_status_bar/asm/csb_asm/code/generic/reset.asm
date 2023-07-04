@@ -31,6 +31,7 @@ reset_ram:
     %reset_ram_byte(bonus_stars_visibility)
     %reset_ram_byte(bonus_stars_symbol)
     %reset_ram_byte(always_check_bonus_stars)
+    %reset_ram_byte(bonus_stars_limit)
     %reset_ram_byte(start_bonus_game_if_bonus_stars_limit_reached)
     %reset_ram_byte(reset_bonus_stars_if_bonus_stars_limit_reached)
 

@@ -39,8 +39,10 @@ handle_bonus_stars:
 
 .visibility0
 .visibility2
-    if !always_check_bonus_stars == 1 : JSR check_bonus_stars
-    %return_handler_hidden()
+    SEP #$20
+    LDA ram_always_check_bonus_stars : BEQ + ; If should always check bonus stars
+    JSR check_bonus_stars                    ; Then run checks
++   %return_handler_hidden()
 
 
 ;-------------------------------------------------------------------------------
@@ -60,16 +62,14 @@ handle_bonus_stars:
 check_bonus_stars:
     SEP #$30
     LDX $0DB3|!addr : LDA $0F48|!addr,x ; Get bonus stars for current player
-    CMP.b #!bonus_stars_limit : BCC +   ; If they are greater or equal than !bonus_stars_limit...
-    if !start_bonus_game_if_bonus_stars_limit_reached == 1
-        LDA #$FF : STA $1425|!addr      ; Then start bonus game when level ends, and...
-    endif
-    if !reset_bonus_stars_if_bonus_stars_limit_reached == 1
-        LDA $0F48|!addr,x               ; ...subtract !bonus_stars_limit stars
-        SEC : SBC.b #!bonus_stars_limit
-        STA $0F48|!addr,x
-    else
-        LDA.b #!bonus_stars_limit       ; ...prevent value from exceeding limit
-        STA $0F48|!addr,x
-    endif
+    CMP ram_bonus_stars_limit : BCC +   ; If they are greater or equal than !bonus_stars_limit...
+    LDA ram_start_bonus_game_if_bonus_stars_limit_reached : BEQ ++  ; If should start bonus game
+    LDA #$FF : STA $1425|!addr          ; Then start bonus game when level ends
+++  LDA ram_reset_bonus_stars_if_bonus_stars_limit_reached : BEQ ++ ; If should reset stars
+    LDA $0F48|!addr,x                   ; Then subtract !bonus_stars_limit stars
+    SEC : SBC ram_bonus_stars_limit
+    STA $0F48|!addr,x
+    BRA +
+++  LDA ram_bonus_stars_limit           ; Else prevent value from exceeding limit
+    STA $0F48|!addr,x
 +   RTS
