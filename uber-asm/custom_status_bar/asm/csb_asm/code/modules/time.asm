@@ -48,8 +48,9 @@ handle_time:
     %return_handler_visible()
 
 .visibility0
-    if !always_check_time == 1 : JSR check_time
-    %return_handler_hidden()
+    LDA ram_always_check_time : BEQ +
+    JSR check_time
++   %return_handler_hidden()
 
 
 ;-------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ check_time:
     LDA $0F30|!addr : CMP #$FF : BEQ +         ; If timer's timer is not $FF
     DEC $0F30|!addr                            ; Then decrement timer's timer and
     BPL +                                      ; If it was 0
-    LDA.b #!time_frequency : STA $0F30|!addr   ; Then reset it
+    LDA ram_time_frequency : STA $0F30|!addr   ; Then reset it
     LDA $0F31|!addr : ORA $0F32|!addr : ORA $0F33|!addr
     BEQ +                                      ; If timer is not 0
     LDX #$02                                   ; Then decrease the timer, digit by digit
