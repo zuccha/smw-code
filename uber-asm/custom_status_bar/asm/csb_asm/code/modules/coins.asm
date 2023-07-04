@@ -28,7 +28,7 @@ handle_coins:
 
 .visibility2
     ; If coin limit is zero, then coins are not visible
-    SEP #$20 : LDA.b #!coins_limit : BEQ .visibility0
+    SEP #$20 : LDA ram_coins_limit : BEQ .visibility0
 
 .visibility1
     JSR check_coins
@@ -41,8 +41,9 @@ handle_coins:
     %return_handler_visible()
 
 .visibility0
-    if !always_check_coins == 1 : JSR check_coins
-    %return_handler_hidden()
+    LDA ram_always_check_coins : BEQ +
+    JSR check_coins
++   %return_handler_hidden()
 
 
 ;-------------------------------------------------------------------------------
@@ -62,22 +63,27 @@ check_coins:
     SEP #$20
     LDA $13CC|!addr : BEQ + ; If there is a "coin increase"
     DEC $13CC|!addr         ; Then decrease it.
-    LDA.b #!coins_limit     ; Load coins limit
+    LDA ram_coins_limit     ; Load coins limit
     CMP $0DBF|!addr : BEQ + ; If coins count != coins limit
     INC $0DBF|!addr         ; Then increase coins count by 1
 
     ; Skip ahead if coin limit has not been reached.
-    LDA.b #!coins_limit : CMP $0DBF|!addr : BNE +
+    LDA ram_coins_limit : CMP $0DBF|!addr : BNE +
 
     ; Limit reached
-    if !add_life_if_coins_limit_reached == 1 : INC $18E4|!addr ; Add life
-    if !reset_coins_if_coins_limit_reached == 1
-        LDA $0DBF|!addr                         ; Decrease by coins limit
-        SEC : SBC.b #!coins_limit
-        STA $0DBF|!addr
-    else
-        LDA.b #!coins_limit : STA $0F48|!addr,x ; Don't exceed limit
-    endif
+
+    ; Add a life if enabled.
+    LDA ram_add_life_if_coins_limit_reached : BEQ ++
+    INC $18E4|!addr
+
+    ; Reset counter decreasing by limit if enabled.
+++  LDA ram_reset_coins_if_coins_limit_reached : BEQ ++
+    LDA $0DBF|!addr
+    SEC : SBC ram_coins_limit
+    STA $0DBF|!addr
+    BRA +
+    ; Otherwise clamp to limit.
+++  LDA ram_coins_limit : STA $0F48|!addr,x
 
     ; Return
 +   RTS
