@@ -4,6 +4,18 @@
 
 ; Revert changes applied by Custom Status Bar.
 
+; Restores status bar IRQ setup.
+org $008294
+    LDA $4211 : STY $4209
+
+; Restore status bar tilemap transfer from ROM.
+org $008CFF
+    LDA #$80 : STA $2115
+
+; Restore status bar tilemap transfer from RAM.
+org $008DAC
+    STZ $2115 : LDA #$42
+
 ; Restore the original status bar routine.
 org $008E1F
     BNE $46
@@ -11,8 +23,7 @@ org $008E1F
 ; Restore default X position for the item box, where the item starts falling
 ; from.
 org $028051
-    LDA #$78
-    CLC : ADC $1A
+    LDA #$78 : CLC : ADC $1A
 
 ; Make sure the item gets stored and falls from the item box.
 org $028008
