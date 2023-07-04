@@ -1,16 +1,22 @@
 ;===============================================================================
-; CUSTOMIZE STATUS BAR
+; CUSTOM STATUS BAR
 ;===============================================================================
+
+; Library file Custom Status Bar.
+
+
+;-------------------------------------------------------------------------------
+; Setup
+;-------------------------------------------------------------------------------
 
 namespace nested off
 
-
-;-------------------------------------------------------------------------------
-; Private
-;-------------------------------------------------------------------------------
-
-; Do not change the order of the includes!
 namespace "internal"
+
+
+;-------------------------------------------------------------------------------
+; Utilities
+;-------------------------------------------------------------------------------
 
 macro include_file(filepath)
     incsrc "../csb_asm/<filepath>"
@@ -19,6 +25,13 @@ endmacro
 macro include_code(filepath)
     %include_file("code/<filepath>")
 endmacro
+
+
+;-------------------------------------------------------------------------------
+; Includes
+;-------------------------------------------------------------------------------
+
+; Do not change the order of the includes!
 
 ; Settings
 pushpc
@@ -30,7 +43,8 @@ pullpc
 %include_code("generic/hijacks.asm")
 
 ; RAM
-%include_code("generic/ram.asm")
+%include_code("generic/ram.asm") ; RAM turns off namespace
+namespace "internal"
 
 ; Utils
 %include_code("generic/utils.asm")
@@ -48,20 +62,5 @@ pullpc
 ; Main routine
 %include_code("generic/main.asm")
 
-namespace off
-
-
-;-------------------------------------------------------------------------------
-; Public
-;-------------------------------------------------------------------------------
-
-; This will make a given label public (i.e., without the "interal" prefix).
-macro make_public(label)
-    base internal_<label>
-        <label>:
-    base off
-endmacro
-
-; In the comment you find the name to use in UberASM code.
-%make_public(main)      ; csb_main
-%make_public(reset_ram) ; csb_reset_ram
+; Public stuff
+%include_code("generic/public.asm")

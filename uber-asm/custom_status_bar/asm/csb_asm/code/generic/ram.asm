@@ -29,6 +29,7 @@ endmacro
 ;-------------------------------------------------------------------------------
 
 ; Define one address for (almost) every setting.
+namespace off
 
 ; General
 %define_ram_address($00, enable_status_bar)
