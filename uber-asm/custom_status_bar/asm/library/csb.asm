@@ -20,30 +20,28 @@ macro include_code(filepath)
     %include_file("code/<filepath>")
 endmacro
 
-pushpc
-
 ; Settings
+pushpc
 %include_file("settings.asm")
 %include_file("colors.asm")
+pullpc
 
 ; Hijack
 %include_code("generic/hijacks.asm")
-
-pullpc
 
 ; RAM
 %include_code("generic/ram.asm")
 
 ; Utils
-%include_code("generic/reset.asm")
 %include_code("generic/utils.asm")
+%include_code("generic/reset.asm")
 
 ; Modules
 %include_code("modules/coins.asm")
 %include_code("modules/bonus_stars.asm")
 %include_code("modules/dragon_coins.asm")
 %include_code("modules/lives.asm")
-%include_code("modules/powerup.asm")
+%include_code("modules/power_up.asm")
 %include_code("modules/score.asm")
 %include_code("modules/time.asm")
 

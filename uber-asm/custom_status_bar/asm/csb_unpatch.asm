@@ -10,12 +10,13 @@ org $008E1F
 
 ; Restore default X position for the item box, where the item starts falling
 ; from.
-org $028052
-    db #$78
+org $028051
+    LDA #$78
+    CLC : ADC $1A
 
 ; Make sure the item gets stored and falls from the item box.
 org $028008
-    PHX
+    PHX : LDA $0DC2
 
 ; Restore graphics and palettes of all tiles in the status bar.
 org $008C81

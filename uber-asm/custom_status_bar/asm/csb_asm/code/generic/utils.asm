@@ -101,3 +101,17 @@ macro return_handler_visible()
     LDA #$0001
     RTS
 endmacro
+
+
+;-------------------------------------------------------------------------------
+; Debug Value
+;-------------------------------------------------------------------------------
+
+; Draw a value as a 3-digits decimal in the bottom-left corner of the status
+; bar, preceded by a ! (e.g., !293).
+; @param <value>: The value to debug.
+macro debug_value(value)
+    PHA : PHY : PHP : SEP #$20
+    LDA <value> : LDY #$0F15 : %draw_3_digits_number_with_symbol(#$28)
+    PLP : PLY : PLA
+endmacro
