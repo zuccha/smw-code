@@ -5,11 +5,15 @@
 ; Do not change the order of the includes!
 namespace nested off
 
+pushpc
+
 ; Global settings
 incsrc "../csb_asm/settings.asm"
 
 ; Hijack
 incsrc "../csb_asm/generic/hijacks.asm"
+
+pullpc
 
 ; Utils
 incsrc "../csb_asm/generic/reset.asm"

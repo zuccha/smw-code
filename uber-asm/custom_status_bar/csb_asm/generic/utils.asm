@@ -58,7 +58,7 @@ endmacro
 ; Draw a one-byte long hexadecimal number as a three-digits decimal.
 ; @param A (8-bit): The hexadecimal number to be drawn.
 ; @param Y (16-bit): Slot position.
-Draw3DigitsNumber:
+draw_3_digits_number:
     LDX #$0000                          ; X counts 100s
 -   CMP #$64 : BCC +                    ; While A >= 100
     SBC #$64 : INX                      ; Subtract 100 increase 100s count
@@ -82,7 +82,7 @@ Draw3DigitsNumber:
 ; @param Y (16-bit): Slot position.
 ; @param <symbol>: Symbol to display before the number.
 macro draw_3_digits_number_with_symbol(symbol)
-    JSL.l Draw3DigitsNumber             ; Draw 100s, 10s, and 1s
+    JSL.l draw_3_digits_number          ; Draw 100s, 10s, and 1s
     LDA.b #<symbol> : STA $0000|!addr,y ; Draw symbol
 endmacro
 

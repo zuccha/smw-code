@@ -10,11 +10,11 @@ org $008E1F
 
 ; Tweak stored power up horizontal position (where it starts falling from).
 org $028052
-    db !PowerUpPositionX
+    db !power_up_position_x
 
 ; Prevent item from falling if disabled from settings.
 org $028008
-if !PowerUpVisibility == 2
+if !power_up_visibility == 2
     RTL
 else
     PHX

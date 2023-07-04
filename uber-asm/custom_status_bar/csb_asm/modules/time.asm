@@ -11,7 +11,7 @@
 ;-------------------------------------------------------------------------------
 
 ; Methods.
-!Time = HandleTime
+!time = handle_time
 
 
 ;-------------------------------------------------------------------------------
@@ -22,10 +22,10 @@
 ; @param A (16-bit): Slot position.
 ; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
 ; @return Z: 0 if the indicator has been drawn, 1 otherwise.
-HandleTime:
+handle_time:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!TimeVisibility, 1, 3)
+    %check_visibility(!time_visibility, 1, 3)
 
 .visibility2
     SEP #$20
@@ -35,21 +35,26 @@ HandleTime:
     ORA $0F33|!addr : BEQ .visibility0 ; Then don't draw
 
 .visibility1
-    JSR CheckTime : REP #$10
+    JSR check_time : REP #$10
 
     ; Draw time counter on the status bar.
-    PLY : SEP #$20                               ; Stack: X, Y <-
-    LDA.b #!TimeSymbol : STA $0000|!addr,y : INY ; Symbol
-    LDA $0F31|!addr : STA $0000|!addr,y : INY    ; Hundreds
-    LDA $0F32|!addr : STA $0000|!addr,y : INY    ; Tens
-    LDA $0F33|!addr : STA $0000|!addr,y          ; Units
+    PLY : SEP #$20                                ; Stack: X, Y <-
+    LDA.b #!time_symbol : STA $0000|!addr,y : INY ; Symbol
+    LDA $0F31|!addr : STA $0000|!addr,y : INY     ; Hundreds
+    LDA $0F32|!addr : STA $0000|!addr,y : INY     ; Tens
+    LDA $0F33|!addr : STA $0000|!addr,y           ; Units
 
     ; Return
     %return_handler_visible()
 
 .visibility0
-    if !AlwaysCheckTime == 1 : JSR CheckTime
+    if !always_check_time == 1 : JSR check_time
     %return_handler_hidden()
+
+
+;-------------------------------------------------------------------------------
+; Check
+;-------------------------------------------------------------------------------
 
 ; Original routine that decrements timer, with a few tweaks:
 ; 1. Customizable decrease frequency.
@@ -58,14 +63,16 @@ HandleTime:
 ; out while visibility = 2, the timer doesn't disappear from the status bar
 ; (since with visibility = 2, the timer should not appear when it is 0, but only
 ; at the start of the level).
-CheckTime:
+; @return A (8-bit)
+; @return X/Y (8-bit)
+check_time:
     SEP #$30
     LDA $1493|!addr : ORA $9D|!addr : BNE +    ; If levels not ending and sprites not locked
     LDA $0D9B|!addr : CMP #$C1 : BEQ +         ; If not at Bowser's
     LDA $0F30|!addr : CMP #$FF : BEQ +         ; If timer's timer is not $FF
     DEC $0F30|!addr                            ; Then decrement timer's timer and
     BPL +                                      ; If it was 0
-    LDA.b #!TimeFrequency : STA $0F30|!addr    ; Then reset it
+    LDA.b #!time_frequency : STA $0F30|!addr   ; Then reset it
     LDA $0F31|!addr : ORA $0F32|!addr : ORA $0F33|!addr
     BEQ +                                      ; If timer is not 0
     LDX #$02                                   ; Then decrease the timer, digit by digit

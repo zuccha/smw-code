@@ -10,7 +10,7 @@
 ; Methods Definition
 ;-------------------------------------------------------------------------------
 
-!Score = HandleScore
+!score = handle_score
 
 
 ;-------------------------------------------------------------------------------
@@ -21,10 +21,10 @@
 ; @param A (16-bit): Slot position.
 ; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
 ; @return Z: 0 if the indicator has been drawn, 1 otherwise.
-HandleScore:
+handle_score:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!ScoreVisibility, 2, 2)
+    %check_visibility(!score_visibility, 2, 2)
 
 .visibility0
 .visibility2
@@ -53,8 +53,8 @@ HandleScore:
     STZ $0000|!addr,x
 -   REP #$20
     PHX : TYX ; We need to use X for this because `SBC.l addr,y` doesn't exist
-    LDA !T2 : SEC : SBC.l TableDigits6L,x : STA !T6
-    LDA !T0 : SBC.l TableDigits6H,x : STA !T4
+    LDA !T2 : SEC : SBC.l six_digits_low_byte_table,x : STA !T6
+    LDA !T0 : SBC.l six_digits_high_byte_table,x : STA !T4
     PLX
     BCC +
     LDA !T6 : STA !T2
@@ -67,15 +67,16 @@ HandleScore:
     ; Return
     %return_handler_visible()
 
-TableDigits6H: dw $0001
-TableDigits6L: dw $86A0
-               dw $0000
-               dw $2710
-               dw $0000
-               dw $03E8
-               dw $0000
-               dw $0064
-               dw $0000
-               dw $000A
-               dw $0000
-               dw $0001
+; Tables for computing offset.
+six_digits_high_byte_table: dw $0001
+six_digits_low_byte_table:  dw $86A0
+                            dw $0000
+                            dw $2710
+                            dw $0000
+                            dw $03E8
+                            dw $0000
+                            dw $0064
+                            dw $0000
+                            dw $000A
+                            dw $0000
+                            dw $0001
