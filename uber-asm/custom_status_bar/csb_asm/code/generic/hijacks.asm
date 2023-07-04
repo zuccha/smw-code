@@ -2,8 +2,6 @@
 ; HIJACK
 ;===============================================================================
 
-pushpc
-
 ; Override status bar after UberASMTool's hijack.
 org $008E1F
     RTS
@@ -19,5 +17,3 @@ if !power_up_visibility == 2
 else
     PHX
 endif
-
-pullpc

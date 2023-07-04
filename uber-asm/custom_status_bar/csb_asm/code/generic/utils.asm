@@ -28,26 +28,16 @@
 ; and check on that. If the level setting is 11, it falls back to the global
 ; setting. Depending on the setting's value, the macro will jump to different
 ; labels.
-; @param <global_setting>: The global setting to use for the current element.
-; @param <group>: Group number for the element (bonus stars, coins, lives, and
-; time are in group 1; power up, dragon coins, and score are in group 2).
-; @param <position>: A value between 0 and 3, referencing the position in the
-; byte %AABBCCDD in the element's visibility table, where 0 points to A, 1 to B,
-; 2 to C, and 3 to D.
+; @param <item>: The item you want to check visibility for. Must be one of:
+;   bonus_stars, coins, lives, time, power_up, dragon_coins, score
 ; @branch .visibility0: Jump here if the setting is not 1 or 2.
 ; @branch .visibility1: Jump here if the setting = 1.
 ; @branch .visibility2: Jump here if the setting = 2.
-; Examples:
-; - %check_visibility(!BonusStarsVisibility, 1, 2)
-; - %check_visibility(!PowerUpVisibility, 2, 1)
-macro check_visibility(global_setting, group, position)
-    if <global_setting> == 2
-        BRA .visibility2
-    elseif <global_setting> == 1
-        BRA .visibility1
-    else
-        BRA .visibility0
-    endif
+macro check_visibility(item)
+    SEP #$20 : LDA ram_<item>_visibility
+    CMP #$02 : BEQ .visibility2
+    CMP #$01 : BEQ .visibility1
+    BRA .visibility0
 endmacro
 
 

@@ -24,7 +24,7 @@
 handle_coins:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!coins_visibility, 1, 0)
+    %check_visibility(coins)
 
 .visibility2
     ; If coin limit is zero, then coins are not visible

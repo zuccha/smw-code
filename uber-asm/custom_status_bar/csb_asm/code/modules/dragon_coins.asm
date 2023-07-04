@@ -65,7 +65,7 @@ custom_dragon_coins_collected_graphics_table:
 handle_dragon_coins:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot
-    %check_visibility(!dragon_coins_visibility, 2, 3)
+    %check_visibility(dragon_coins)
 
 .visibility2
     ; Show coins only when not all have been collected (vanilla) - Don't

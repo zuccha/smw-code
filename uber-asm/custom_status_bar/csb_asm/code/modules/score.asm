@@ -24,7 +24,7 @@
 handle_score:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!score_visibility, 2, 2)
+    %check_visibility(score)
 
 .visibility0
 .visibility2

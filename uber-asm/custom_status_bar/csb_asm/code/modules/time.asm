@@ -25,7 +25,7 @@
 handle_time:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!time_visibility, 1, 3)
+    %check_visibility(time)
 
 .visibility2
     SEP #$20

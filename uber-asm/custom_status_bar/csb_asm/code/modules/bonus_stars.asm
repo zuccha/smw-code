@@ -24,7 +24,7 @@
 handle_bonus_stars:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!bonus_stars_visibility, 1, 2)
+    %check_visibility(bonus_stars)
 
 .visibility1
     ; Check bonus stars amount and setup bonus game if necessary.

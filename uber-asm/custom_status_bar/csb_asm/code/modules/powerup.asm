@@ -22,7 +22,7 @@
 handle_power_up:
     ; Backup registers and check visibility.
     PHX : PHY ; Stack: X, Y <-
-    %check_visibility(!power_up_visibility, 2, 1)
+    %check_visibility(power_up)
 
 .visibility1
     ; Slightly modified version of routine found at $009079 to draw the power up

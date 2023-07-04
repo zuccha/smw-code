@@ -24,7 +24,7 @@
 handle_lives:
     ; Backup registers and check visibility.
     PHX : PHY : PHA ; Stack: X, Y, Slot <-
-    %check_visibility(!lives_visibility, 1, 1)
+    %check_visibility(lives)
 
 .visibility1
     ; Clamp amount of lives.
