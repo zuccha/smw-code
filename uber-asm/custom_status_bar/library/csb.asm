@@ -2,8 +2,15 @@
 ; CUSTOMIZE STATUS BAR
 ;===============================================================================
 
-; Do not change the order of the includes!
 namespace nested off
+
+
+;-------------------------------------------------------------------------------
+; Private
+;-------------------------------------------------------------------------------
+
+; Do not change the order of the includes!
+namespace "internal"
 
 pushpc
 
@@ -30,3 +37,21 @@ incsrc "../csb_asm/modules/time.asm"
 
 ; Main routine
 incsrc "../csb_asm/generic/main.asm"
+
+namespace off
+
+
+;-------------------------------------------------------------------------------
+; Public
+;-------------------------------------------------------------------------------
+
+; This will make a given label public (i.e., without the "interal" prefix).
+macro make_public(label)
+    base internal_<label>
+        <label>:
+    base off
+endmacro
+
+; In the comment you find the name to use in UberASM code.
+%make_public(main)      ; csb_main
+%make_public(reset_ram) ; csb_reset_ram
