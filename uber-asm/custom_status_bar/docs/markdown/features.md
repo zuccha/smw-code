@@ -89,14 +89,14 @@ Don't you hate when you have a hole in the UI?
 |                  There is a hole where the coin indicator should be                   |
 
 Don't worry, this won't actually happen with CSB ;). In fact, this UberASM
-"shifts" elements when one is not visible
+"shifts" elements when one is not visible, preventing gaps among elements
 
 | ![In the sublevel coins are not visible and time takes their place](../assets/images/dynamic-2.gif) |
 | :-------------------------------------------------------------------------------------------------: |
 |                  In the sublevel coins are not visible and time takes their place                   |
 
-To understand how it works, check out the guide
-[about dynamic positioning](./about_dynamic_positioning.md).
+To understand how it works, check out the guide about
+[dynamic positioning](./dynamic_positioning.md).
 
 ## RAM-controlled settings
 

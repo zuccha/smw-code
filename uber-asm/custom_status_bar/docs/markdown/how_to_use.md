@@ -1,4 +1,4 @@
-# HOW TO USE
+# How to use
 
 You have different ways of customizing the status bar. After applying any change
 with the methods described below, rerun UberASMTool and you are good to go.

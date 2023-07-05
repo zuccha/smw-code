@@ -1,4 +1,4 @@
-# HOW TO INSERT
+# How to insert
 
 Instructions for inserting CSB into your ROM hack via UberASMTool.
 

@@ -1,4 +1,4 @@
-# HOW TO REMOVE
+# How to remove
 
 Instructions to remove CSB from your ROM hack.
 
