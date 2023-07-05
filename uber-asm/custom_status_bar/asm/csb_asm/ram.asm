@@ -89,16 +89,16 @@ namespace off
 %define_ram($02, bonus_stars_symbol)
 %define_ram($03, always_check_bonus_stars)
 %define_ram($04, bonus_stars_limit)
-%define_ram($05, start_bonus_game_if_bonus_stars_limit_reached)
-%define_ram($06, reset_bonus_stars_if_bonus_stars_limit_reached)
+%define_ram($05, start_bonus_game_when_bonus_stars_limit_reached)
+%define_ram($06, reset_bonus_stars_when_bonus_stars_limit_reached)
 
 ; Coins
 %define_ram($07, coins_visibility)
 %define_ram($08, coins_symbol)
 %define_ram($09, always_check_coins)
 %define_ram($0A, coins_limit)
-%define_ram($0B, add_life_if_coins_limit_reached)
-%define_ram($0C, reset_coins_if_coins_limit_reached)
+%define_ram($0B, add_life_when_coins_limit_reached)
+%define_ram($0C, reset_coins_when_coins_limit_reached)
 
 ; Life
 %define_ram($0D, lives_visibility)

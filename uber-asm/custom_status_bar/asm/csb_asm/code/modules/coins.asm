@@ -51,9 +51,9 @@ handle_coins:
 ;-------------------------------------------------------------------------------
 
 ; Check amount of coins.
-; - If amount > limit && add_life_if_coins_limit_reached == 1
+; - If amount > limit && add_life_when_coins_limit_reached == 1
 ;   -> Then add a life
-; - If amount > limit &&  reset_coins_if_coins_limit_reached == 1
+; - If amount > limit &&  reset_coins_when_coins_limit_reached == 1
 ;   -> Then remove `limit` coins from amount (remove the coin required to "pay"
 ;      for the extra life)
 ;   -> Else set the amount to `limit`, so that it doesn't exceed it
@@ -74,11 +74,11 @@ check_coins:
     JSR trigger_coins_limit_reached : SEP #$20 : REP #$10
 
     ; Add a life if enabled.
-    LDA ram_add_life_if_coins_limit_reached : BEQ ++
+    LDA ram_add_life_when_coins_limit_reached : BEQ ++
     INC $18E4|!addr
 
     ; Reset counter decreasing by limit if enabled.
-++  LDA ram_reset_coins_if_coins_limit_reached : BEQ ++
+++  LDA ram_reset_coins_when_coins_limit_reached : BEQ ++
     LDA $0DBF|!addr
     SEC : SBC ram_coins_limit
     STA $0DBF|!addr

@@ -78,23 +78,23 @@
 ; Whether the bonus game should start after the level if the bonus stars limit
 ; is reached.
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
-; !reset_bonus_stars_if_bonus_stars_limit_reached.
+; !reset_bonus_stars_when_bonus_stars_limit_reached.
 ; * Values:
 ;     0 = Don't add bonus stars when completing level
 ;     1 = Add bonus stars when completing level (vanilla)
 ; * Default: 1
-; * RAM: csb_ram_start_bonus_game_if_bonus_stars_limit_reached
-!start_bonus_game_if_bonus_stars_limit_reached = 1
+; * RAM: csb_ram_start_bonus_game_when_bonus_stars_limit_reached
+!start_bonus_game_when_bonus_stars_limit_reached = 1
 
 ; Whether the game should reset the counter when the coin limit is reached.
 ; N.B.: This doesn't control whether the bonus game will start, for that refer
-; to !start_bonus_game_if_bonus_stars_limit_reached.
+; to !start_bonus_game_when_bonus_stars_limit_reached.
 ; * Values:
 ;     0 = Don't reset counter
 ;     1 = Reset counter (vanilla)
 ; * Default: 1
-; * RAM: csb_ram_reset_bonus_stars_if_bonus_stars_limit_reached
-!reset_bonus_stars_if_bonus_stars_limit_reached = 1
+; * RAM: csb_ram_reset_bonus_stars_when_bonus_stars_limit_reached
+!reset_bonus_stars_when_bonus_stars_limit_reached = 1
 
 
 ;-------------------------------------------------------------------------------
@@ -136,23 +136,23 @@
 
 ; Whether the game should add a life when the coin limit is reached.
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
-; !reset_coins_if_coins_limit_reached.
+; !reset_coins_when_coins_limit_reached.
 ; * Values:
 ;     0 = Don't increase coins
 ;     1 = Increase coins (vanilla)
 ; * Default: 1
-; * RAM: csb_ram_add_life_if_coins_limit_reached
-!add_life_if_coins_limit_reached = 1
+; * RAM: csb_ram_add_life_when_coins_limit_reached
+!add_life_when_coins_limit_reached = 1
 
 ; Whether the game should reset the counter when the coin limit is reached.
 ; N.B.: This doesn't control whether a life is added, for that refer to
-; !add_life_if_coins_limit_reached.
+; !add_life_when_coins_limit_reached.
 ; * Values:
 ;     0 = Don't reset counter
 ;     1 = Reset counter (vanilla)
 ; * Default: 1
-; * RAM: csb_ram_reset_coins_if_coins_limit_reached
-!reset_coins_if_coins_limit_reached = 1
+; * RAM: csb_ram_reset_coins_when_coins_limit_reached
+!reset_coins_when_coins_limit_reached = 1
 
 
 ;-------------------------------------------------------------------------------

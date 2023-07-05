@@ -32,8 +32,8 @@ reset_ram:
     %reset_ram_byte(bonus_stars_symbol)
     %reset_ram_byte(always_check_bonus_stars)
     %reset_ram_byte(bonus_stars_limit)
-    %reset_ram_byte(start_bonus_game_if_bonus_stars_limit_reached)
-    %reset_ram_byte(reset_bonus_stars_if_bonus_stars_limit_reached)
+    %reset_ram_byte(start_bonus_game_when_bonus_stars_limit_reached)
+    %reset_ram_byte(reset_bonus_stars_when_bonus_stars_limit_reached)
 
     ; Coins
     %reset_ram_byte(coins_visibility)
@@ -42,8 +42,8 @@ reset_ram:
     %reset_ram_byte(coins_limit)
 
     ; Life
-    %reset_ram_byte(add_life_if_coins_limit_reached)
-    %reset_ram_byte(reset_coins_if_coins_limit_reached)
+    %reset_ram_byte(add_life_when_coins_limit_reached)
+    %reset_ram_byte(reset_coins_when_coins_limit_reached)
     %reset_ram_byte(lives_visibility)
     %reset_ram_byte(lives_symbol)
 
