@@ -25,7 +25,7 @@ reset_ram:
     SEP #$20
 
     ; General
-    %reset_ram_byte(enable_status_bar)
+    %reset_ram_byte(status_bar_visibility)
 
     ; Bonus Stars
     %reset_ram_byte(bonus_stars_visibility)

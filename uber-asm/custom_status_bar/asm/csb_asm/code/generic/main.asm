@@ -46,7 +46,7 @@ endmacro
 
 ; Main routine, draw all the elements of the status bar.
 main:
-    SEP #$30 : LDA ram_enable_status_bar : BNE +
+    SEP #$30 : LDA ram_status_bar_visibility : BNE +
     RTL
 
 +   REP #$30

@@ -63,9 +63,9 @@
 
 ; Define an address with a given size.
 ; This will produce a label accessible with `ram_<name>`. For instance:
-;   define_ram_size(enable_status_bar, $01)
-; will make `ram_enable_status_bar` usable in the code as follows:
-;   LDA $01 : STA ram_enable_status_bar ; Enable status bar
+;   define_ram_size(status_bar_visibility, $01)
+; will make `ram_status_bar_visibility` usable in the code as follows:
+;   LDA $01 : STA ram_status_bar_visibility ; Enable status bar
 macro define_ram(offset, name)
     !ram_<name> = !freeram_address+<offset>
     base !ram_<name>
@@ -82,7 +82,7 @@ endmacro
 namespace off
 
 ; General
-%define_ram($00, enable_status_bar)
+%define_ram($00, status_bar_visibility)
 
 ; Bonus Stars
 %define_ram($01, bonus_stars_visibility)

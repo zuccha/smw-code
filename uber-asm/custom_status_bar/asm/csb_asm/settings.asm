@@ -25,15 +25,6 @@
 ; General
 ;-------------------------------------------------------------------------------
 
-; This patch requires 33 bytes of free contiguous RAM to store settings that can
-; be changed dynamically (mostly used for per-level customization).
-; RAM starts at the address indicated here. Unless you have some conflics with
-; other custom code, you won't need to change it.
-; * Values: Any address in free space.
-; * Default: $7FB700
-; * RAM: N/A
-!freeram_address = $7FB700
-
 ; Whether to enable the status bar or not.
 ; When disabled, nothing will render.
 ; TODO: Disable IRQ and free layer 3.
@@ -41,8 +32,8 @@
 ;     0 = Disabled
 ;     1 = Enabled
 ; * Default: 1
-; * RAM: csb_ram_enable_status_bar
-!enable_status_bar = 1
+; * RAM: csb_ram_status_bar_visibility
+!status_bar_visibility = 1
 
 
 ;-------------------------------------------------------------------------------

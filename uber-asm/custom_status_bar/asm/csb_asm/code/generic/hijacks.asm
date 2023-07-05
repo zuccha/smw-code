@@ -60,7 +60,7 @@ check_if_item_should_drop:
 ; Disable IRQ if status bar is disabled.
 check_irq_setup:
     LDA $0D9B|!addr : BMI .enable ; Always enable the IRQ in mode 7 boss rooms
-    LDA ram_enable_status_bar : BNE .enable
+    LDA ram_status_bar_visibility : BNE .enable
 .disable:
 if !sa1
     LDX #$81
@@ -80,7 +80,7 @@ endif
 
 ; Skip tilemap transfer from ROM if status bar is disabled.
 check_tilemap_transfer_from_rom:
-    LDA ram_enable_status_bar : BNE .enable
+    LDA ram_status_bar_visibility : BNE .enable
 .disable:
     JML $008D8F|!bank    ; Jump to the end of the routine
 .enable:
@@ -89,7 +89,7 @@ check_tilemap_transfer_from_rom:
 
 ; Skip tilemap transfer from RAM if status bar is disabled.
 check_tilemap_transfer_from_ram:
-    LDA ram_enable_status_bar : BNE .enable
+    LDA ram_status_bar_visibility : BNE .enable
 .disable:
     JML $008DE6|!bank    ; Jump to the end of the routine
 .enable:

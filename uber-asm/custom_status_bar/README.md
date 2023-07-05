@@ -112,7 +112,7 @@ follows
 ```asm
 load:
     ; Enable timer and use a custom symbol.
-    LDA $01 : STA csb_ram_enable_status_bar
+    LDA $01 : STA csb_ram_status_bar_visibility
     LDA $01 : STA csb_ram_time_visibility
     LDA $1D : STA csb_ram_time_symbol
 ```
@@ -223,7 +223,7 @@ fullscreen layer 3!
 We just need to disable the status bar fully...
 
 ```asm
-!enable_status_bar = 0
+!status_bar_visibility = 0
 ```
 
 ...and voilà!
