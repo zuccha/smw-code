@@ -69,6 +69,7 @@ check_bonus_stars:
     CMP ram_bonus_stars_limit : BCC +
 
     ; Limit reached.
+    PHX : JSR trigger_bonus_stars_limit_reached : SEP #$20 : REP #$10 : PLX
 
     ; Start a bonus game if enabled.
     LDA ram_start_bonus_game_if_bonus_stars_limit_reached : BEQ ++

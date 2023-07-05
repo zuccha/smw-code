@@ -51,6 +51,7 @@ reset_ram:
     %reset_ram_byte(time_visibility)
     %reset_ram_byte(time_symbol)
     %reset_ram_byte(always_check_time)
+    %reset_ram_byte(kill_player_when_time_runs_out)
     %reset_ram_byte(time_frequency)
 
     ; Dragon Coins

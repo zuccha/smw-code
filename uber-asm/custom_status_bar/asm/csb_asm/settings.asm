@@ -210,6 +210,14 @@
 ; * RAM: csb_ram_always_check_time
 !always_check_time = 0
 
+; Whether the game should kill the player when time runs out.
+; * Values:
+;     0 = Don't kill player
+;     1 = Kill player (vanilla)
+; * Default: 1
+; * RAM: csb_ram_kill_player_when_time_runs_out
+!kill_player_when_time_runs_out = 1
+
 ; Frequency for decreasing the timer. The timer will decrease every
 ; !time_frequency frames.
 ; * Values: $00-$FE

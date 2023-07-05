@@ -3,7 +3,7 @@
 ;===============================================================================
 
 ; Prepare RAM addresses for usage in the code.
-; The patch required 33 bytes of free contiguous RAM. Its position can be
+; The patch required 34 bytes of free contiguous RAM. Its position can be
 ; configured down below.
 
 
@@ -11,7 +11,7 @@
 ; Base Address
 ;-------------------------------------------------------------------------------
 
-; This patch requires 33 bytes of free contiguous RAM to store settings that can
+; This patch requires 34 bytes of free contiguous RAM to store settings that can
 ; be changed dynamically (mostly used for per-level customization).
 ; RAM starts at the address indicated here. Unless you have some conflics with
 ; other custom code, you won't need to change it.
@@ -108,19 +108,19 @@ namespace off
 %define_ram($0F, time_visibility)
 %define_ram($10, time_symbol)
 %define_ram($11, always_check_time)
-%define_ram($12, time_frequency)
+%define_ram($12, kill_player_when_time_runs_out)
+%define_ram($13, time_frequency)
 
 ; Dragon Coins
-%define_ram($13, dragon_coins_visibility)
-%define_ram($14, dragon_coins_collected_symbol)
-%define_ram($15, dragon_coins_missing_symbol)
-%define_ram($16, use_custom_dragon_coins_collected_graphics)
-%define_ram($17, custom_dragon_coins_collected_graphics)
+%define_ram($14, dragon_coins_visibility)
+%define_ram($15, dragon_coins_collected_symbol)
+%define_ram($16, dragon_coins_missing_symbol)
+%define_ram($17, use_custom_dragon_coins_collected_graphics)
+%define_ram($18, custom_dragon_coins_collected_graphics)
 
 ; Score
-%define_ram($1E, score_visibility)
+%define_ram($1F, score_visibility)
 
 ; Power Up
-%define_ram($1F, power_up_visibility)
-%define_ram($20, power_up_position_x)
-
+%define_ram($20, power_up_visibility)
+%define_ram($21, power_up_position_x)

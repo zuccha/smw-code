@@ -71,6 +71,7 @@ check_coins:
     LDA ram_coins_limit : CMP $0DBF|!addr : BNE +
 
     ; Limit reached
+    JSR trigger_coins_limit_reached : SEP #$20 : REP #$10
 
     ; Add a life if enabled.
     LDA ram_add_life_if_coins_limit_reached : BEQ ++
@@ -83,7 +84,7 @@ check_coins:
     STA $0DBF|!addr
     BRA +
     ; Otherwise clamp to limit.
-++  LDA ram_coins_limit : STA $0F48|!addr,x
+++  LDA ram_coins_limit : STA $0DBF|!addr
 
     ; Return
 +   RTS

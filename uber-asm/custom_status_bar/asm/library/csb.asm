@@ -49,6 +49,7 @@ namespace "internal"
 ; Utils
 %include_code("generic/utils.asm")
 %include_code("generic/reset.asm")
+%include_file("callbacks.asm")
 
 ; Modules
 %include_code("modules/coins.asm")
