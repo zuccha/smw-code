@@ -2,12 +2,18 @@
 
 ## Unreleased
 
+Empty
+
+## 0.1.0 (2023-07-06)
+
 ### New features
 
 - Reorganize and draw original status bar elements (bonus stars, coins, dragon
   coins, lives, power up, score, and time) in a more minimalistic manner
 - Allow to reorganize original elements
 - Allow choosing the symbol in front of bonus stars, coins, lives, and time
+- Allow to control the entire status bar visibility (on/off), enabling and
+  disabling IRQ
 - Allow to control original elements visibility (on/off)
 - Allow to modify bonus stars and coins limit
 - Allow to show coins and time indicators only if their limit is greater than 0
