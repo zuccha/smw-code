@@ -53,7 +53,7 @@ org $008C81
     db $FC, !color_white ; (16,01), ($10,$01), RAM: N/A
     db $FC, !color_white ; (17,01), ($11,$01), RAM: N/A
 org $008C89
-    ; Top row:
+    ; Top row
     db $FC, !color_gold  ; (02,02), ($02,$02), RAM: $0EF9
     db $FC, !color_gold  ; (03,02), ($03,$02), RAM: $0EFA
     db $FC, !color_gold  ; (04,02), ($04,$02), RAM: $0EFB
@@ -82,7 +82,7 @@ org $008C89
     db $FC, !color_white ; (27,02), ($1B,$02), RAM: $0F12
     db $FC, !color_white ; (28,02), ($1C,$02), RAM: $0F13
     db $FC, !color_white ; (29,02), ($1D,$02), RAM: $0F14
-    ; Bottom row:
+    ; Bottom row
     ; Not available :(  ; (02,03), ($02,$03), RAM: N/A
     db $FC, !color_gold  ; (03,03), ($03,$03), RAM: $0F15
     db $FC, !color_gold  ; (04,03), ($04,$03), RAM: $0F16

@@ -31,13 +31,13 @@ org $028008
 
 ; Restore graphics and palettes of all tiles in the status bar.
 org $008C81
-    ;Top 4 tiles of the item box
+    ; Top 4 tiles of the item box
     db $3A, %00111000
     db $3B, %00111000
     db $3B, %00111000
     db $3A, %01111000
 org $008C89
-    ;Top RAM-editable row:
+    ; Top row
     db $30, %00101000
     db $31, %00101000
     db $32, %00101000
@@ -66,7 +66,7 @@ org $008C89
     db $FC, %00111000
     db $FC, %00111000
     db $00, %00111000
-    ;Bottom RAM-editable row:
+    ; Bottom row
     db $26, %00111000
     db $FC, %00111000
     db $00, %00111000
@@ -95,7 +95,7 @@ org $008C89
     db $FC, %00111000
     db $00, %00111000
 org $008CF7
-    ;Bottom 4 tiles of the item box
+    ; Bottom 4 tiles of the item box
     db $3A, %10111000
     db $3B, %10111000
     db $3B, %10111000
