@@ -2,10 +2,7 @@
 
 A collection of SMW ASM and resources.
 
-## Patches
-
-- [Customize Status Bar](./patches/customize-status-bar)
-
 ## UberASM
 
+- [Customi Status Bar](./uber-asm/custom-status-bar)
 - [Update Player Overworld Animation](./uber-asm/update-player-overworld-animation)
