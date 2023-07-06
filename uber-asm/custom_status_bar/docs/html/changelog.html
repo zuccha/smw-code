@@ -1,57 +1,165 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/markdown.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../assets/markdown.css" />
   </head>
   <body>
-    <div data-color-mode="light" data-light-theme="light" data-dark-theme="dark" class="markdown-body">
+    <div
+      data-color-mode="light"
+      data-light-theme="light"
+      data-dark-theme="dark"
+      class="markdown-body"
+    >
       <main>
-        <div class="navigation"><a href="../../README.html">Home</a> | Changelog | <a href="./compatibility.html">Compatibility</a> | <a href="./credits.html">Credits</a> | <a href="./dynamic_positioning.html">Dynamic positioning</a> | <a href="./features.html">Features</a> | <a href="./how_to_insert.html">How to insert</a> | <a href="./how_to_remove.html">How to remove</a> | <a href="./how_to_use.html">How to use</a></div>
-        <h1 id="changelog"><a class="anchor" aria-hidden="true" tabindex="-1" href="#changelog"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Changelog</h1><h2 id="unreleased"><a class="anchor" aria-hidden="true" tabindex="-1" href="#unreleased"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Unreleased</h2><h3 id="new-features"><a class="anchor" aria-hidden="true" tabindex="-1" href="#new-features"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>New features</h3><ul>
-<li>Reorganize and draw original status bar elements (bonus stars, coins, dragon
-coins, lives, power up, score, and time) in a more minimalistic manner</li>
-<li>Allow to reorganize original elements</li>
-<li>Allow choosing the symbol in front of bonus stars, coins, lives, and time</li>
-<li>Allow to control original elements visibility (on/off)</li>
-<li>Allow to modify bonus stars and coins limit</li>
-<li>Allow to show coins and time indicators only if their limit is greater than 0</li>
-<li>Allow to disable resetting bonus stars and coins when their limit is reached</li>
-<li>Allow to disable going to bonus game if bonus stars limit is reached</li>
-<li>Allow to disable getting a life if coins limit is reached</li>
-<li>Allow to disable dying if time runs out</li>
-<li>Allow to run custom code when bonus stars and coins limit are reached, and
-when time runs out</li>
-<li>Allow to process (increase/decrease) bonus stars, coins, and time even if the
-elements are not visible</li>
-<li>Allow to modify the frequency for decreasing the time</li>
-<li>Allow to always show dragon coins even if all have been collected</li>
-<li>Allow to show a custom message when all dragon coins have been collected and
-to cutomize the message</li>
-<li>Allow to customize the icon for collected and missing dragon coins</li>
-<li>Allow to disable item box (no power up drop)</li>
-<li>Allow to control all aforementioned features with RAM addresses (except for
-elements positioning/ordering)</li>
-<li>Expose RAM addresses so that they can be used in other UberASM code or in
-other tools (<em>e.g.</em> GPS)</li>
-<li>Allow customizing the base address for free RAM</li>
-<li>Add custom GFX28.bin with modified graphics</li>
-</ul>
-<h3 id="documentation"><a class="anchor" aria-hidden="true" tabindex="-1" href="#documentation"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Documentation</h3><ul>
-<li>Write generic readme</li>
-<li>Write features overview</li>
-<li>Write compatibility notes</li>
-<li>Write credits</li>
-<li>Write &quot;how to insert&quot; guide</li>
-<li>Write &quot;how to remove&quot; guide</li>
-<li>Write &quot;how to use&quot; guide</li>
-<li>Write notes about dynamic positioning</li>
-<li>Document callbacks, colors, RAM, and settings usage</li>
-<li>Initialize changelog</li>
-</ul>
-
+        <div class="navigation">
+          <a href="../../README.html">Home</a> | Changelog |
+          <a href="./compatibility.html">Compatibility</a> |
+          <a href="./credits.html">Credits</a> |
+          <a href="./dynamic_positioning.html">Dynamic positioning</a> |
+          <a href="./features.html">Features</a> |
+          <a href="./how_to_insert.html">How to insert</a> |
+          <a href="./how_to_remove.html">How to remove</a> |
+          <a href="./how_to_use.html">How to use</a>
+        </div>
+        <h1 id="changelog">
+          <a class="anchor" aria-hidden="true" tabindex="-1" href="#changelog"
+            ><svg
+              class="octicon octicon-link"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
+              ></path></svg></a
+          >Changelog
+        </h1>
+        <h2 id="unreleased">
+          <a class="anchor" aria-hidden="true" tabindex="-1" href="#unreleased"
+            ><svg
+              class="octicon octicon-link"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
+              ></path></svg></a
+          >Unreleased
+        </h2>
+        <h3 id="new-features">
+          <a
+            class="anchor"
+            aria-hidden="true"
+            tabindex="-1"
+            href="#new-features"
+            ><svg
+              class="octicon octicon-link"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
+              ></path></svg></a
+          >New features
+        </h3>
+        <ul>
+          <li>
+            Reorganize and draw original status bar elements (bonus stars,
+            coins, dragon coins, lives, power up, score, and time) in a more
+            minimalistic manner
+          </li>
+          <li>Allow to reorganize original elements</li>
+          <li>
+            Allow choosing the symbol in front of bonus stars, coins, lives, and
+            time
+          </li>
+          <li>Allow to control original elements visibility (on/off)</li>
+          <li>Allow to modify bonus stars and coins limit</li>
+          <li>
+            Allow to show coins and time indicators only if their limit is
+            greater than 0
+          </li>
+          <li>
+            Allow to disable resetting bonus stars and coins when their limit is
+            reached
+          </li>
+          <li>
+            Allow to disable going to bonus game if bonus stars limit is reached
+          </li>
+          <li>Allow to disable getting a life if coins limit is reached</li>
+          <li>Allow to disable dying if time runs out</li>
+          <li>
+            Allow to run custom code when bonus stars and coins limit are
+            reached, and when time runs out
+          </li>
+          <li>
+            Allow to process (increase/decrease) bonus stars, coins, and time
+            even if the elements are not visible
+          </li>
+          <li>Allow to modify the frequency for decreasing the time</li>
+          <li>
+            Allow to always show dragon coins even if all have been collected
+          </li>
+          <li>
+            Allow to show a custom message when all dragon coins have been
+            collected and to cutomize the message
+          </li>
+          <li>
+            Allow to customize the icon for collected and missing dragon coins
+          </li>
+          <li>Allow to disable item box (no power up drop)</li>
+          <li>
+            Allow to control all aforementioned features with RAM addresses
+            (except for elements positioning/ordering)
+          </li>
+          <li>
+            Expose RAM addresses so that they can be used in other UberASM code
+            or in other tools (<em>e.g.</em> GPS)
+          </li>
+          <li>Allow customizing the base address for free RAM</li>
+          <li>Add custom GFX28.bin with modified graphics</li>
+        </ul>
+        <h3 id="documentation">
+          <a
+            class="anchor"
+            aria-hidden="true"
+            tabindex="-1"
+            href="#documentation"
+            ><svg
+              class="octicon octicon-link"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
+              ></path></svg></a
+          >Documentation
+        </h3>
+        <ul>
+          <li>Write generic readme</li>
+          <li>Write features overview</li>
+          <li>Write compatibility notes</li>
+          <li>Write credits</li>
+          <li>Write &quot;how to insert&quot; guide</li>
+          <li>Write &quot;how to remove&quot; guide</li>
+          <li>Write &quot;how to use&quot; guide</li>
+          <li>Write notes about dynamic positioning</li>
+          <li>Document callbacks, colors, RAM, and settings usage</li>
+          <li>Initialize changelog</li>
+        </ul>
       </main>
     </div>
   </body>

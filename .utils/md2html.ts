@@ -6,6 +6,7 @@ import {
   upperFirstCase,
 } from "https://deno.land/x/case@2.1.1/mod.ts";
 import { CSS, render } from "https://deno.land/x/gfm@0.2.5/mod.ts";
+import prettier from "npm:prettier";
 import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
 
 // Usage in top directory: deno run --allow-read --allow-write [-v] <type> <name>
@@ -16,11 +17,13 @@ const extraCSS =
   "img{width:100% !important;max-width:500px !important;}" +
   "table{margin-left:auto !important;margin-right:auto !important;}";
 
-const generateHtml = (
+const generateHtml = async (
   body: string,
   assetsPath: string,
   navigation?: string
-): string => `
+): Promise<string> =>
+  await prettier.format(
+    `\
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -37,7 +40,9 @@ const generateHtml = (
     </div>
   </body>
 </html>
-`;
+`,
+    { parser: "html" }
+  );
 
 const convertFile = async (
   sourceFile: string,
@@ -49,7 +54,7 @@ const convertFile = async (
     .replace(/\.md\)/g, ".html)")
     .replace(/\/markdown\//g, "/html/");
   const body = render(markdown, { disableHtmlSanitization: true });
-  const html = generateHtml(body, assetsPath, navigation);
+  const html = await generateHtml(body, assetsPath, navigation);
   if (isVerbose) console.log(sourceFile, "->", targetFile);
   await Deno.writeTextFile(targetFile, html);
 };
@@ -168,12 +173,4 @@ if (await exists(projectMarkdown)) {
       navigation
     );
   }
-
-  //   for await (const dirEntry of Deno.readDir(projectMarkdown)) {
-  //     const markdownPath = join(projectMarkdown, dirEntry.name);
-  //     const htmlPath = join(projectHtml, dirEntry.name.replace(/md$/, "html"));
-  //     if (!dirEntry.isFile) continue;
-  //     if (!markdownPath.endsWith(".md")) continue;
-  //     await convertFile(markdownPath, htmlPath, join("..", "assets"), true);
-  //   }
 }
