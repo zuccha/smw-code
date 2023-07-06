@@ -7,16 +7,18 @@ Instructions for inserting CSB into your ROM hack via UberASMTool.
 Follow these steps:
 
 1. Copy `asm/csb_asm/` inside UberASMTool's top folder (at the same level of
-   `gamemode/`, `levels/`, `library/`, etc.)
+   `gamemode/`, `levels/`, `library/`, _etc._)
 2. Copy `asm/library/csb.asm` inside UberASMTool's `library/` folder
 3. Copy `asm/other/status.code` inside UberASMTool's `other/` folder (note that
    the file already exists, you can replace it)
 4. Copy `asm/gamemode/csb_gm11.asm` inside UberASMTool's `gamemode/` folder
 5. Copy the following in UberASMTool's `list.txt`, under `gamemode:`
+
    ```asm6502
    gamemode:
    11 csb_gm11.asm ; <- Add this line
    ```
+
 6. Make sure you have edited at least one level in Lunar Magic
 7. Run UberASMTool
 

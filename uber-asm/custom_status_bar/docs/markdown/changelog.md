@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-New features:
+### New features
 
 - Reorganize and draw original status bar elements (bonus stars, coins, dragon
   coins, lives, power up, score, and time) in a more minimalistic manner
@@ -28,11 +28,11 @@ New features:
 - Allow to control all aforementioned features with RAM addresses (except for
   elements positioning/ordering)
 - Expose RAM addresses so that they can be used in other UberASM code or in
-  other tools (e.g. GPS)
+  other tools (_e.g._ GPS)
 - Allow customizing the base address for free RAM
 - Add custom GFX28.bin with modified graphics
 
-Documentation:
+### Documentation
 
 - Write generic readme
 - Write features overview

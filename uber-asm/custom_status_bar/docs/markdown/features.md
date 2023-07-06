@@ -4,7 +4,15 @@ List of features available with Custom Status Bar (CSB).
 
 Note that everything that is shown in this overview can be achieved by a series
 of different customizations, however by default CSB retains the original
-behaviors whenever possible (except for the graphics).
+behaviors whenever possible (except for the layout).
+
+Notes about this showcase:
+
+- We use a modifies _GFX28_ with custom graphics for the sidebar. It is not the
+  default, but I personally like it better. The modified _GFX28_ is shipped with
+  this UberASM.
+- There are little to no technical explanations, for that check out the
+  [instructions on how to use this UberASM](./how_to_use.md).
 
 ## Table of Contents
 
@@ -41,8 +49,8 @@ And use custom symbols before bonus stars, coins, lives, and time
 | :------------------------------------------------------------------: |
 |                     Elements with custom symbols                     |
 
-Notice that the newly designed status bar makes use of a couple of graphics that
-are not present in the original _GFX28_ (e.g., the heart before the lives
+Notice that the newly designed status bar makes use of a few graphic tiles that
+are not present in the original _GFX28_ (_e.g._, the heart before the lives
 counter). This is because this UberASM comes with a modified _GFX28_ that you
 can import in your hack. Usage is completely **optional** and it's not the
 default. In this guide we will use images that make use of it.
@@ -55,8 +63,8 @@ Any element in the status bar can be easily made visible or hidden
 | :-----------------------------------------------------------------------: |
 |                    No score, lives or bonus stars here                    |
 
-By default, when an element is hidden it will also be disabled (e.g., coins will
-not be increased, time doesn't run out, etc.). If you want, you can make
+By default, when an element is hidden it will also be disabled (_e.g._, coins
+will not be increased, time doesn't run out, _etc._). If you want, you can make
 elements active even if they are not visible
 
 | ![Time runs out even if no timer is displayed](../assets/images/visibility-2.gif) |
@@ -142,7 +150,7 @@ during a level
 | :-----------------------------------------------------------------: |
 |                 Only 5 coins to get an extra life!                  |
 
-Altering a limit will change when specific limit-events are triggered (e.g.,
+Altering a limit will change when specific limit-events are triggered (_e.g._,
 receiving an extra life when collecting enough coins).
 
 It is possible to prevent the game from resetting these limits when reached

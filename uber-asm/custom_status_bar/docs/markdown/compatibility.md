@@ -6,15 +6,15 @@ Compatibility notes and considerations regarding other patches/systems.
 
 The code hijacks the ROM in the following points:
 
-|  Id | Addresses         | Bytes | Description                                  |
+|  Id | Addresses         | Bytes | Reason                                       |
 | --: | ----------------- | ----: | -------------------------------------------- |
 |   1 | `$008294-$008298` |     4 | Disable IRQ                                  |
-|   2 | `$008294-$008298` |     4 | Disable status bar tilemap transfer from ROM |
-|   3 | `$008DAC-$008D10` |     4 | Disable status bar tilemap transfer from RAM |
-|   4 | `$008E1F`         |     1 | Turn off original status bar routine         |
-|   5 | `$028008`         |     1 | Prevent item in item box from falling        |
-|   5 | `$028052`         |     1 | Override item box horizontal position        |
-|   5 | `$008C81-$008CFE` |    63 | Alter the status bar's tilemap               |
+|   2 | `$008C81-$008CFE` |    63 | Alter the status bar's tilemap               |
+|   3 | `$008CFF-$008D02` |     4 | Disable status bar tilemap transfer from ROM |
+|   4 | `$008DAC-$008D10` |     4 | Disable status bar tilemap transfer from RAM |
+|   5 | `$008E1F`         |     1 | Turn off original status bar routine         |
+|   6 | `$028008`         |     1 | Prevent item in item box from falling        |
+|   7 | `$028052`         |     1 | Override item box horizontal position        |
 
 The code comes with a patch that can be applied to revert hijacks. For more, see
 [how to remove](./how_to_remove.md).

@@ -13,7 +13,15 @@
         <h1 id="features"><a class="anchor" aria-hidden="true" tabindex="-1" href="#features"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Features</h1><p>List of features available with Custom Status Bar (CSB).</p>
 <p>Note that everything that is shown in this overview can be achieved by a series
 of different customizations, however by default CSB retains the original
-behaviors whenever possible (except for the graphics).</p>
+behaviors whenever possible (except for the layout).</p>
+<p>Notes about this showcase:</p>
+<ul>
+<li>We use a modifies <em>GFX28</em> with custom graphics for the sidebar. It is not the
+default, but I personally like it better. The modified <em>GFX28</em> is shipped with
+this UberASM.</li>
+<li>There are little to no technical explanations, for that check out the
+<a href="./how_to_use.html" rel="noopener noreferrer">instructions on how to use this UberASM</a>.</li>
+</ul>
 <h2 id="table-of-contents"><a class="anchor" aria-hidden="true" tabindex="-1" href="#table-of-contents"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Table of Contents</h2><ol>
 <li><a href="#original-elements-in-a-minimalistic-style">Original elements in a minimalistic style</a></li>
 <li><a href="#control-elements-visibility">Control elements visibility</a></li>
@@ -61,8 +69,8 @@ in a more minimalistic style.</p>
 <td align="center">Elements with custom symbols</td>
 </tr>
 </tbody></table>
-<p>Notice that the newly designed status bar makes use of a couple of graphics that
-are not present in the original <em>GFX28</em> (e.g., the heart before the lives
+<p>Notice that the newly designed status bar makes use of a few graphic tiles that
+are not present in the original <em>GFX28</em> (<em>e.g.</em>, the heart before the lives
 counter). This is because this UberASM comes with a modified <em>GFX28</em> that you
 can import in your hack. Usage is completely <strong>optional</strong> and it&#39;s not the
 default. In this guide we will use images that make use of it.</p>
@@ -77,8 +85,8 @@ default. In this guide we will use images that make use of it.</p>
 <td align="center">No score, lives or bonus stars here</td>
 </tr>
 </tbody></table>
-<p>By default, when an element is hidden it will also be disabled (e.g., coins will
-not be increased, time doesn&#39;t run out, etc.). If you want, you can make
+<p>By default, when an element is hidden it will also be disabled (<em>e.g.</em>, coins
+will not be increased, time doesn&#39;t run out, <em>etc.</em>). If you want, you can make
 elements active even if they are not visible</p>
 <table>
 <thead>
@@ -191,7 +199,7 @@ during a level</p>
 <td align="center">Only 5 coins to get an extra life!</td>
 </tr>
 </tbody></table>
-<p>Altering a limit will change when specific limit-events are triggered (e.g.,
+<p>Altering a limit will change when specific limit-events are triggered (<em>e.g.</em>,
 receiving an extra life when collecting enough coins).</p>
 <p>It is possible to prevent the game from resetting these limits when reached</p>
 <table>

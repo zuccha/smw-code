@@ -11,7 +11,10 @@ import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
 // Usage in top directory: deno run --allow-read --allow-write [-v] <type> <name>
 
 const extraCSS =
-  "body {margin:0;}main{max-width:800px;margin:0 auto;padding:1em 1em 4em 1em;}.navigation{font-size:0.9em}";
+  "body{margin:0;}main{max-width:800px;margin:0 auto;padding:1em 1em 4em 1em;}" +
+  ".navigation{font-size:0.9em}" +
+  "img{width:100% !important;max-width:500px !important;}" +
+  "table{margin-left:auto !important;margin-right:auto !important;}";
 
 const generateHtml = (
   body: string,
@@ -126,8 +129,6 @@ if (await exists(projectMarkdown)) {
   for await (const dirEntry of Deno.readDir(projectMarkdown)) {
     const markdownPath = join(projectMarkdown, dirEntry.name);
     const htmlPath = join(projectHtml, dirEntry.name.replace(/md$/, "html"));
-    if (!dirEntry.isFile) continue;
-    if (!markdownPath.endsWith(".md")) continue;
     files.push({
       htmlName: dirEntry.name.replace(/.md$/, ""),
       readableName: upperFirstCase(
@@ -144,20 +145,20 @@ if (await exists(projectMarkdown)) {
     await Deno.remove(projectHtml, { recursive: true });
   await Deno.mkdir(projectHtml);
 
+  files.sort((f1, f2) => {
+    if (f1.htmlName > f2.htmlName) return 1;
+    if (f1.htmlName < f2.htmlName) return -1;
+    return 0;
+  });
+
   for (const file of files) {
     const navigation = [
       `<a href="../../README.html">Home</a>`,
-      ...files
-        .sort((f1, f2) => {
-          if (f1.htmlName > f2.htmlName) return 1;
-          if (f1.htmlName < f2.htmlName) return -1;
-          return 0;
-        })
-        .map((f) =>
-          f.htmlName === file.htmlName
-            ? f.readableName
-            : `<a href="./${f.htmlName}.html">${f.readableName}</a>`
-        ),
+      ...files.map((f) =>
+        f.htmlName === file.htmlName
+          ? f.readableName
+          : `<a href="./${f.htmlName}.html">${f.readableName}</a>`
+      ),
     ].join(" | ");
 
     await convertFile(
