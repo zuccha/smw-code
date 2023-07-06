@@ -4,5 +4,5 @@ A collection of SMW ASM and resources.
 
 ## UberASM
 
-- [Customi Status Bar](./uber-asm/custom-status-bar)
-- [Update Player Overworld Animation](./uber-asm/update-player-overworld-animation)
+- [Custom Status Bar](./uber-asm/custom_status_bar)
+- [Update Player Overworld Animation](./uber-asm/update_player_overworld_animation)
