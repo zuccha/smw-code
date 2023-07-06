@@ -22,7 +22,7 @@ Status bar elements are organized in clusters:
 Every group controls its set of elements to display in positions called "slots".
 Elements within a group are ordered by priority via settings. For instance
 
-```asm
+```asm6502
 !group_1_order = !lives, !bonus_stars, !time, !coins
 ```
 

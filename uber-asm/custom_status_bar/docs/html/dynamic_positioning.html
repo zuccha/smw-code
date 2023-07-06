@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/markdown.css">
+  </head>
+  <body>
+    <div data-color-mode="light" data-light-theme="light" data-dark-theme="dark" class="markdown-body">
+      <main>
+        <div class="navigation"><a href="../../README.html">Home</a> | <a href="./changelog.html">Changelog</a> | <a href="./compatibility.html">Compatibility</a> | <a href="./credits.html">Credits</a> | Dynamic positioning | <a href="./features.html">Features</a> | <a href="./how_to_insert.html">How to insert</a> | <a href="./how_to_remove.html">How to remove</a> | <a href="./how_to_use.html">How to use</a></div>
+        <h1 id="dynamic-positioning"><a class="anchor" aria-hidden="true" tabindex="-1" href="#dynamic-positioning"><svg class="octicon octicon-link" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Dynamic positioning</h1><p>Dynamic positioning is when elements &quot;shift&quot; from one position to the next one
+filling holes</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="../assets/images/dynamic-2.gif" alt="In the sublevel coins are not visible and time takes their place" title="" /></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">In the sublevel coins are not visible and time takes their place</td>
+</tr>
+</tbody></table>
+<p>But how does it work?</p>
+<p>Status bar elements are organized in clusters:</p>
+<ul>
+<li>Group 1: Bonus Stars, Coins, Lives, and Time</li>
+<li>Group 2: Dragon Coins and Score</li>
+<li>Item Box</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="../assets/images/dynamic-3.png" alt="Slots" title="" /></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">All groups and slots</td>
+</tr>
+</tbody></table>
+<p>Every group controls its set of elements to display in positions called &quot;slots&quot;.
+Elements within a group are ordered by priority via settings. For instance</p>
+<div class="highlight highlight-source-asm6502 notranslate"><pre>!group_1_order = !lives<span class="token punctuation">,</span> !bonus_stars<span class="token punctuation">,</span> !time<span class="token punctuation">,</span> !coins</pre></div><p>By configuration, in group 1 the lives indicator has the highest priority, and
+the coins the lowest. But what does this mean?</p>
+<p>Visible elements will be positioned in slots in increasing order. In the example
+above, the life counter is the first element, so it is drawn in slot 1, bonus
+stars are drawn in slot 2, and so on. This is useful because if some element is
+not visible, those that follow will shift to take its place, so to avoid holes
+in your status bar.</p>
+<p>If we go back to our initial example, we configured the time indicator to appear
+only if the time limit is greater than zero: the coin indicator will shift to
+take its position whenever the former doesn&#39;t appear.</p>
+<p>The same applies for score and dragon coins. If the score is not visible, dragon
+coins will shift to the top line of the status bar.</p>
+<p>By default the slots of each group are drawn close to each other, but you can
+actually place each slot wherever you want in the space available to the status
+bar.</p>
+
+      </main>
+    </div>
+  </body>
+</html>
