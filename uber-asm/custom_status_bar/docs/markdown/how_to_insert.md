@@ -14,7 +14,7 @@ Follow these steps:
 4. Copy `asm/gamemode/csb_gm11.asm` inside UberASMTool's `gamemode/` folder
 5. Copy the following in UberASMTool's `list.txt`, under `gamemode:`
 
-   ```asm6502
+   ```uberasm
    gamemode:
    11 csb_gm11.asm ; <- Add this line
    ```
@@ -31,7 +31,7 @@ Clarifications to problems that might arise when installing.
 Instead of copying and replacing the file, you can just open UberASMTool's
 `other/status_code.asm` and modify the `main:` label as follows
 
-```asm6502
+```asar
 main:
     ...          ; Other stuff that you previously added
     JSL csb_main ; <- Add this line
@@ -45,7 +45,7 @@ call CSB's routine for GM11 inside the already existing GM11 file, under the
 `init:` label. For instance, if you are using KevinM's Retry System, you can
 modify `retry_gm11.asm` to look like this
 
-```asm6502
+```asar
 init:
     JSL retry_level_init_1_init
     JSL retry_level_transition_init
@@ -62,7 +62,7 @@ GM11 files, as described on SMWCentral. For more about that, consult the
 In our case, we need to create a `gm11.asm` file in UberASMTool's `gamemode/`
 folder with the following content
 
-```asm6502
+```asar
 macro call_library(i)
     PHB
     LDA.b #<i>>>16
@@ -85,7 +85,7 @@ main:
 In this case `other_gm11.asm` is the other GM11 file, that now we moved from
 `gamemode/` folder to `library/` folder. It looks something like this
 
-```asm6502
+```asar
 init:
     ... ; Some code
     RTL
@@ -101,7 +101,7 @@ need "csb_gm11.asm" at all!
 
 Now, in `list.txt`, under `gamemode:` label, we list the newly created file
 
-```asm6502
+```uberasm
 gamemode:
 11 gm11.asm ; <- Add this line
 ```

@@ -78,9 +78,9 @@ Magic is greater than zero
 | :------------------------------------------------------------------------------------------: |
 |                    The sublevel has no time limit, so the time disappears                    |
 
-N.B.: For this to work with sublevels, you also need to mark the "Force time
+**N.B.: For this to work with sublevels, you also need to mark the "Force time
 limit to reset to this value every time the player enter this level" flag in
-Lunar Magic's _Change Music & Time Limit Settings_!
+Lunar Magic's _Change Music & Time Limit Settings_!**
 
 ## Per-level customization
 
@@ -121,7 +121,8 @@ runtime, via custom blocks for example
 | :-----------------------------------------------------------------------------------------: |
 |                      A block that toggles the status bar's visibility!                      |
 
-Technical comment: this is also how you control the status bar on a level basis.
+**Technical comment: this is also how you control the status bar on a level
+basis.**
 
 ## Disable IRQ and free layer 3
 
@@ -212,9 +213,9 @@ Finally, you can show different graphics for collected and missing dragon coins
 ## Disable the item box
 
 By default the item box that drops a stored power up is visible and working, but
-you can also make it so that it is invisible and not working, and invisible and
+you can also make it so that it is invisible and not working, or invisible and
 working
 
-| ![Invisible and disabled](../assets/images/item-box-1.gif) | ![Invisible and enabled](../assets/images/item-box-2.gif) |
-| :--------------------------------------------------------: | :-------------------------------------------------------: |
-|                   Invisible and disabled                   |                   Invisible and enabled                   |
+| ![Invisible and enabled](../assets/images/item-box-1.gif) | ![Invisible and disabled](../assets/images/item-box-2.gif) |
+| :-------------------------------------------------------: | :--------------------------------------------------------: |
+|                   Invisible and enabled                   |                   Invisible and disabled                   |

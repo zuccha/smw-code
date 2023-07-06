@@ -15,7 +15,7 @@ Follow these steps in UberASMTool's top folder:
 2. Remove file `library/csb.asm`
 3. Open file `other/status_code.asm` and remove the call to `csb_main`
 
-   ```asm6502
+   ```asar
    main:
        ...          ; Other stuff
        JSL csb_main ; <- Remove this line
@@ -25,7 +25,7 @@ Follow these steps in UberASMTool's top folder:
 4. Remove file `gamemode/csb_gm11.asm`
 5. Open file `list.txt` and remove `11 csb_gm11.asm` under the `gamemode:` label
 
-   ```asm6502
+   ```uberasm
    gamemode:
    11 csb_gm11.asm ; <- Remove this line
    ```
@@ -37,13 +37,13 @@ Follow these steps in UberASMTool's top folder:
 
 Clarifications to problems that might arise when uninstalling.
 
-### (1.4/5) What if I have a shared Game Mode 11 (GM11) file?
+### (1.4) What if I have a shared Game Mode 11 (GM11) file?
 
 You can simply remove the call to `csb_reset_ram` from the file that is
 specified in GM11 in `list.txt`. For instance, with KevinM's Retry System we
 would remove the call from `retry_gm11.asm` that we added during installation
 
-```asm6502
+```asar
 init:
     JSL retry_level_init_1_init
     JSL retry_level_transition_init

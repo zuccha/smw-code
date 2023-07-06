@@ -97,9 +97,9 @@
               Copy the following in UberASMTool&#39;s <code>list.txt</code>,
               under <code>gamemode:</code>
             </p>
-            <div class="highlight highlight-source-asm6502 notranslate">
-              <pre>gamemode<span class="token punctuation">:</span>
-<span class="token decimal-number number">11</span> csb_gm11<span class="token directive property">.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
+            <div class="highlight highlight-source-uberasm notranslate">
+              <pre>gamemode:
+<span class="token decimal-number number">11</span> <span class="token filename keyword">csb_gm11.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
             </div>
           </li>
           <li>
@@ -154,10 +154,10 @@
           UberASMTool&#39;s <code>other/status_code.asm</code> and modify the
           <code>main:</code> label as follows
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
+        <div class="highlight highlight-source-asar notranslate">
           <pre>main<span class="token punctuation">:</span>
     ...          <span class="token comment">; Other stuff that you previously added</span>
-    JSL csb_main <span class="token comment">; &lt;- Add this line</span>
+    <span class="token op-code keyword">JSL</span> csb_main <span class="token comment">; &lt;- Add this line</span>
     <span class="token op-code keyword">RTS</span></pre>
         </div>
         <h3 id="14-what-if-i-already-have-a-file-for-game-mode-11-gm11">
@@ -186,12 +186,12 @@
           using KevinM&#39;s Retry System, you can modify
           <code>retry_gm11.asm</code> to look like this
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
+        <div class="highlight highlight-source-asar notranslate">
           <pre>init<span class="token punctuation">:</span>
-    JSL retry_level_init_1_init
-    JSL retry_level_transition_init
-    JSL csb_reset_ram               <span class="token comment">; &lt;- Add this line</span>
-    RTL</pre>
+    <span class="token op-code keyword">JSL</span> retry_level_init_1_init
+    <span class="token op-code keyword">JSL</span> retry_level_transition_init
+    <span class="token op-code keyword">JSL</span> csb_reset_ram               <span class="token comment">; &lt;- Add this line</span>
+    <span class="token op-code keyword">RTL</span></pre>
         </div>
         <p>With this method, you skip step (1.e) of the instructions.</p>
         <p>
@@ -209,38 +209,38 @@
           UberASMTool&#39;s <code>gamemode/</code> folder with the following
           content
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>macro call_library<span class="token punctuation">(</span>i<span class="token punctuation">)</span>
-    PHB
+        <div class="highlight highlight-source-asar notranslate">
+          <pre><span class="token builtin function">macro</span> call_library<span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+    <span class="token op-code keyword">PHB</span>
     <span class="token op-code keyword">LDA</span><span class="token directive property">.b</span> #&lt;i>>><span class="token decimal-number number">16</span>
     <span class="token op-code keyword">PHA</span>
-    PLB
-    JSL &lt;i>
-    PLB
-endmacro
+    <span class="token op-code keyword">PLB</span>
+    <span class="token op-code keyword">JSL</span> &lt;i>
+    <span class="token op-code keyword">PLB</span>
+<span class="token builtin function">endmacro</span>
 
 init<span class="token punctuation">:</span>
-    %call_library<span class="token punctuation">(</span>other_gm11_init<span class="token punctuation">)</span> <span class="token comment">; Stuff from already existing GM11 file</span>
-    JSL csb_reset_ram              <span class="token comment">; &lt;- Call to our library</span>
-    RTL
+    <span class="token class-name">%call_library</span><span class="token punctuation">(</span>other_gm11_init<span class="token punctuation">)</span> <span class="token comment">; Stuff from already existing GM11 file</span>
+    <span class="token op-code keyword">JSL</span> csb_reset_ram              <span class="token comment">; &lt;- Call to our library</span>
+    <span class="token op-code keyword">RTL</span>
 
 main<span class="token punctuation">:</span>
-    %call_library<span class="token punctuation">(</span>other_gm11_main<span class="token punctuation">)</span> <span class="token comment">; More stuff from already existing GM11 file</span>
-    RTL</pre>
+    <span class="token class-name">%call_library</span><span class="token punctuation">(</span>other_gm11_main<span class="token punctuation">)</span> <span class="token comment">; More stuff from already existing GM11 file</span>
+    <span class="token op-code keyword">RTL</span></pre>
         </div>
         <p>
           In this case <code>other_gm11.asm</code> is the other GM11 file, that
           now we moved from <code>gamemode/</code> folder to
           <code>library/</code> folder. It looks something like this
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
+        <div class="highlight highlight-source-asar notranslate">
           <pre>init<span class="token punctuation">:</span>
     ... <span class="token comment">; Some code</span>
-    RTL
+    <span class="token op-code keyword">RTL</span>
 
 main<span class="token punctuation">:</span>
     ... <span class="token comment">; Some other code</span>
-    RTL</pre>
+    <span class="token op-code keyword">RTL</span></pre>
         </div>
         <p>
           Also, notice that we don&#39;t need to move
@@ -252,9 +252,9 @@ main<span class="token punctuation">:</span>
           Now, in <code>list.txt</code>, under <code>gamemode:</code> label, we
           list the newly created file
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>gamemode<span class="token punctuation">:</span>
-<span class="token decimal-number number">11</span> gm11<span class="token directive property">.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
+        <div class="highlight highlight-source-uberasm notranslate">
+          <pre>gamemode:
+<span class="token decimal-number number">11</span> <span class="token filename keyword">gm11.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
         </div>
       </main>
     </div>

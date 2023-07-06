@@ -103,7 +103,7 @@
           <code>level_105.asm</code> in UberASMTool&#39;s
           <code>levels/</code> folder as follows
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
+        <div class="highlight highlight-source-asar notranslate">
           <pre>load<span class="token punctuation">:</span>
     <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> csb_ram_time_visibility <span class="token comment">; Make timer visible</span>
     <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$3C</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> csb_ram_time_frequency  <span class="token comment">; Decrease timer every real second</span></pre>
@@ -112,9 +112,9 @@
           then add the level in UberASMTool&#39;s <code>list.txt</code>, under
           the <code>level:</code> label
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>level<span class="token punctuation">:</span>
-<span class="token decimal-number number">105</span> level_105<span class="token directive property">.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
+        <div class="highlight highlight-source-uberasm notranslate">
+          <pre>level:
+<span class="token decimal-number number">105</span> <span class="token filename keyword">level_105.asm</span> <span class="token comment">; &lt;- Add this line</span></pre>
         </div>
         <p>
           In UberASM code almost every setting has a corresponding RAM address,
@@ -122,9 +122,9 @@
           The RAM address can also be found in the setting&#39;s description in
           <code>csb_asm/settings.asm</code>. To change a value we do
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>   value            RAM address
-     v                   v
+        <div class="highlight highlight-source-asar notranslate">
+          <pre><span class="token comment">;  value            RAM address</span>
+<span class="token comment">;    v                   v</span>
 <span class="token op-code keyword">LDA</span> <span class="token decimal-number number">#01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> csb_ram_time_visibility</pre>
         </div>
         <p>
@@ -164,8 +164,8 @@
           For instance, we can create a block that toggles the visibility of the
           status bar when hit from below
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>db <span class="token hex-number number">$42</span>
+        <div class="highlight highlight-source-asar notranslate">
+          <pre><span class="token builtin function">db</span> <span class="token hex-number number">$42</span>
 <span class="token op-code keyword">JMP</span> MarioBelow
 <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore
 <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore
@@ -173,57 +173,57 @@
 
 <span class="token comment">; Redefine RAM base address.</span>
 <span class="token comment">; It has to be the same as the one in ram.asm!</span>
-!freeram_address = $7FB700
+<span class="token define number">!freeram_address</span> = <span class="token hex-number number">$7FB700</span>
 
 <span class="token comment">; Macro for generating addresses.</span>
-macro define_ram<span class="token punctuation">(</span>offset<span class="token punctuation">,</span> name<span class="token punctuation">)</span>
-    !ram_&lt;name> = !freeram_address+&lt;offset>
-    base !ram_&lt;name>
+<span class="token builtin function">macro</span> define_ram<span class="token punctuation">(</span>offset<span class="token punctuation">,</span> name<span class="token punctuation">)</span>
+    <span class="token define number">!ram_</span>&lt;name> = <span class="token define number">!freeram_address</span>+&lt;offset>
+    <span class="token builtin function">base</span> <span class="token define number">!ram_</span>&lt;name>
         ram_&lt;name><span class="token punctuation">:</span>
-    base off
-endmacro
+    <span class="token builtin function">base</span> off
+<span class="token builtin function">endmacro</span>
 
 <span class="token comment">; Define the addresses we need for the block.</span>
 <span class="token comment">; Do not change the offset ($00)!</span>
-%define_ram<span class="token punctuation">(</span><span class="token hex-number number">$00</span><span class="token punctuation">,</span> status_bar_visibility<span class="token punctuation">)</span>
+<span class="token class-name">%define_ram</span><span class="token punctuation">(</span><span class="token hex-number number">$00</span><span class="token punctuation">,</span> status_bar_visibility<span class="token punctuation">)</span>
 
 <span class="token comment">; Our code.</span>
 MarioBelow<span class="token punctuation">:</span>
     <span class="token comment">; If visibility is 1 set it to 0, if it is 0 set it to 1.</span>
     <span class="token op-code keyword">LDA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">BEQ</span> +
-    <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$00</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> RTL
-+   <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> RTL
+    <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$00</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">RTL</span>
++   <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">RTL</span>
 
 Ignore<span class="token punctuation">:</span>
-    RTL
+    <span class="token op-code keyword">RTL</span>
 
-print <span class="token string">"Toggle status bar when hit from below"</span></pre>
+<span class="token builtin function">print</span> <span class="token string">"Toggle status bar when hit from below"</span></pre>
         </div>
         <p>
           Alternatively, you can copy <code>ram.asm</code> and put it in the
           folder containing the block file(s) and include it
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
-          <pre>db <span class="token hex-number number">$42</span>
+        <div class="highlight highlight-source-asar notranslate">
+          <pre><span class="token builtin function">db</span> <span class="token hex-number number">$42</span>
 <span class="token op-code keyword">JMP</span> MarioBelow
 <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore
 <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore
 <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore <span class="token punctuation">:</span> <span class="token op-code keyword">JMP</span> Ignore
 
 <span class="token comment">; Include the RAM file. Make sure !freeram_address has the correct address!</span>
-incsrc ram.asm
+<span class="token builtin function">incsrc</span> ram.asm
 
 <span class="token comment">; Our code.</span>
 MarioBelow<span class="token punctuation">:</span>
     <span class="token comment">; If visibility is 1 set it to 0, if it is 0 set it to 1.</span>
     <span class="token op-code keyword">LDA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">BEQ</span> +
-    <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$00</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> RTL
-+   <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> RTL
+    <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$00</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">RTL</span>
++   <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$01</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_status_bar_visibility <span class="token punctuation">:</span> <span class="token op-code keyword">RTL</span>
 
 Ignore<span class="token punctuation">:</span>
-    RTL
+    <span class="token op-code keyword">RTL</span>
 
-print <span class="token string">"Toggle status bar when hit from below"</span></pre>
+<span class="token builtin function">print</span> <span class="token string">"Toggle status bar when hit from below"</span></pre>
         </div>
         <p>For more, check out <code>csb_asm/ram.asm</code>.</p>
         <h2 id="4-status-bar-tilemap-color-palette">
@@ -296,7 +296,7 @@ print <span class="token string">"Toggle status bar when hit from below"</span><
           they reach the limit. To do so, add to the already defined routines in
           <code>csb_asm/callbacks.asm</code>
         </p>
-        <div class="highlight highlight-source-asm6502 notranslate">
+        <div class="highlight highlight-source-asar notranslate">
           <pre>trigger_bonus_stars_limit_reached<span class="token punctuation">:</span>
     <span class="token op-code keyword">LDA</span> <span class="token hex-number number">#$28</span> <span class="token punctuation">:</span> <span class="token op-code keyword">STA</span> ram_bonus_stars_symbol <span class="token comment">; $28 is the "!" tile in GFX28</span>
     <span class="token op-code keyword">RTS</span>

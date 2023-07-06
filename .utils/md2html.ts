@@ -8,6 +8,8 @@ import {
 import { CSS, render } from "https://deno.land/x/gfm@0.2.5/mod.ts";
 import prettier from "npm:prettier";
 import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
+import "./syntax_asar.js";
+import "./syntax_uberasm.js";
 
 // Usage in top directory: deno run --allow-read --allow-write [-v] <type> <name>
 

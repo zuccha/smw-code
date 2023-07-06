@@ -22,7 +22,7 @@ For instance, let's say we want to enable the timer (globally disabled) and
 customize it for level 105. Then we create file `level_105.asm` in UberASMTool's
 `levels/` folder as follows
 
-```asm6502
+```asar
 load:
     LDA #$01 : STA csb_ram_time_visibility ; Make timer visible
     LDA #$3C : STA csb_ram_time_frequency  ; Decrease timer every real second
@@ -30,7 +30,7 @@ load:
 
 then add the level in UberASMTool's `list.txt`, under the `level:` label
 
-```asm6502
+```uberasm
 level:
 105 level_105.asm ; <- Add this line
 ```
@@ -39,9 +39,9 @@ In UberASM code almost every setting has a corresponding RAM address, that can
 be accessed with `csb_ram_<setting_name>`. The RAM address can also be found in
 the setting's description in `csb_asm/settings.asm`. To change a value we do
 
-```asm6502
-   value            RAM address
-     v                   v
+```asar
+;  value            RAM address
+;    v                   v
 LDA #01 : STA csb_ram_time_visibility
 ```
 
@@ -59,7 +59,7 @@ case you first need to include their definitions.
 For instance, we can create a block that toggles the visibility of the status
 bar when hit from below
 
-```asm6502
+```asar
 db $42
 JMP MarioBelow
 JMP Ignore : JMP Ignore : JMP Ignore
@@ -98,7 +98,7 @@ print "Toggle status bar when hit from below"
 Alternatively, you can copy `ram.asm` and put it in the folder containing the
 block file(s) and include it
 
-```asm6502
+```asar
 db $42
 JMP MarioBelow
 JMP Ignore : JMP Ignore : JMP Ignore
@@ -146,7 +146,7 @@ Let's take an example, we want to change the symbol in front of our bonus stars'
 and coins' indicators to a "!" when they reach the limit. To do so, add to the
 already defined routines in `csb_asm/callbacks.asm`
 
-```asm6502
+```asar
 trigger_bonus_stars_limit_reached:
     LDA #$28 : STA ram_bonus_stars_symbol ; $28 is the "!" tile in GFX28
     RTS

@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-Empty
+### Documentation
+
+- Correct some mistakes in the features overview
+- Add better syntax highlight for Asar and UberASM code snippets
 
 ## 0.1.0 (2023-07-06)
 
