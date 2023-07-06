@@ -116,17 +116,20 @@ handle_dragon_coins:
     LDX #$0000               ; Dragon coins index
     ; Collected coins.
 -   TXA : CMP !T0 : BCS +    ; If index < collected dragon coins...
-    CMP #$05 : BCS .return   ; ...and index < 5
+    CMP #$05 : BCS .pad   ; ...and index < 5
     LDA ram_dragon_coins_collected_symbol
     STA $0000|!addr,y        ; Then draw a coin
     INX : INY                ; Go to next coin and next drawing position
     BRA -
 +   ; Non-collected coins.
--   CPX #$0005 : BCS .return ; If index < 5
+-   CPX #$0005 : BCS .pad ; If index < 5
     LDA ram_dragon_coins_missing_symbol
     STA $0000|!addr,y        ; Then draw a missing coin
     INX : INY                ; Go to next coin and next drawing position
     BRA -
+.pad
+    ; Draw two empty spaces to fill the slot entirely.
+    LDA #$FC : STA $0005|!addr,y : STA $0006|!addr,y
 
 .return
     %return_handler_visible()
