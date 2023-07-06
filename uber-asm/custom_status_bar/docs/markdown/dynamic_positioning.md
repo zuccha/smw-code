@@ -35,19 +35,9 @@ stars are drawn in slot 2, and so on. This is useful because if some element is
 not visible, those that follow will shift to take its place, so to avoid holes
 in your status bar.
 
-Let's suppose we configured the time indicator to appear only if the time limit
-is greater than zero. Then we have different positions for the coin indicator if
-we have all elements
-
-| ![All elements visible](../assets/images/dynamic-4.png) |
-| :-----------------------------------------------------: |
-|                  All elements visible                   |
-
-or if the timer is missing
-
-| ![No timer, coin indicator shifts to take its place](../assets/images/dynamic-5.png) |
-| :----------------------------------------------------------------------------------: |
-|                  No timer, coin indicator shifts to take its place                   |
+If we go back to our initial example, we configured the time indicator to appear
+only if the time limit is greater than zero: the coin indicator will shift to
+take its position whenever the former doesn't appear.
 
 The same applies for score and dragon coins. If the score is not visible, dragon
 coins will shift to the top line of the status bar.

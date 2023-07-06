@@ -2,7 +2,7 @@
 
 List of features available with Custom Status Bar (CSB).
 
-Note that everything that is show in this overview can be achieved by a series
+Note that everything that is shown in this overview can be achieved by a series
 of different customizations, however by default CSB retains the original
 behaviors whenever possible (except for the graphics).
 
@@ -25,15 +25,15 @@ All of the original elements of the status bar (bonus stars, coins, dragon
 coins, item box, lives, score, and time) are still available, but are presented
 in a more minimalistic style.
 
-| ![Minimalistic status bar](../assets/images/minimalistic-1.png) |
-| :-------------------------------------------------------------: |
-|                  Same status bar, less clutter                  |
+| ![Same status bar, less clutter](../assets/images/minimalistic-1.png) |
+| :-------------------------------------------------------------------: |
+|                     Same status bar, less clutter                     |
 
 You can reorganize elements as you like
 
-| ![Reorganized status bar](../assets/images/minimalistic-2.png) |
-| :------------------------------------------------------------: |
-|             Elements positions have been mirrored              |
+| ![Elements positions have been mirrored](../assets/images/minimalistic-2.png) |
+| :---------------------------------------------------------------------------: |
+|                     Elements positions have been mirrored                     |
 
 And use custom symbols before bonus stars, coins, lives, and time
 
@@ -51,11 +51,11 @@ default. In this guide we will use images that make use of it.
 
 Any element in the status bar can be easily made visible or hidden
 
-| ![Status bar without score, coins, and bonus stars](../assets/images/visibility-1.png) |
-| :------------------------------------------------------------------------------------: |
-|                          No score, lives or bonus stars here                           |
+| ![No score, lives or bonus stars here](../assets/images/visibility-1.png) |
+| :-----------------------------------------------------------------------: |
+|                    No score, lives or bonus stars here                    |
 
-By default, when an element is hidden it will also be disable (e.g., coins will
+By default, when an element is hidden it will also be disabled (e.g., coins will
 not be increased, time doesn't run out, etc.). If you want, you can make
 elements active even if they are not visible
 
@@ -69,6 +69,10 @@ Magic is greater than zero
 | ![The sublevel has no time limit, so the time disappears](../assets/images/visibility-3.gif) |
 | :------------------------------------------------------------------------------------------: |
 |                    The sublevel has no time limit, so the time disappears                    |
+
+N.B.: For this to work with sublevels, you also need to mark the "Force time
+limit to reset to this value every time the player enter this level" flag in
+Lunar Magic's _Change Music & Time Limit Settings_!
 
 ## Per-level customization
 
@@ -86,14 +90,14 @@ Don't you hate when you have a hole in the UI?
 
 | ![There is a hole where the coin indicator should be](../assets/images/dynamic-1.png) |
 | :-----------------------------------------------------------------------------------: |
-|                  There is a hole where the coin indicator should be                   |
+|                  There is a hole where the time indicator should be                   |
 
 Don't worry, this won't actually happen with CSB ;). In fact, this UberASM
 "shifts" elements when one is not visible, preventing gaps among elements
 
 | ![In the sublevel coins are not visible and time takes their place](../assets/images/dynamic-2.gif) |
 | :-------------------------------------------------------------------------------------------------: |
-|                  In the sublevel coins are not visible and time takes their place                   |
+|                    In the sublevel time is not visible and coins take its place                     |
 
 To understand how it works, check out the guide about
 [dynamic positioning](./dynamic_positioning.md).
@@ -113,16 +117,17 @@ Technical comment: this is also how you control the status bar on a level basis.
 
 ## Disable IRQ and free layer 3
 
-If you don't really need the status bar in a level (or in most levels), the you
-can completely turning it off. The difference compared to turning off elements
+If you don't really need the status bar in a level (or in most levels), then you
+can completely turn it off. The difference compared to turning off elements
 individually is that IRQ is disabled and layer 3 is entirely free!
 
 | ![Status bar enabled](../assets/images/irq-1.png) | ![Status bar disabled](../assets/images/irq-2.png) |
 | :-----------------------------------------------: | :------------------------------------------------: |
 |                Status bar enabled                 |                Status bar disabled                 |
 
-Notice how the background that is on layer 3 leaves a hole when the status bar
-is enabled.
+Notice how the custom background that is on layer 3 leaves a hole when the
+status bar is enabled (the custom background on layer 3 is set to _Start of
+Layer 3_).
 
 Credits to KevinM for this, code was taken from his
 [RAM Toggled Status Bar (& IRQ)](https://www.smwcentral.net/?p=section&a=details&id=28449)
@@ -133,18 +138,18 @@ patch.
 You can customize the maximum amount of bonus stars and coins a player can get
 during a level
 
-| ![Max 5 bonus stars](../assets/images/limits-1.gif) | ![Max 10 coins](../assets/images/limits-2.gif) |
-| :-------------------------------------------------: | :--------------------------------------------: |
-|                  Max 5 bonus stars                  |                  Max 10 coins                  |
+| ![Only 5 coins to get an extra life!](../assets/images/limit-1.gif) |
+| :-----------------------------------------------------------------: |
+|                 Only 5 coins to get an extra life!                  |
 
 Altering a limit will change when specific limit-events are triggered (e.g.,
 receiving an extra life when collecting enough coins).
 
 It is possible to prevent the game from resetting these limits when reached
 
-| ![No more bonus stars](../assets/images/limits-3.gif) | ![No more coins](../assets/images/limits-4.gif) |
-| :---------------------------------------------------: | :---------------------------------------------: |
-|                  No more bonus stars                  |                  No more coins                  |
+| ![No more coins](../assets/images/limit-2.gif) |
+| :--------------------------------------------: |
+|                 No more coins                  |
 
 You can also disable some vanilla behaviors that happen when different limits
 are reached. In particular:
@@ -153,16 +158,17 @@ are reached. In particular:
 - Disable getting a life when coins limit is reached
 - Disable player dying when time runs out
 
-| ![No bonus game](../assets/images/limits-5.gif) | ![No extra life](../assets/images/limits-6.gif) | ![No death](../assets/images/limits-7.gif) |
-| :---------------------------------------------: | :---------------------------------------------: | :----------------------------------------: |
-|                  No bonus game                  |                  No extra life                  |                  No death                  |
+| ![No extra life](../assets/images/limit-3.gif) | ![No death](../assets/images/limit-4.gif) |
+| :--------------------------------------------: | :---------------------------------------: |
+|                 No extra life                  |                 No death                  |
 
 In addition to that, you can also define custom behaviors on these events. For
-instance, we could disable the status bar once we collect 10 coins
+instance, we could change the symbol in front of the coins counter once we reach
+the limit of five
 
-| ![Bye status bar!](../assets/images/limits-8.gif) |
-| :-----------------------------------------------: |
-|                  Bye status bar!                  |
+| ![A "!" appears](../assets/images/limit-5.gif) |
+| :--------------------------------------------: |
+|                 A "!" appears                  |
 
 ## Change timer frequency
 
@@ -191,7 +197,7 @@ Even better, you can show a custom message when all dragon coins are collected
 
 Finally, you can show different graphics for collected and missing dragon coins
 
-| ![Xs for collected, Os for missing](../assets/images/dragon-coins-4.png) |
+| ![Xs for collected, Os for missing](../assets/images/dragon-coins-4.gif) |
 | :----------------------------------------------------------------------: |
 |                     Xs for collected, Os for missing                     |
 

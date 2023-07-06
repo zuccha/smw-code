@@ -115,6 +115,8 @@
 ; * Values: $00-$7F/$FC
 ; * Default: $2E (coin)
 ; * RAM: csb_ram_coins_symbol
+; If you are using the modified GFX28 bundled with this patch, you can also use
+; $3B (star, alternative), which replaces part of the now unused item box.
 !coins_symbol = $2E
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
