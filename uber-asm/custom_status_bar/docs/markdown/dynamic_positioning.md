@@ -33,7 +33,7 @@ Visible elements will be positioned in slots in increasing order. In the example
 above, the life counter is the first element, so it is drawn in slot 1, bonus
 stars are drawn in slot 2, and so on. This is useful because if some element is
 not visible, those that follow will shift to take its place, so to avoid holes
-in your status bar.
+in the status bar.
 
 If we go back to our initial example, we configured the time indicator to appear
 only if the time limit is greater than zero: the coin indicator will shift to

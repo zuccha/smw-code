@@ -9,10 +9,10 @@ Follow these steps:
 1. Copy `asm/csb_asm/` inside UberASMTool's top folder (at the same level of
    `gamemode/`, `levels/`, `library/`, _etc._)
 2. Copy `asm/library/csb.asm` inside UberASMTool's `library/` folder
-3. Copy `asm/other/status.code` inside UberASMTool's `other/` folder (note that
-   the file already exists, you can replace it)
+3. Copy `asm/other/status_code.asm` inside UberASMTool's `other/` folder (note
+   that the file already exists, you can replace it)
 4. Copy `asm/gamemode/csb_gm11.asm` inside UberASMTool's `gamemode/` folder
-5. Copy the following in UberASMTool's `list.txt`, under `gamemode:`
+5. Add the following in UberASMTool's `list.txt`, under `gamemode:`
 
    ```uberasm
    gamemode:
@@ -53,7 +53,7 @@ init:
     RTL
 ```
 
-With this method, you skip step (1.e) of the instructions.
+With this method you skip step (1.5) of the instructions.
 
 As an alternative, you can create a common file that merges the two (or more)
 GM11 files, as described on SMWCentral. For more about that, consult the
@@ -97,7 +97,7 @@ main:
 
 Also, notice that we don't need to move `csb_gm11.asm` in the `library/` folder,
 since `csb_reset_ram` is already available in UberASM code. In fact, we don't
-need "csb_gm11.asm" at all!
+need `csb_gm11.asm` at all!
 
 Now, in `list.txt`, under `gamemode:` label, we list the newly created file
 

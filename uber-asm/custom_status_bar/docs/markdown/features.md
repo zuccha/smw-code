@@ -113,7 +113,7 @@ To understand how it works, check out the guide about
 ## RAM-controlled settings
 
 Almost every setting has an equivalent address in memory. The RAM addresses are
-available in UberASMCode, but they can also be imported in other tools, like
+available in UberASM code, but they can also be imported in other tools, like
 GPS. This means that it is possible to control the behavior of the status bar at
 runtime, via custom blocks for example
 
@@ -186,7 +186,7 @@ this is now a reality
 
 | ![Seconds going by](../assets/images/time-1.gif) |
 | :----------------------------------------------: |
-|                 Seconds goin by                  |
+|                 Seconds going by                 |
 
 ## Custom dragon coins messages and symbols
 

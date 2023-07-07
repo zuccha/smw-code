@@ -40,7 +40,7 @@ Clarifications to problems that might arise when uninstalling.
 ### (1.4) What if I have a shared Game Mode 11 (GM11) file?
 
 You can simply remove the call to `csb_reset_ram` from the file that is
-specified in GM11 in `list.txt`. For instance, with KevinM's Retry System we
+specified for GM11 in `list.txt`. For instance, with KevinM's Retry System we
 would remove the call from `retry_gm11.asm` that we added during installation
 
 ```asar

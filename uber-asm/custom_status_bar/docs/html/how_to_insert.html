@@ -81,9 +81,9 @@
           </li>
           <li>
             <p>
-              Copy <code>asm/other/status.code</code> inside UberASMTool&#39;s
-              <code>other/</code> folder (note that the file already exists, you
-              can replace it)
+              Copy <code>asm/other/status_code.asm</code> inside
+              UberASMTool&#39;s <code>other/</code> folder (note that the file
+              already exists, you can replace it)
             </p>
           </li>
           <li>
@@ -94,7 +94,7 @@
           </li>
           <li>
             <p>
-              Copy the following in UberASMTool&#39;s <code>list.txt</code>,
+              Add the following in UberASMTool&#39;s <code>list.txt</code>,
               under <code>gamemode:</code>
             </p>
             <div class="highlight highlight-source-uberasm notranslate">
@@ -193,7 +193,7 @@
     <span class="token op-code keyword">JSL</span> csb_reset_ram               <span class="token comment">; &lt;- Add this line</span>
     <span class="token op-code keyword">RTL</span></pre>
         </div>
-        <p>With this method, you skip step (1.e) of the instructions.</p>
+        <p>With this method you skip step (1.5) of the instructions.</p>
         <p>
           As an alternative, you can create a common file that merges the two
           (or more) GM11 files, as described on SMWCentral. For more about that,
@@ -246,7 +246,7 @@ main<span class="token punctuation">:</span>
           Also, notice that we don&#39;t need to move
           <code>csb_gm11.asm</code> in the <code>library/</code> folder, since
           <code>csb_reset_ram</code> is already available in UberASM code. In
-          fact, we don&#39;t need &quot;csb_gm11.asm&quot; at all!
+          fact, we don&#39;t need <code>csb_gm11.asm</code> at all!
         </p>
         <p>
           Now, in <code>list.txt</code>, under <code>gamemode:</code> label, we
