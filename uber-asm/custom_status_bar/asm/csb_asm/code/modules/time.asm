@@ -2,8 +2,8 @@
 ; TIME
 ;===============================================================================
 
-; Time indicator in form "SHTU", where S is the coin symbol, H is the hundreds,
-; T is the tens, and U is the units.
+; Time indicator in form "SHTO", where "S" is the coin symbol, "H" is the 100s,
+; "T" is the 10s, and "O" is the 1s.
 
 
 ;-------------------------------------------------------------------------------

@@ -26,8 +26,7 @@
 ;-------------------------------------------------------------------------------
 
 ; Whether to enable the status bar or not.
-; When disabled, nothing will render.
-; TODO: Disable IRQ and free layer 3.
+; When disabled, nothing will render and layer 3 is free.
 ; * Values:
 ;     0 = Disabled
 ;     1 = Enabled

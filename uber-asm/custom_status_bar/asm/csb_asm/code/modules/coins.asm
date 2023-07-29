@@ -2,8 +2,8 @@
 ; COINS
 ;===============================================================================
 
-; Coin indicator in form "S0TU", where S is the coin symbol, followed by a
-; hardcoded 0, T is the tens, and U is the units.
+; Coin indicator in form "SHTO", where "S" is the star symbol, "H" is the 100s'
+; digit, "T" is the 10s' digit, and "O" is the 1s' digit.
 
 
 ;-------------------------------------------------------------------------------

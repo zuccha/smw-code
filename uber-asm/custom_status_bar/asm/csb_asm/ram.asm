@@ -3,7 +3,7 @@
 ;===============================================================================
 
 ; Prepare RAM addresses for usage in the code.
-; The patch required 34 bytes of free contiguous RAM. Its position can be
+; The patch requires 34 bytes of free contiguous RAM. Its position can be
 ; configured down below.
 
 
@@ -56,6 +56,7 @@
 
 ; For UberASMTool you don't need to do anything, since it is automatically
 ; included.
+
 
 ;-------------------------------------------------------------------------------
 ; Utils

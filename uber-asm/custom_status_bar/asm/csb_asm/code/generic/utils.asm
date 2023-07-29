@@ -42,7 +42,7 @@ endmacro
 
 
 ;-------------------------------------------------------------------------------
-; Draw Counter With Two Digits
+; Draw Three-Digits Number
 ;-------------------------------------------------------------------------------
 
 ; Draw a one-byte long hexadecimal number as a three-digits decimal.
@@ -51,7 +51,7 @@ endmacro
 draw_3_digits_number:
     LDX #$0000                          ; X counts 100s
 -   CMP #$64 : BCC +                    ; While A >= 100
-    SBC #$64 : INX                      ; Subtract 100 increase 100s count
+    SBC #$64 : INX                      ; Subtract 100 and increase 100s count
     BRA -                               ; Repeat
 +   PHA : TXA : STA $0001|!addr,y : PLA ; Draw 100s.
 
@@ -66,8 +66,8 @@ draw_3_digits_number:
     RTL
 
 ; Draw a hexadecimal number lower than $64 (100) as a two-digits decimal number.
-; The number will be drawn in format "S0TU", where "S" is the symbol, "0" is a
-; harcoded 0, "T" is the tens' digit, and "U" is the units' digit.
+; The number will be drawn in format "SHTO", where "S" is the symbol, "H" is the
+; hundreds' digit, "T" is the tens' digit, and "O" is the ones' digit.
 ; @param A (8-bit): The hexadecimal number.
 ; @param Y (16-bit): Slot position.
 ; @param <symbol>: Address (label) containing the symbol to display before the

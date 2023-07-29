@@ -2,7 +2,7 @@
 ; HIJACKS
 ;===============================================================================
 
-; This patch uses the following highjacks:
+; This patch uses the following hijacks:
 ; 1. Disable original status bar.
 ; 2. Retrieve custom item box's horizontal position.
 ; 3. Prevent item box from dropping item if power_up_visibility = 2 (disabled).
