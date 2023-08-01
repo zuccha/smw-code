@@ -44,7 +44,7 @@
 ShopPay:
 
 if !bonus_stars_cost > 0
-  LDX $0DB3|!addr : LDA $0F48,x        ; Get current player's bonus stars
+  LDX $0DB3|!addr : LDA $0F48|!addr,x  ; Get current player's bonus stars
   CMP.b #!bonus_stars_cost             ; If player doesn't have enough bonus stars...
   BCC .dont_buy                        ; ...then don't buy
 endif
@@ -64,20 +64,20 @@ endif
 if !score_cost > 0
   LDA $0DB3|!addr                      ; Load current player (0 =  Mario, 1 = Luigi)...
   ASL : CLC : ADC $0DB3|!addr : TAX    ; ...and multiply it by 3 (0 = Mario, 3 = Luigi)
-  LDA $0F36,x : CMP.b #!score_cost>>16 ; \
-  BCC .dont_buy : BNE .buy             ; | Compare score and cost, from high to low bytes:
-  LDA $0F35,x : CMP.b #!score_cost>>8  ; | - if cost byte is greater don't buy
-  BCC .dont_buy : BNE .buy             ; | - else if cost is smaller (not equal) buy
-  LDA $0F34,x : CMP.b #!score_cost     ; | - else (they are equal) go to next byte
-  BCC .dont_buy                        ; /
+  LDA $0F36|!addr,x : CMP.b #!score_cost>>16 ; \
+  BCC .dont_buy : BNE .buy                   ; | Compare score and cost, from high to low bytes:
+  LDA $0F35|!addr,x : CMP.b #!score_cost>>8  ; | - if cost byte is greater don't buy
+  BCC .dont_buy : BNE .buy                   ; | - else if cost is smaller (not equal) buy
+  LDA $0F34|!addr,x : CMP.b #!score_cost     ; | - else (they are equal) go to next byte
+  BCC .dont_buy                              ; /
 endif
 
 .buy
 
 if !bonus_stars_cost > 0
-  LDX $0DB3|!addr : LDA $0F48,x        ; Get current player's bonus stars
+  LDX $0DB3|!addr : LDA $0F48|!addr,x  ; Get current player's bonus stars
   SEC : SBC.b #!bonus_stars_cost       ; Subtract cost from bonus stars counter
-  STA $0F48,x                          ; Update counter
+  STA $0F48|!addr,x                    ; Update counter
 endif
 
 if !coins_cost > 0
@@ -95,12 +95,12 @@ endif
 if !score_cost > 0
   LDA $0DB3|!addr                      ; Load current player (0 =  Mario, 1 = Luigi)...
   ASL : CLC : ADC $0DB3|!addr : TAX    ; ...and multiply it by 3 (0 = Mario, 3 = Luigi)
-  LDA $0F34,x : SEC                    ; \
-  SBC.b #!score_cost     : STA $0F34,x ; | Subtract cost from score, byte-by-byte,
-  LDA $0F35,x                          ; | starting from the low byte going up
-  SBC.b #!score_cost>>8  : STA $0F35,x ; | up to the high byte, setting the carry
-  LDA $0F36,x                          ; | flag only on the first subtraction
-  SBC.b #!score_cost>>16 : STA $0F36,x ; /
+  LDA $0F34|!addr,x : SEC                    ; \
+  SBC.b #!score_cost     : STA $0F34|!addr,x ; | Subtract cost from score, byte-by-byte,
+  LDA $0F35|!addr,x                          ; | starting from the low byte going up
+  SBC.b #!score_cost>>8  : STA $0F35|!addr,x ; | up to the high byte, setting the carry
+  LDA $0F36|!addr,x                          ; | flag only on the first subtraction
+  SBC.b #!score_cost>>16 : STA $0F36|!addr,x ; /
 endif
 
   LDA #$01 : RTL

@@ -110,7 +110,7 @@ BuyItem:
 
   ; Transform block
 if !availability > 0
-  PHY : LDA.b #!shop_after_usage : STA $9C : JSL $00BEB0 : PLY
+  PHY : LDA.b #!shop_after_usage : STA $9C : JSL $00BEB0|!bank : PLY
 endif
 
   ; Finish
