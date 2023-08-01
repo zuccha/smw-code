@@ -5,6 +5,10 @@ Created by zuccha, commissioned by Anas.
 Blocks for buying items and powerups, spending bonus stars, coins, lives, and/or
 score points.
 
+|     <img src="./shop_block.gif" width="400px" />      |
+| :---------------------------------------------------: |
+| Buy items and powerups, each one with different costs |
+
 ## Contents
 
 This package comes with the following files:
