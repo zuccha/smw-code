@@ -69,6 +69,11 @@ spawn sprites, flip the ON/OFF switch, etc.
 4. Changelog
 --------------------------------------------------------------------------------
 
+* v1.0.1 (2023-08-01)
+
+Fixed:
+- Ensure SA-1 compatibility
+
 * v1.0.0 (2023-08-01)
 
 Added:
