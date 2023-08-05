@@ -54,7 +54,7 @@ check_if_item_should_drop:
     LDA ram_power_up_visibility ; If visibility = 2
     CMP #$02 : BNE +            ; Then don't drop item
     JML $028071|!bank           ; (jump to the end of the routine)
-+   PHX : LDA $0DC2             ; Else restore original code
++   PHX : LDA $0DC2|!addr       ; Else restore original code
     JML $02800C|!bank           ; (jump back into the routine)
 
 ; Disable IRQ if status bar is disabled.

@@ -16,8 +16,11 @@
 ; RAM starts at the address indicated here. Unless you have some conflics with
 ; other custom code, you won't need to change it.
 ; * Values: Any address in free space.
-; * Default: $7FB700
-!freeram_address = $7FB700
+; * Default: $7FB700 ($40A700 for SA-1)
+; !freeram_address_sa1 will override !freeram_address in SA-1 hacks, otherwise
+; it will be ignored.
+!freeram_address     = $7FB700
+!freeram_address_sa1 = $40A700
 
 
 ;-------------------------------------------------------------------------------
@@ -61,6 +64,11 @@
 ;-------------------------------------------------------------------------------
 ; Utils
 ;-------------------------------------------------------------------------------
+
+; Update freeram address if SA-1.
+if read1($00FFD5) == $23
+    !freeram_address = !freeram_address_sa1
+endif
 
 ; Define an address with a given size.
 ; This will produce a label accessible with `ram_<name>`. For instance:

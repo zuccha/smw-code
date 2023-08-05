@@ -16,7 +16,7 @@ macro draw_empty_spaces(size)
     SEP #$20 : LDA #$FC
     !i #= 0
     while !i < <size>
-        STA $0000+!i,y
+        STA $0000+!i|!addr,y
         !i #= !i+1
     endif
     REP #$20

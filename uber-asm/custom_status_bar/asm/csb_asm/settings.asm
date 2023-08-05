@@ -349,6 +349,8 @@
 ; * Values: $0EF9-$0F11/$0F15-$0F2C
 ; * Default: $0F11, $0F2C, $0F0C, $0F27
 ; * RAM: N/A
+; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
+; will automatically convert the addresses into SA-1.
 !group1_slots = $0F11, $0F2C, $0F0C, $0F27
 
 
@@ -380,6 +382,8 @@
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
 ; * Default: $0EF9, $0F15
 ; * RAM: N/A
+; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
+; will automatically convert the addresses into SA-1.
 !group2_slots = $0EF9, $0F15
 
 

@@ -4,6 +4,19 @@
 
 ; Revert changes applied by Custom Status Bar.
 
+; SA-1
+if read1($00FFD5) == $23
+    sa1rom
+    !sa1  = 1
+    !addr = $6000
+    !bank = $000000
+else
+    lorom
+    !sa1  = 0
+    !addr = $0000
+    !bank = $800000
+endif
+
 ; Restores status bar IRQ setup.
 org $008294
     LDA $4211 : STY $4209
@@ -27,7 +40,7 @@ org $028051
 
 ; Make sure the item gets stored and falls from the item box.
 org $028008
-    PHX : LDA $0DC2
+    PHX : LDA $0DC2|!addr
 
 ; Restore graphics and palettes of all tiles in the status bar.
 org $008C81
