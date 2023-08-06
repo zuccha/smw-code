@@ -12,5 +12,5 @@ A collection of SMW ASM and resources.
 
 | Name                                                                              | Download                                                                                                             |
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [Custom Status Bar](./uber-asm/custom_status_bar)                                 | [v0.1.0](https://github.com/zuccha/smw-code/releases/download/custom_status_bar%2F0.1.0/custom_status_bar-0.1.0.zip) |
+| [Custom Status Bar](./uber-asm/custom_status_bar)                                 | [v0.2.0](https://github.com/zuccha/smw-code/releases/download/custom_status_bar%2F0.2.0/custom_status_bar-0.2.0.zip) |
 | [Update Player Overworld Animation](./uber-asm/update_player_overworld_animation) | Unreleased                                                                                                           |
