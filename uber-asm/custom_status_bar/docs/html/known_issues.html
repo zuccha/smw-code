@@ -16,16 +16,20 @@
         <div class="navigation">
           <a href="../../README.html">Home</a> |
           <a href="./changelog.html">Changelog</a> |
-          <a href="./compatibility.html">Compatibility</a> | Credits |
+          <a href="./compatibility.html">Compatibility</a> |
+          <a href="./credits.html">Credits</a> |
           <a href="./dynamic_positioning.html">Dynamic positioning</a> |
           <a href="./features.html">Features</a> |
           <a href="./how_to_insert.html">How to insert</a> |
           <a href="./how_to_remove.html">How to remove</a> |
-          <a href="./how_to_use.html">How to use</a> |
-          <a href="./known_issues.html">Known issues</a>
+          <a href="./how_to_use.html">How to use</a> | Known issues
         </div>
-        <h1 id="credits">
-          <a class="anchor" aria-hidden="true" tabindex="-1" href="#credits"
+        <h1 id="known-issues">
+          <a
+            class="anchor"
+            aria-hidden="true"
+            tabindex="-1"
+            href="#known-issues"
             ><svg
               class="octicon octicon-link"
               viewBox="0 0 16 16"
@@ -37,23 +41,26 @@
                 fill-rule="evenodd"
                 d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
               ></path></svg></a
-          >Credits
+          >Known Issues
         </h1>
-        <p>Contributors:</p>
-        <ul>
-          <li><strong>zuccha:</strong> Main programmer, maintainer.</li>
+        <p>This UberASM has a few known issues that I plan on fixing:</p>
+        <ol>
           <li>
-            <strong>KevinM:</strong> Disable IRQ and free layer 3 when status
-            bar is fully disabled (code taken from
-            <a
-              href="https://www.smwcentral.net/?p=section&a=details&id=28449"
-              rel="noopener noreferrer"
-              >RAM Toggled Status Bar (&amp; IRQ)</a
-            >
-            patch).
+            If <code>!status_bar_visibility = 1</code> in settings, when it is
+            turned off on a single level, the status bar will still be visible
+            for an instant before disappearing.
           </li>
-        </ul>
-        <p>Credits in ROM hacks are optional.</p>
+          <li>
+            If <code>!status_bar_visibility = 1</code> in settings, when it is
+            turned off on a single level, the status bar will reappear after
+            display a message on screen (e.g., message box).
+          </li>
+          <li>
+            If <code>!status_bar_visibility = 0</code> in settings, when it is
+            turned on on a single level, the status bar sometimes uses the wrong
+            color palette.
+          </li>
+        </ol>
       </main>
     </div>
   </body>
