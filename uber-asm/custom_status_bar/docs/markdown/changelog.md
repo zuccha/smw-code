@@ -1,11 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2023-08-06)
+
+### New features
+
+- Make code compatible with SA-1
 
 ### Documentation
 
 - Correct some mistakes in the features overview
 - Add better syntax highlight for Asar and UberASM code snippets
+- Add "known issues" section
 
 ## 0.1.0 (2023-07-06)
 
