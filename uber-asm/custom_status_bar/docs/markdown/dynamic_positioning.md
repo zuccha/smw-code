@@ -3,9 +3,9 @@
 Dynamic positioning is when elements "shift" from one position to the next one
 filling holes
 
-| ![In the sublevel time is not visible and coins take its place](../assets/images/dynamic-2.gif) |
-| :---------------------------------------------------------------------------------------------: |
-|                  In the sublevel time is not visible and coins take its place                   |
+|  <img src="../assets/images/dynamic-2.gif" width="400px" />  |
+| :----------------------------------------------------------: |
+| In the sublevel time is not visible and coins take its place |
 
 But how does it work?
 
@@ -15,9 +15,9 @@ Status bar elements are organized in clusters:
 - Group 2: Dragon Coins and Score
 - Item Box
 
-| ![All groups and slots](../assets/images/dynamic-3.png) |
-| :-----------------------------------------------------: |
-|                  All groups and slots                   |
+| <img src="../assets/images/dynamic-3.png" width="400px" /> |
+| :--------------------------------------------------------: |
+|                    All groups and slots                    |
 
 Every group controls its set of elements to display in positions called "slots".
 Elements within a group are ordered by priority via settings. For instance

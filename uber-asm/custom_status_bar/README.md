@@ -6,8 +6,8 @@ bar in different ways.
 | [Download v0.1.0](https://github.com/zuccha/smw-code/releases/download/custom_status_bar%2F0.1.0/custom_status_bar-0.1.0.zip) |
 | :---------------------------------------------------------------------------------------------------------------------------: |
 
-| ![Customize your status bar](./docs/assets/images/overview.gif) |
-| --------------------------------------------------------------- |
+| <img src="./docs/assets/images/overview.gif" width="400px" /> |
+| ------------------------------------------------------------- |
 
 If you don't know how it works and want to find out more, check out the list of
 [features](./docs/markdown/features.md).
