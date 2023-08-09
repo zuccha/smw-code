@@ -58,7 +58,7 @@
 ; 0 = hidden, 1 = visible.
 ; N.B.: This is relevant only if you are showing the counter in the status bar
 ; with the custom "status_code.asm" file.
-!show_presses_in_status_bar = 0
+!show_presses_in_status_bar = 1
 
 ; 1 byte of free RAM, keeping track of the number of presses (1 byte).
 ; N.B.: This needs to be the same as the one defined in the status bar's ASM!
