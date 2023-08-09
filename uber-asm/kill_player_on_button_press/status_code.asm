@@ -18,12 +18,12 @@
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
 !ram_show_presses_in_status_bar = $140C
 
-; Status bar RAM for deciding where to draw the counter. By default, it is set
-; do be drawn on the top-left corner (overriding the Mario/Luigi text).
+; Status bar RAM for deciding where to draw the counter. By default, it replaces
+; the "TIME" text, above the timer.
 ; For more, check out https://smwc.me/m/smw/ram/7E0EF9
-!ram_100s = $0EF9
-!ram_10s  = $0EFA
-!ram_1s   = $0EFB
+!ram_100s = $0F0A
+!ram_10s  = $0F0B
+!ram_1s   = $0F0C
 
 
 ;-------------------------------------------------------------------------------
