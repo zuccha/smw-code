@@ -16,6 +16,8 @@
 ; Number of pressed required to hurt/kill the player.
 ; Must be a value between 1-255 ($01-$FF). 0 won't do anything, any value above
 ; 255 ($FF) will crash the game.
+; N.B.: This needs to be the same as the one defined in the indicator's ASM (if
+; you are using it)!
 !button_presses_threshold = $0A
 
 ; Which buttons, when pressed, increase the counter.
