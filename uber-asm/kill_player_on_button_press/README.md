@@ -37,10 +37,32 @@ Obviously, use the level you actually want to insert the code into.
 
 Run UberASMTool, and it should work.
 
+### Show the counter over Mario's head
+
+Note that this step is optional, you need to do this only if you want the
+counter to be visible over Mario's head.
+
+You can show the indicator over Mario's head via the sprite "indicator.asm". The
+sprite requires the bundled "ExGFX80.bin" (you can use numbers other than 80).
+
+The graphics file needs to contain the ten digits spread on two lines as follows
+
+```
+  0 1 2 3 4
+  5 6 7 8 9
+```
+
+The initial position (the position of tile "0") can be configured with the
+`!gfx_initial_tile` define, and you can choose which SP slot to use with
+`!gfx_sp`.
+
+The sprite will follow Mario whenever he goes. You can choose to show the inputs
+done or the input remaining.
+
 ### Show the counter in the status bar
 
 Note that this step is optional, you need to do this only if you want the
-counter to be visible.
+counter to be visible in the status bar.
 
 By default, the counter is not visible in the status bar. To make it appear, we
 need to add the routine that draws the counter.
@@ -76,6 +98,21 @@ in all level files you are using.
 This UberASM is compatible with SA-1 and KevinM's Retry System.
 
 ## Changelog
+
+### v1.1.0 (2023-08-11)
+
+Added:
+
+- Add indicator sprite showing the counter over Mario's head.
+- Allow to show either inputs left or done on sprite counter.
+- Allow to configure which SP slot to use, which initial graphics tile, and the
+  palette for the sprite counter.
+- Allow to specify the size of digits for the sprite counter.
+- Allow to show either inputs left or done on status bar counter.
+
+Changed:
+
+- Default to inputs left in status bar.
 
 ### v1.0.0 (2023-08-09)
 
