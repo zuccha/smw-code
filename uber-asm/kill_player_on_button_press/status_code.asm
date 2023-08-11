@@ -9,6 +9,12 @@
 ; Configuration
 ;-------------------------------------------------------------------------------
 
+; Number of pressed required to hurt/kill the player.
+; Must be a value between 1-255 ($01-$FF). 0 won't do anything, any value above
+; 255 ($FF) will crash the game.
+; N.B.: This needs to be the same as the one defined in the level's ASM!
+!button_presses_threshold = $65
+
 ; 1 byte of free RAM, keeping track of the number of presses (1 byte).
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
 !ram_button_presses_count = $140B
@@ -17,6 +23,11 @@
 ; counter or not.
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
 !ram_show_presses_in_status_bar = $140C
+
+; Whether to show the inputs left or done.
+; 0 = show inputs done (when it reaches the threshold Mario dies)
+; 1 = show inputs left (when it reaches zero Mario dies)
+!show_inputs_left = 1
 
 ; Status bar RAM for deciding where to draw the counter. By default, it replaces
 ; the "TIME" text, above the timer.
@@ -35,7 +46,12 @@ main:
     LDA.w !ram_show_presses_in_status_bar|!addr ; If we don't need to draw the counter
     BEQ .return                                 ; Then return
 
-    LDA.w !ram_button_presses_count|!addr       ; Load current press count
+if !show_inputs_left == 0
+    LDA.w !ram_button_presses_count|!addr       ; Number to show = current count
+else
+    LDA.b #!button_presses_threshold
+    SEC : SBC.w !ram_button_presses_count|!addr ; Number to show = threshold - current count
+endif
 
     LDX #$00                                    ; X counts 100s
 -   CMP #$64 : BCC +                            ; While A >= 100

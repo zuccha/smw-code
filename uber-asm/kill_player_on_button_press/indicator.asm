@@ -20,8 +20,8 @@
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
 !ram_button_presses_count = $140B
 
-; Whether to show the input left or done.
-; 0 = show inputs done (when it reaches threshold Mario dies)
+; Whether to show the inputs left or done.
+; 0 = show inputs done (when it reaches the threshold Mario dies)
 ; 1 = show inputs left (when it reaches zero Mario dies)
 !show_inputs_left = 1
 
