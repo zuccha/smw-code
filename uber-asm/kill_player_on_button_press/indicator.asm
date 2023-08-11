@@ -14,7 +14,7 @@
 ; Must be a value between 1-255 ($01-$FF). 0 won't do anything, any value above
 ; 255 ($FF) will crash the game.
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
-!button_presses_threshold = $65
+!button_presses_threshold = $0A
 
 ; 1 byte of free RAM, keeping track of the number of presses (1 byte).
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
