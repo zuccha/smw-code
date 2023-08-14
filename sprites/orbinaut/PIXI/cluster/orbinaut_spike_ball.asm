@@ -10,11 +10,13 @@
 ;-------------------------------------------------------------------------------
 
 ; These need to be the same as those defined in "orbinaut.asm".
-!orbinaut   = $0F72|!addr
-!angle_l    = $0F4A|!addr
-!angle_h    = $0F86|!addr
-!rotation_l = !1504
-!rotation_h = !1510
+!orbinaut         = $0F72|!addr
+!angle_l          = $0F4A|!addr
+!angle_h          = $0F86|!addr
+!rotation_l       = !1504
+!rotation_h       = !1510
+!throw_speed      = $1E52|!addr
+!throw_speed_frac = $1E66|!addr
 
 
 ;-------------------------------------------------------------------------------
@@ -38,7 +40,8 @@ print "MAIN ",pc
     PHB : PHK : PLB
 
     ; Check if orbinaut is dead
-    %get_orbinaut(!14C8) : CMP #$08 : BEQ +     ; If orbinaut is dead
+    LDA !throw_speed,y : BNE +                  ; If ball has not already been thrown...
+    %get_orbinaut(!14C8) : CMP #$08 : BEQ +     ; ...and orbinaut is dead
     LDA #$00 : STA !cluster_num,y               ; Then kill spike ball too
     PLB : RTL
 
@@ -49,11 +52,31 @@ print "MAIN ",pc
     LDY $15E9|!addr
     LDA $9D : BNE .return                       ; If game is not frozen, then continue
 
-    ; Update
-    JSR move
+    ; Check if sprite needs to be thrown
+    LDA !throw_speed,y : BNE .thrown            ; If ball has not already been thrown...
+
+    LDA !angle_h,y : XBA : LDA !angle_l,y       ; ...and it's at bottom position...
+    REP #$20 : CMP #$0080 : SEP #$20 : BNE .orbiting ; (angle is $0080)
+
+    LDA !cluster_x_low,y : STA $00              ; ...and it's within player's range
+    LDA !cluster_x_high,y : STA $01             ; (preload ball position)
+    %get_orbinaut(!extra_byte_3) : STA $02 : STZ $03 ; (preload range)
+    REP #$20 : LDA $7E : SEC : SBC $00 : BPL +  ; (player X - ball X)
+    EOR #$FFFF : INC                            ; (take absolute value)
++   CMP $02 : SEP #$20 : BCS .orbiting          ; (distance < range)
+
+    JSR throw                                   ; Then start throw
+
+.thrown
+    JSR travel
+    BRA .interactions
+
+.orbiting
+    JSR orbit
+
+.interactions
     JSR check_player_interaction
 
-    ; Return
 .return
     PLB : RTL
 
@@ -68,6 +91,7 @@ render:
     LDA !cluster_x_high,y : STA $01
     LDA !cluster_y_low,y : STA $02
     LDA !cluster_y_high,y : STA $03
+    %get_orbinaut(!extra_prop_2) : STA $04
 
     REP #$20
     LDA $00 : SEC : SBC $1A : STA $00           ; Compute X-position on screen
@@ -82,29 +106,72 @@ render:
 
     LDA $00 : STA $0200|!addr,y                 ; X position
     LDA $02 : STA $0201|!addr,y                 ; Y position
-    LDA #$02 : STA $0202|!addr,y                ; Tile number
+    LDA $04 : STA $0202|!addr,y                 ; Tile number
     LDA #%00101111 : STA $0203|!addr,y          ; Tile properties
 
-    TYA : LSR #2 : TAY
-    LDA #$02 : STA $0420|!addr,y
+    TYA : LSR #2 : TAY                          ; Table $0420 is smaller
+    LDA #$02 : STA $0420|!addr,y                ; 16x16 tile
 
     RTS
 
 .offscreen
-    SEP #$20 : RTS
+    SEP #$20 : LDA !throw_speed,y : BEQ +       ; If ball has been thrown
+    LDA #$00 : STA !cluster_num,y               ; Kill ball sprite
++   RTS
 
 
 ;-------------------------------------------------------------------------------
-; Move
+; Throw
 ;-------------------------------------------------------------------------------
 
-; Move spike ball, following orbinaut and rotating around it.
-move:
+; Set spike ball speed when it is thrown.
+throw:
+    %get_orbinaut(!rotation_h)                  ; Check rotation direction
+    AND #$80 : BEQ .clockwise                   ; (poor people's BLP .clockwise)
+
+.counterclockwise
+    %get_orbinaut(!extra_byte_4)                ; Load speed from extra byte...
+    STA !throw_speed,y                          ; ...and store it
+    RTS
+
+.clockwise
+    %get_orbinaut(!extra_byte_4)                ; Load speed from extra byte...
+    EOR #$FF : INC : STA !throw_speed,y         ; ...negate it, and store it
+    RTS
+
+
+;-------------------------------------------------------------------------------
+; Travel
+;-------------------------------------------------------------------------------
+
+; Move spike ball horizontally if thrown.
+; Function taken form original code.
+travel:
+    LDA !throw_speed,y : ASL #4
+    CLC : ADC !throw_speed_frac,y
+    STA !throw_speed_frac,y
+    PHP
+    LDX #$00 : LDA !throw_speed,y : LSR #4
+    CMP #$08 : BCC +
+    ORA #$F0 : DEX
++   PLP
+    ADC !cluster_x_low,y : STA !cluster_x_low,y
+    TXA
+    ADC !cluster_x_high,y : STA !cluster_x_high,y
+    RTS
+
+
+;-------------------------------------------------------------------------------
+; Orbit
+;-------------------------------------------------------------------------------
+
+; Orbit spike ball arount orbinaut.
+orbit:
 .rotate
     %get_orbinaut(!rotation_l) : STA $00        ; Load rotation speed low byte
     %get_orbinaut(!rotation_h) : STA $01        ; Load rotation speed high byte
     LDA !angle_h,y : XBA : LDA !angle_l,y       ; Load angle
-    REP #$20 : CLC : ADC $00                    ; Increase it
+    REP #$20 : CLC : ADC $00                    ; Increase angle by rotation
     AND #$01FF : SEP #$20                       ; And wrap around (modulo)
     STA !angle_l,y : XBA : STA !angle_h,y       ; Store angle
 
@@ -116,8 +183,8 @@ move:
     JSR scale_radius                            ; Adjust radius amplitude
 
     LDY $15E9|!addr
-    %get_orbinaut("!sprite_x_high") : XBA       ; Use orbinaut's coordinates as center
-    %get_orbinaut("!sprite_x_low")
+    %get_orbinaut(!sprite_x_high) : XBA         ; Use orbinaut's coordinates as center
+    %get_orbinaut(!sprite_x_low)
     REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
     STA !cluster_x_low,y : XBA                  ; Update Y coordinate
     STA !cluster_x_high,y
@@ -130,8 +197,8 @@ move:
     JSR scale_radius                            ; Adjust radius amplitude
 
     LDY $15E9|!addr
-    %get_orbinaut("!sprite_y_high") : XBA       ; Use orbinaut's coordinates as center
-    %get_orbinaut("!sprite_y_low")
+    %get_orbinaut(!sprite_y_high) : XBA         ; Use orbinaut's coordinates as center
+    %get_orbinaut(!sprite_y_low)
     REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
     STA !cluster_y_low,y : XBA                  ; Update Y coordinate
     STA !cluster_y_high,y
@@ -243,8 +310,9 @@ check_player_interaction:
 
 ; +   LDX.W $15E9 : RTS
 
+
 ;-------------------------------------------------------------------------------
-; Utils
+; Find OAM Slot
 ;-------------------------------------------------------------------------------
 
 ; Find a free OAM slot for the current cluster sprite.
@@ -258,6 +326,11 @@ find_oam_slot:
     LDA #$00 : STA !cluster_num,y               ; So we kill this sprite...
     LDY #$00                                    ; ...and use index 0
 +   RTS
+
+
+;-------------------------------------------------------------------------------
+; Compute Sine/Cosine
+;-------------------------------------------------------------------------------
 
 ; Compute sine, signed.
 ; @param $00-$01: Degree (#$0000-#$01FF).
@@ -291,36 +364,10 @@ compute_cosine:
     ASL : TAX : LDA $07F7DB,x : STA $02         ; Load and store value from table
     SEP #$30 : PLX : RTS
 
-; Multiplication (8/16-bit).
-; @param $00: First multiplicand.
-; @param $02/$04: Second multiplicand.
-; @return A: Product.
-multiply:
-    STA $04
--	LSR $02 : BEQ ++ : BCC +
-    CLC : ADC $00
-+	ASL $00 : BRA -
-++  CLC : ADC $00
-    SEC : SBC $04
-    RTS
 
-; Division (16-bit).
-; @param $00-$01: Dividend.
-; @param $02-$03: Divisor.
-; @return $00-$01: Quotient.
-; @return $02-$03: Remainder.
-divide:
-    REP #$20
-    ASL $00
-    LDY #$0F : LDA #$0000
--   ROL A
-    CMP $02 : BCC +
-    SBC $02
-+   ROL $00
-    DEY : BPL -
-    STA $02
-    SEP #$20
-    RTS
+;-------------------------------------------------------------------------------
+; Scale Radius
+;-------------------------------------------------------------------------------
 
 ; Scale sine/cosine value. The value can be controlled with the defines below:
 ;   sine * !numerator / !denominator
@@ -355,3 +402,34 @@ scale_radius:
     JSR divide : REP #$20                       ; Divide (A is 8-bit)
     LDA $00 : EOR #$FFFF : INC : STA $00        ; Convert result to signed
     SEP #$20 : RTS
+
+; Multiplication (8/16-bit).
+; @param $00: First multiplicand.
+; @param $02/$04: Second multiplicand.
+; @return A: Product.
+multiply:
+    STA $04
+-	LSR $02 : BEQ ++ : BCC +
+    CLC : ADC $00
++	ASL $00 : BRA -
+++  CLC : ADC $00
+    SEC : SBC $04
+    RTS
+
+; Division (16-bit).
+; @param $00-$01: Dividend.
+; @param $02-$03: Divisor.
+; @return $00-$01: Quotient.
+; @return $02-$03: Remainder.
+divide:
+    REP #$20
+    ASL $00
+    LDY #$0F : LDA #$0000
+-   ROL A
+    CMP $02 : BCC +
+    SBC $02
++   ROL $00
+    DEY : BPL -
+    STA $02
+    SEP #$20
+    RTS

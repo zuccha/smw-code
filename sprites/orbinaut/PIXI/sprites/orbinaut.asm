@@ -7,39 +7,46 @@
 
 
 ;-------------------------------------------------------------------------------
-; Configuration
+; Configuration (extra bytes)
+;-------------------------------------------------------------------------------
+
+; Extra Property Byte 1: Tile number for the orbinaut to use.
+
+; Extra Property Byte 2: Tile number for the spike ball to use.
+
+; Extra bit: If 1, the orbinaut can go through solid walls (blocks), otherwise
+; it stops there.
+
+; Extra Byte 1: Movement type, it should be one of
+; - 00 = Never move
+; - 01 = Always move towards player
+; - 02 = Move towards player if player is moving
+; - 03 = Move towards player if player is not moving
+
+; Extra Byte 2: Orbinaut horizontal speed. It should be a value betwee 0 and 127
+; ($00 and $7F).
+
+; Extra Byte 3: Rotation speed of the spike balls around the orbinaut. It should
+; be one of $00, $01, $02, $04, $08, or $10, or the balls might not be thrown
+; correctly.
+
+; Extra Byte 3: Throw range. If the player is within this range, the orbinaut
+; will start shoting the spike balls when they are at angle 270 (bottom).
+
+; Extra Byte 4: Throw speed. The horizontal speed of the spike ball once it has
+; beed thrown.
+
+
+;-------------------------------------------------------------------------------
+; Configuration (defines)
 ;-------------------------------------------------------------------------------
 
 ; Number for "orbinaut_spike_ball.asm" as defined in PIXI's "list.asm".
 !spike_ball_sprite_number = $11
 
-; Offset, in pixels, of spike balls with respect to the center of the orbinaut.
-!spike_ball_offset = $10
-
-; Movement mode. When the orbinaut should move. If moving, the orbinaut will
-; always target Mario.
-; 0 = never
-; 1 = always
-; 2 = only when player is moving
-; 3 = only when player is not moving
-!movement_type = 1
-
-; Movement speed. It should be a value betwee 0 and 127 ($00 and $7F).
-!speed = $08
-
 ; Speed for spike balls rotation. Should be one of $00, $01, $02, $04, $08, or
 ; $10, other values might not behave correctly.
 !rotation_speed = $02
-
-; Whether the sprite can go through solid blocks or not.
-; 0 = can't go through solid block, 1 = can go through solid blocks
-!can_go_through_solid_block = 0
-
-; Tile for the first digit (0) in the graphics file. Digits must be on two
-; lines, in the following order:
-;   0 1 2 3 4
-;   5 6 7 8 9
-!gfx_initial_tile = $46
 
 
 ;-------------------------------------------------------------------------------
@@ -63,6 +70,12 @@
 !rotation_l = !1504
 !rotation_h = !1510
 
+; Table holding the speed of thrown spike balls. If the value is zero, the ball
+; has not been thrown.
+; Type: Cluster sprite table.
+!throw_speed      = $1E52|!addr
+!throw_speed_frac = $1E66|!addr
+
 
 ;-------------------------------------------------------------------------------
 ; Set Rotation Speed
@@ -70,7 +83,7 @@
 
 ; Utility defines.
 !rotation_speed_clockwise        = $0000|!rotation_speed
-!rotation_speed_counterclockwise = (($0000|!rotation_speed)^$FFFF)+1
+!rotation_speed_counterclockwise = -($0000|!rotation_speed)
 
 ; Set spike balls rotations speed.
 ; @param <speed>: 16-bit number.
@@ -78,6 +91,7 @@ macro set_rotation_speed(speed)
     LDA.b #<speed> : STA !rotation_l,x           ; Low byte
     LDA.b #(<speed>)>>8 : STA !rotation_h,x      ; High byte
 endmacro
+
 
 ;-------------------------------------------------------------------------------
 ; Init
@@ -88,16 +102,16 @@ print "INIT ",pc
 
     LDA #$01 : STA $18B8|!addr                 ; Run cluster sprite code
 
-    LDA #$00 : STA $00 : LDA #$00 : STA $01    ; $0000
+    ; Position spike balls slightly offset (by $0010), so that on first frame
+    ; the bottom one doesn't disappear if in player's range, due to its position
+    ; not being set yet (i.e., force on frame of orbit).
+    LDA #$10 : STA $00 : LDA #$00 : STA $01    ; $0010
     JSR spawn_spike_ball                       ; Right
-
-    LDA #$80 : STA $00 : LDA #$00 : STA $01    ; $0080
+    LDA #$90 : STA $00 : LDA #$00 : STA $01    ; $0090
     JSR spawn_spike_ball                       ; Bottom
-
-    LDA #$00 : STA $00 : LDA #$01 : STA $01    ; $0100
+    LDA #$10 : STA $00 : LDA #$01 : STA $01    ; $0110
     JSR spawn_spike_ball                       ; Left
-
-    LDA #$80 : STA $00 : LDA #$01 : STA $01    ; $0180
+    LDA #$90 : STA $00 : LDA #$01 : STA $01    ; $0190
     JSR spawn_spike_ball                       ; Top
 
     %set_rotation_speed(!rotation_speed_clockwise)
@@ -125,9 +139,9 @@ print "MAIN ",pc
 render:
     %GetDrawInfo()
 
-    LDA $00 : STA $0300|!Base2,y               ; X position
-    LDA $01 : STA $0301|!Base2,y               ; Y position
-    LDA #$00 : STA $0302|!Base2,y              ; Tile number
+    LDA $00 : STA $0300|!addr,y                ; X position
+    LDA $01 : STA $0301|!addr,y                ; Y position
+    LDA !extra_prop_1,x : STA $0302|!addr,y    ; Tile number
 
     LDA !15F6,x : ORA $64                      ; Load CFG properties
     PHY                                        ; Preserve Y
@@ -135,9 +149,9 @@ render:
     EOR #%01000000                             ; Then flip sprite image horizontally
 +   LDY !14C8,x : CPY #$02 : BCS +             ; If sprite has been killed
     EOR #%10000000                             ; Then flip sprite image vertically
-+   PLY : STA $0303|!Base2,y                   ; Restore Y and save properties
++   PLY : STA $0303|!addr,y                    ; Restore Y and save properties
 
-    LDA #$00                                   ; Tile to draw - 1
+    LDA #$00                                   ; Draw one tile
     LDY #$02                                   ; 16x16 sprite
     JSL $01B7B3|!bank                          ; Finish OAM
 
@@ -164,11 +178,10 @@ update:
     JSL $01A7DC|!bank                          ; Check for player contact
     JSL $018032|!bank                          ; Check for sprite contact
 
-if !can_go_through_solid_block == 1
-    LDA !1588,x : AND #$03 : BEQ .return       ; If sprite touches a wall
+    LDA !extra_bits,x : AND #04 : BEQ .return  ; If extra bit is set...
+    LDA !1588,x : AND #$03 : BEQ .return       ; ...and sprite touches a wall
     LDA $B6,x : EOR #$FF : INC : STA $B6,x     ; Then invert its speed...
     JSL $01802A|!bank                          ; ...to undo its movement
-endif
 
 .return
     RTS
@@ -183,7 +196,7 @@ endif
 ; @param X: Sprite index.
 ; @return A: The speed of the sprite.
 get_speed:
-    LDA #!movement_type
+    LDA !extra_byte_1,x
     CMP #$03 : BEQ .move_if_player_doesnt_move
     CMP #$02 : BEQ .move_if_player_moves
     CMP #$01 : BEQ .move
@@ -200,20 +213,23 @@ get_speed:
     LDA #$00 : RTS                             ; Else speed if 0
 
 .move
-    PHY : LDY $E4,x : CPY $7E                  ; Compare sprite X position
-    BEQ .zero_speed : BCC .positive_speed      ; with player X position
+    LDA !sprite_x_high,x : XBA                 ; Compare sprite and player X positions
+    LDA !sprite_x_low,x                        ; - if sprite < player -> positive speed (move right)
+    REP #$20 : CMP $7E : SEP #$20              ; - if sprite > player -> negative speed (move left)
+    BEQ .zero_speed : BCC .positive_speed      ; - if sprite = player -> no speed (don't move)
 
 .negative_speed
-+   LDA #-!speed                                ; Set negative speed
-    PLY : RTS
+    LDA !extra_byte_2,x                        ; Load orbinaut speed
+    EOR #$FF : INC A                           ; Negate it
+    RTS
 
 .positive_speed
-+   LDA #!speed                                 ; Set positive speed
-    PLY : RTS
+    LDA !extra_byte_2,x                        ; Load orbinaut speed
+    RTS
 
 .zero_speed
-    LDA #$00                                    ; Set zero speed
-    PLY : RTS
+    LDA #$00                                   ; Set zero speed
+    RTS
 
 
 ;-------------------------------------------------------------------------------
@@ -255,5 +271,7 @@ spawn_spike_ball:
     TXA : STA !orbinaut,y                      ; Save orbinaut as spike ball's parent
     LDA $00 : STA !angle_l,y                   ; Save angle low byte
     LDA $01 : STA !angle_h,y                   ; Save angle high byte
+    LDA #$00 : STA !throw_speed,y              ; Initial throw speed is 0 (not thrown)
+    LDA #$00 : STA !throw_speed_frac,y         ; Initial throw speed fractional is 0 (not thrown)
 
     RTS
