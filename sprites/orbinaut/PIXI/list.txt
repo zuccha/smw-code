@@ -1,2 +1,2 @@
-00 orbinaut.cfg
-01 orbinaut_spike_ball.cfg
+00 orbinaut.json
+01 orbinaut_spike_ball.json
