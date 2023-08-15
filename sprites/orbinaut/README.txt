@@ -168,5 +168,5 @@ Added:
 - Allow to configure throw speed via extra byte 4.
 - Allow to configure rotation speed via define.
 
-Documentaion:
+Documentation:
 - Added readme.
