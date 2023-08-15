@@ -147,7 +147,8 @@ so be mindful when using it!
 - Allow to configure whether the orbinaut goes through solid walls or not via
   extra bit.
 - Allow to configure orbinaut movement (never move, always move, move when
-  player move, move when player doesn't move) via extra byte 1.
+  player move, move when player doesn't move, always go left, always go right)
+  via extra byte 1.
 - Allow to configure orbinaut horizontal speed via extra byte 2.
 - Allow to configure throw range via extra byte 3.
 - Allow to configure throw speed via extra byte 4.

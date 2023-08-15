@@ -29,6 +29,8 @@
 ; - 01 = Always move towards player
 ; - 02 = Move towards player if player is moving
 ; - 03 = Move towards player if player is not moving
+; - 04 = Always move left
+; - 05 = Always move right
 
 ; Extra Byte 2: Orbinaut horizontal speed. It should be a value betwee 0 and 127
 ; ($00 and $7F).
@@ -82,15 +84,8 @@
 ; Set spike balls rotations speed.
 ; @param <speed>: 16-bit number.
 macro set_rotation_speed(speed)
-    LDA.b #<speed> : STA !rotation_l,x           ; Low byte
-    LDA.b #(<speed>)>>8 : STA !rotation_h,x      ; High byte
-endmacro
-
-; Compare spike ball and player X positions.
-; @param X: Spike ball sprite index.
-macro cmp_sprite_player_x()
-    LDA !sprite_x_high,x : XBA : LDA !sprite_x_low,x
-    REP #$20 : CMP $94 : SEP #$20
+    LDA.b #<speed> : STA !rotation_l,x         ; Low byte
+    LDA.b #(<speed>)>>8 : STA !rotation_h,x    ; High byte
 endmacro
 
 
@@ -142,7 +137,7 @@ render:
     LDA !sprite_oam_properties,x : ORA $64     ; Load CFG properties
     PHY                                        ; Preserve Y
 
-    PHA : %cmp_sprite_player_x() : BCS ++      ; If sprite X position < player X position
+    PHA : JSR get_direction : BCS ++           ; If sprite X position < player X position
     PLA : EOR #%01000000 : BRA +               ; Then flip sprite image horizontally
 ++  PLA                                        ; Restore A
 
@@ -197,37 +192,35 @@ update:
 ; @return A: The speed of the sprite.
 get_speed:
     LDA !extra_byte_1,x
-    CMP #$03 : BEQ .move_if_player_doesnt_move
-    CMP #$02 : BEQ .move_if_player_moves
-    CMP #$01 : BEQ .move
+    CMP #$05 : BEQ .move_right
+    CMP #$04 : BEQ .move_left
+    CMP #$03 : BEQ .move_towards_player_if_player_doesnt_move
+    CMP #$02 : BEQ .move_towards_player_if_player_moves
+    CMP #$01 : BEQ .move_towards_player
 
 .dont_move
     LDA #$00 : RTS                             ; Don't move
 
-.move_if_player_doesnt_move
-    LDA $7B : BEQ .move                        ; If player is not moving, then move
+.move_towards_player_if_player_doesnt_move
+    LDA $7B : BEQ .move_towards_player         ; If player is not moving, then move
     LDA #$00 : RTS                             ; Else speed if 0
 
-.move_if_player_moves
-    LDA $7B : BNE .move                        ; If player is moving, then move
+.move_towards_player_if_player_moves
+    LDA $7B : BNE .move_towards_player         ; If player is moving, then move
     LDA #$00 : RTS                             ; Else speed if 0
 
-.move
-    %cmp_sprite_player_x()
-    BEQ .zero_speed
-    BCC .positive_speed
+.move_towards_player
+    JSR get_direction
+    BEQ .dont_move
+    BCC .move_right
 
-.negative_speed
+.move_left
     LDA !extra_byte_2,x                        ; Load orbinaut speed
     EOR #$FF : INC A                           ; Negate it
     RTS
 
-.positive_speed
+.move_right
     LDA !extra_byte_2,x                        ; Load orbinaut speed
-    RTS
-
-.zero_speed
-    LDA #$00                                   ; Set zero speed
     RTS
 
 
@@ -237,7 +230,7 @@ get_speed:
 
 ; Invert spike balls rotation if player faces moves on the side of the orbinaut.
 invert_rotation:
-    %cmp_sprite_player_x()
+    JSR get_direction
     BEQ .return : BCC .player_on_right
 
 .player_on_left
@@ -274,3 +267,29 @@ spawn_spike_ball:
     LDA $05 : STA !angle_h,y                   ; Save angle high byte
 
     PLY : RTS
+
+
+;-------------------------------------------------------------------------------
+; Get Direction
+;-------------------------------------------------------------------------------
+
+; Compare spike ball and player X positions.
+; @param X: Orbinaut sprite index.
+; @return Z: 1 if there is no change in direction, 0 otherwise.
+; @return C: 1 if facing right, 0 if facing left.
+get_direction:
+    LDA !extra_byte_1,x
+    CMP #$05 : BEQ .always_right
+    CMP #$04 : BEQ .always_left
+
+    LDA !sprite_x_high,x : XBA : LDA !sprite_x_low,x
+    REP #$20 : CMP $94 : SEP #$20
+    RTS
+
+.always_left:
+    REP #%00000010 : SEC                       ; Z = 0, C = 1
+    RTS
+
+.always_right:
+    REP #%00000011                             ; Z = 0, C = 0
+    RTS

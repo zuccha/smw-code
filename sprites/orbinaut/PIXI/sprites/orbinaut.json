@@ -61,7 +61,7 @@
     {
       "X": 0,
       "Y": 0,
-      "Description": "Orbinaut with four spike balls orbiting around it. Extra Bit: 00 = blocked by solid walls; 01 = can go through solid walls. Extra Byte 1: Movement type. 00 = never move; 01 = always move; 02 = move towards player if player is moving; 03 = move towards player if player is not moving. Extra Byte 2: Orbinaut horizontal speed (00-7F). Extra Byte 3: Throw range. Extra Byte 4: Throw speed.",
+      "Description": "Orbinaut with four spike balls orbiting around it. Extra Bit: 00 = blocked by solid walls; 01 = can go through solid walls. Extra Byte 1: Movement type. 00 = never move; 01 = always move; 02 = move towards player if player is moving; 03 = move towards player if player is not moving; 04 = always move left; 05 = always move right. Extra Byte 2: Orbinaut horizontal speed (00-7F). Extra Byte 3: Throw range. Extra Byte 4: Throw speed.",
       "ExtraBit": false,
       "Tiles": [
         {
