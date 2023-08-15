@@ -1,4 +1,2 @@
-00 orbinaut.asm
-
-CLUSTER:
-00 orbinaut_spike_ball.asm
+00 orbinaut.cfg
+01 orbinaut_spike_ball.cfg
