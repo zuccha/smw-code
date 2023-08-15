@@ -5,6 +5,8 @@ on GreenHammerBro and Akaginite routines.
 
 Sprite featuring a central orbinaut, with four spike balls orbiting around it.
 
+<img src="./docs/orbinaut-1.gif" />
+
 ## Contents
 
 This package contains the following files:

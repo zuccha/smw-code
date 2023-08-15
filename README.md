@@ -8,6 +8,12 @@ A collection of SMW ASM and resources.
 | --------------------- | ------------------------------------------------------------------------------------------------ |
 | [Shop](./blocks/shop) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/shop_block%2F1.0.1/shop-1.0.1.zip) |
 
+## Sprites
+
+| Name                           | Download                                                                                           |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| [Orbinaut](./sprites/orbinaut) | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/orbinaut%2F1.0.0/orbinaut-1.0.0.zip) |
+
 ## UberASM
 
 | Name                                                                              | Download                                                                                                                                 |
