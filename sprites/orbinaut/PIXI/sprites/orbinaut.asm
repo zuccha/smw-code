@@ -34,10 +34,10 @@
 ; ($00 and $7F).
 
 ; Extra Byte 3: Throw range. If the player is within this range, the orbinaut
-; will start shoting the spike balls when they are at angle 270 (bottom).
+; will start throwing the spike balls when they are at angle 270 (bottom).
 
 ; Extra Byte 4: Throw speed. The horizontal speed of the spike ball once it has
-; beed thrown.
+; beed thrown. If zero, the ball will never be thrown.
 
 
 ;-------------------------------------------------------------------------------
