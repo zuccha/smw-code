@@ -6,7 +6,20 @@
 
 
 ;-------------------------------------------------------------------------------
-; Defines
+; Configuration (extra bytes)
+;-------------------------------------------------------------------------------
+
+; Extra Property Byte 1: Tile number for the spike ball to use. This is a value
+; between 0 and 255. The tile chosen to be drawn is taken from an SP graphics
+; slot base on this value and which graphics page to use ("Use second graphics
+; page" property in the CFG/JSON configuration file):
+;   |       | 1st | 2nd |
+;   | 00-7F | SP1 | SP3 |
+;   | 80-FF | SP2 | SP4 |
+
+
+;-------------------------------------------------------------------------------
+; Defines (don't touch these)
 ;-------------------------------------------------------------------------------
 
 ; These need to be the same as those defined in "orbinaut.asm".
@@ -36,8 +49,9 @@ endmacro
 ; Main
 ;-------------------------------------------------------------------------------
 
-print "INIT ",pc
+init:
     PHB : PHK : PLB
+    JSR orbit                                   ; Orbit once to setup X and Y positions
     PLB : RTL
 
 
@@ -45,7 +59,7 @@ print "INIT ",pc
 ; Main
 ;-------------------------------------------------------------------------------
 
-print "MAIN ",pc
+main:
     PHB : PHK : PLB
 
     ; Check if orbinaut is dead
@@ -58,10 +72,11 @@ print "MAIN ",pc
 +   JSR render
 
     ; Check if sprite needs updates
-    LDA $9D : BNE .return                       ; If game is not frozen, then continue
+    LDA $9D : BEQ +                             ; If game is not frozen, then continue
+    PLB : RTL                                   ; Then don't update spike ball
 
     ; Check if sprite needs to be thrown
-    LDA !sprite_speed_x,x : BNE .thrown         ; If ball has not already been thrown...
++   LDA !sprite_speed_x,x : BNE .thrown         ; If ball has not already been thrown...
 
     LDA !angle_h,x : XBA : LDA !angle_l,x       ; ...and it's at bottom position...
     REP #$20 : CMP #$0080 : SEP #$20 : BNE .orbiting ; (angle is $0080)
@@ -78,7 +93,7 @@ print "MAIN ",pc
 
 .thrown
     LDA #$00 : %SubOffScreen()                  ; Despawn if offscreen
-    STZ $AA,x : LDA !sprite_speed_x,x : STA $B6,x  ; Vertical speed is always zero (no gravity)
+    STZ !sprite_speed_y,x                       ; Vertical speed is always zero (no gravity)
     JSL $01802A|!bank                           ; Move spike ball
     BRA .interactions
 
@@ -86,8 +101,8 @@ print "MAIN ",pc
     JSR orbit
 
 .interactions
-    JSL $01A7DC|!bank                          ; Check for player contact
-    JSL $018032|!bank                          ; Check for sprite contact
+    JSL $01A7DC|!bank                           ; Check for player contact
+    JSL $018032|!bank                           ; Check for sprite contact
 
 .return
     PLB : RTL

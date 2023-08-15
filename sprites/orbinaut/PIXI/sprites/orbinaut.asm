@@ -10,9 +10,16 @@
 ; Configuration (extra bytes)
 ;-------------------------------------------------------------------------------
 
-; Extra Property Byte 1: Tile number for the orbinaut to use.
+; Extra Property Byte 1: Tile number for the orbinaut to use. This is a value
+; between 0 and 255. The tile chosen to be drawn is taken from an SP graphics
+; slot base on this value and which graphics page to use ("Use second graphics
+; page" property in the CFG/JSON configuration file):
+;   |       | 1st | 2nd |
+;   | 00-7F | SP1 | SP3 |
+;   | 80-FF | SP2 | SP4 |
 
-; Extra Property Byte 2: Tile number for the spike ball to use.
+; Extra Property Byte 2: Number for "orbinaut_spike_ball.cfg" as defined in
+; PIXI's "list.asm".
 
 ; Extra bit: If 1, the orbinaut can go through solid walls (blocks), otherwise
 ; it stops there.
@@ -37,16 +44,13 @@
 ; Configuration (defines)
 ;-------------------------------------------------------------------------------
 
-; Number for "orbinaut_spike_ball.asm" as defined in PIXI's "list.asm".
-!spike_ball_sprite_number = $01
-
 ; Speed for spike balls rotation. Should be one of $00, $01, $02, $04, $08, or
 ; $10, other values might not behave correctly.
 !rotation_speed = $02
 
 
 ;-------------------------------------------------------------------------------
-; Defines
+; Defines (don't touch these)
 ;-------------------------------------------------------------------------------
 
 ; Tables keeping track of the rotation speed. The speed can be positive or
@@ -66,14 +70,14 @@
 !angle_l = !1504
 !angle_h = !1510
 
-
-;-------------------------------------------------------------------------------
-; Set Rotation Speed
-;-------------------------------------------------------------------------------
-
-; Utility defines.
+; Rotation values.
 !rotation_speed_clockwise        = $0000|!rotation_speed
 !rotation_speed_counterclockwise = -($0000|!rotation_speed)
+
+
+;-------------------------------------------------------------------------------
+; Macros
+;-------------------------------------------------------------------------------
 
 ; Set spike balls rotations speed.
 ; @param <speed>: 16-bit number.
@@ -94,19 +98,16 @@ endmacro
 ; Init
 ;-------------------------------------------------------------------------------
 
-print "INIT ",pc
+init:
     PHB : PHK : PLB
 
-    ; Position spike balls slightly offset (by $0010), so that on first frame
-    ; the bottom one doesn't disappear if in player's range, due to its position
-    ; not being set yet (i.e., force on frame of orbit).
-    LDA #$10 : STA $04 : LDA #$00 : STA $05    ; $0010
+    LDA #$00 : STA $04 : LDA #$00 : STA $05    ; $0000
     JSR spawn_spike_ball                       ; Right
-    LDA #$90 : STA $04 : LDA #$00 : STA $05    ; $0090
+    LDA #$80 : STA $04 : LDA #$00 : STA $05    ; $0080
     JSR spawn_spike_ball                       ; Bottom
-    LDA #$10 : STA $04 : LDA #$01 : STA $05    ; $0110
+    LDA #$00 : STA $04 : LDA #$01 : STA $05    ; $0100
     JSR spawn_spike_ball                       ; Left
-    LDA #$90 : STA $04 : LDA #$01 : STA $05    ; $0190
+    LDA #$80 : STA $04 : LDA #$01 : STA $05    ; $0180
     JSR spawn_spike_ball                       ; Top
 
     %set_rotation_speed(!rotation_speed_clockwise)
@@ -118,7 +119,7 @@ print "INIT ",pc
 ; Main
 ;-------------------------------------------------------------------------------
 
-print "MAIN ",pc
+main:
     PHB : PHK : PLB
 
     JSR render
@@ -169,16 +170,17 @@ update:
 
     JSR invert_rotation                        ; Invert rotation direction if necessary
 
-    STZ $AA,x                                  ; Vertical speed is always zero (no gravity)
-    JSR get_speed : STA $B6,x                  ; Compute horizontal speed and set it
+    STZ !sprite_speed_y,x                      ; Vertical speed is always zero (no gravity)
+    JSR get_speed : STA !sprite_speed_x,x      ; Compute horizontal speed and set it
 
-+   JSL $01802A|!bank                          ; Move orbinaut
+    JSL $01802A|!bank                          ; Move orbinaut
     JSL $01A7DC|!bank                          ; Check for player contact
     JSL $018032|!bank                          ; Check for sprite contact
 
     LDA !extra_bits,x : AND #04 : BEQ .return  ; If extra bit is set...
     LDA !1588,x : AND #$03 : BEQ .return       ; ...and sprite touches a wall
-    LDA $B6,x : EOR #$FF : INC : STA $B6,x     ; Then invert its speed...
+    LDA !sprite_speed_x,x : EOR #$FF : INC     ; Then invert its speed...
+    STA !sprite_speed_x,x
     JSL $01802A|!bank                          ; ...to undo its movement
 
 .return
@@ -257,17 +259,18 @@ invert_rotation:
 ; Spawn a spike ball around the orbinaut
 ; @param $04-$05: Rotation angle.
 spawn_spike_ball:
-    PHY : TXY                                  ; Preserve X and Y, and store orbinaut index in Y
-    LDA.b #!spike_ball_sprite_number           ; Sprite number to spawn
+    PHY                                        ; Preserve X and Y, and store orbinaut index in Y
+    LDA !extra_prop_2,x                        ; Sprite number to spawn
+    STZ $00 : STZ $01 : STZ $02 : STZ $03      ; Zero offset and speed
     ; LDX.b #!sprite_slots-1                     ; Number of slots to look through
     SEC                                        ; Custom sprite
     %SpawnSprite()                             ; Spawn Spike Ball
 
     BCC +                                      ; If sprite failed to spawn
-    TYX : PLY : RTS                            ; Then return
+    PLY : RTS                                  ; Then return
 
-+   TYA : STA !orbinaut,x                      ; Save orbinaut as spike ball's parent
-    LDA $04 : STA !angle_l,x                   ; Save angle low byte
-    LDA $05 : STA !angle_h,x                   ; Save angle high byte
++   TXA : STA !orbinaut,y                      ; Save orbinaut as spike ball's parent
+    LDA $04 : STA !angle_l,y                   ; Save angle low byte
+    LDA $05 : STA !angle_h,y                   ; Save angle high byte
 
-    TYX : PLY : RTS
+    PLY : RTS
