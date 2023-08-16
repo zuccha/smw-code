@@ -2,8 +2,8 @@
 |                                   ORBINAUT                                   |
 ================================================================================
 
-Author: zuccha, requested by NopeContest
-The code for orbital movement is based on GreenHammerBro and Akaginite routines.
+Author: zuccha, requested by NopeContest. The code for orbital movement is based
+on GreenHammerBro and Akaginite routines.
 
 Sprite featuring a central orbinaut, with four spike balls orbiting around it.
 
@@ -13,6 +13,7 @@ Sprite featuring a central orbinaut, with four spike balls orbiting around it.
 --------------------------------------------------------------------------------
 
 This package contains the following files:
+
 - `README.txt`: This file.
 - `ExGraphics/ExGFX80.bin`: The graphics file containing the images for the
   orbinaut and the spike ball. This is a copy of `GFX02.bin`, adding the new
@@ -42,16 +43,16 @@ do the following:
 
 1. Copy `PIXI/list.txt` in PIXI's main folder.
 2. Copy `PIXI/sprites/orbinaut.asm`, `PIXI/sprites/orbinaut.json`,
-  `PIXI/sprites/orbinaut_spike_ball.asm`, and
-  `PIXI/sprites/orbinaut_spike_ball.json` in PIXI's `sprites` folder.
+   `PIXI/sprites/orbinaut_spike_ball.asm`, and
+   `PIXI/sprites/orbinaut_spike_ball.json` in PIXI's `sprites` folder.
 3. Copy `ExGraphics/ExGFX80.bin` in the ROM's `ExGraphics` folder, then insert
-  graphics via Lunar Magic. You can change "80" into any free ExGFX number.
+   graphics via Lunar Magic. You can change "80" into any free ExGFX number.
 4. Open "Super GFX Bypass" menu in Lunar Magic and change "SP4" to "80" (or the
-  number of your choice).
+   number of your choice).
 5. Run PIXI.
 6. Insert the sprite in Lunar Magic with the "Insert Manual..." command. The
-  sprite accepts four extra bytes and the extra bit; their behavior is described
-  in detail in `PIXI/sprites/orbinaut.asm`.
+   sprite accepts four extra bytes and the extra bit; their behavior is
+   described in detail in `PIXI/sprites/orbinaut.asm`.
 
 ................................................................................
 2.2 Customize Sprite Numbers
@@ -63,11 +64,13 @@ Property Byte 2" in `orbinaut.json` to match that number.
 
 For instance, if you modify "list.txt" as follows
 
-  12 orbinaut.json
-  2F orbinaut_spike_ball.json
+```
+12 orbinaut.json
+2F orbinaut_spike_ball.json
+```
 
 then you have to open `orbinaut.json` (either with a text editor or with PIXI's
-CFG Editor) and set "Extra Property Byte 2" to "2F".
+CFG Editor) and set "Extra Property Byte 2" to `2F`.
 
 ................................................................................
 2.3 Customize Graphics
@@ -81,45 +84,50 @@ If you want to use SP1 or SP2, set the property "Use second graphics page" to
 `false`. If you want to use SP3 or SP4 set "Use second graphics page" to `true`.
 
 With "Extra Property Byte 1" you can define what tile to use. In a graphics file
-tiles range from 0x00 to 0x7F. If you put the graphics file in slots SP1 or SP3,
-you use the tile value of the graphics file (0x00-0x7F). If you put the graphics
-file in SP2 or SP4, you need to add 0x80 to the tile value, resulting in values
-ranging from 0x80 to 0xFF.
+tiles range from `0x00` to `0x7F`. If you put the graphics file in slots SP1 or
+SP3, you use the tile value of the graphics file (`0x00`-`0x7F`). If you put the
+graphics file in SP2 or SP4, you need to add `0x80` to the tile value, resulting
+in values ranging from `0x80` to `0xFF`.
 
 You can check the following table for reference, where columns indicate whether
 "Use second graphics page" is `false` (1st) or `true` (2nd), and the rows state
 the range values for "Extra Property Byte 1":
 
-  |-------|-----|-----|
-  |       | 1st | 2nd |
-  |-------|-----|-----|
-  | 00-7F | SP1 | SP3 |
-  |-------|-----|-----|
-  | 80-FF | SP2 | SP4 |
-  |-------|-----|-----|
+|             | 1st | 2nd |
+| ------------| --- | --- |
+| `0x00-0x7F` | SP1 | SP3 |
+| `0x80-0xFF` | SP2 | SP4 |
 
 By default, both the orbinaut and the spike ball are in the same graphics file
-`ExGFX80.bin` at positions 0x40 and 0x60 respectively. In both their JSON config
-file "Use second graphics page" is set to `true` and they are specifying values
-greater than 0x80 in "Extra Property Byte 1" (i.e., 0xC0 = 0x40 + 0x80 and
-0xE0 = 0x60 + 0x80), meaning we need to load "80" in SP4 via Lunar Magic.
+`ExGFX80.bin` at positions `0x40` and `0x60` respectively. In both their JSON
+config file "Use second graphics page" is set to `true` and they are specifying
+values greater than `0x80` in "Extra Property Byte 1" (_i.e._,
+`0xC0 = 0x40 + 0x80` and `0xE0 = 0x60 + 0x80`), meaning we need to load `80` in
+SP4 via Lunar Magic.
 
 Let's take another example. In Lunar Magic, we set the following SP slots:
+
 - SP1: 0
 - SP2: 2
 - SP3: 80
 - SP4: A2
+
 Also, we have `orbinaut.json` with the following properties:
-- "Extra Property Byte 1": 146 (0x92)
-- "Use second graphics page": false
+
+- Extra Property Byte 1: `146` (`0x92`)
+- Use second graphics page: `false`
+
 and `orbinaut_spike_ball.json`:
-- "Extra Property Byte 1": 36 (0x24)
-- "Use second graphics page": true
-For the orbinaut the game will take tile 0x12 in GFX02.bin (SP2), because we set
-"Use second graphics page" to `false` (either SP1 or SP2) and "Extra Property
-Byte 1" is 0x92 >= 0x80 (so SP2). For the spike ball the game will take tile
-0x24 in ExGFX80.bin (SP3), because we set "Use second graphics page" to `true`
-(either SP3 or SP4) and its "Extra Property Byte 1" is 0x24 < 0x80 (so SP3).
+
+- Extra Property Byte 1: `36` (`0x24`)
+- Use second graphics page: `true`
+
+For the orbinaut the game will take tile `0x12` in GFX02.bin (SP2), because we
+set "Use second graphics page" to `false` (either SP1 or SP2) and "Extra
+Property Byte 1" is `0x92` >= `0x80` (so SP2). For the spike ball the game will
+take tile `0x24` in `ExGFX80.bin` (SP3), because we set "Use second graphics
+page" to `true` (either SP3 or SP4) and its "Extra Property Byte 1" is
+`0x24 < 0x80` (so SP3).
 
 ................................................................................
 2.4 Customize Palette
@@ -129,7 +137,7 @@ By default the sprite uses sprite palette 7 (global palette F) both for the
 orbinaut and the spike ball.
 
 To change the palettes, you can open the JSON configuration files and change the
-"Palette" property (0-7).
+"Palette" property (`0-7`).
 
 
 --------------------------------------------------------------------------------
@@ -140,8 +148,8 @@ This sprite is compatible with PIXI 1.40, older versions will not work.
 
 The sprite is compatible with SA-1.
 
-The sprite takes 5 sprite slots, one for the orbinaut and four for the spike
-balls, so be mindful when using it!
+The sprite takes 5 sprite slots, 1 for the orbinaut and 4 for the spike balls,
+so be mindful when using it!
 
 
 --------------------------------------------------------------------------------
@@ -149,10 +157,22 @@ balls, so be mindful when using it!
 --------------------------------------------------------------------------------
 
 ................................................................................
+v1.0.1 (2023-08-16)
+................................................................................
+
+Fixed:
+
+- Dismount Yoshi when colliding with spike balls.
+- Make spike balls absorb player fireballs.
+- Kill spike balls still attached to orbinaut if orbinaut turns into a coin
+  (because of being hit by fireball or activating silver p-switch).
+
+................................................................................
 v1.0.0 (2023-08-15)
 ................................................................................
 
 Added:
+
 - Create orbinaut sprite and orbiting spike ball sprite.
 - Add modified GFX02.bin as ExGFX80.bin containing orbinaut and spike ball
   graphics.
@@ -170,4 +190,5 @@ Added:
 - Allow to configure rotation speed via define.
 
 Documentation:
+
 - Added readme.

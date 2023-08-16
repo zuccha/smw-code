@@ -81,10 +81,10 @@ You can check the following table for reference, where columns indicate whether
 _Use second graphics page_ is `false` (1st) or `true` (2nd), and the rows state
 the range values for _Extra Property Byte 1_:
 
-|                   | 1st | 2nd |
-| ----------------- | --- | --- |
-| **`0x00`-`0x7F`** | SP1 | SP3 |
-| **`0x80`-`0xFF`** | SP2 | SP4 |
+|                 | 1st | 2nd |
+| --------------- | --- | --- |
+| **`0x00-0x7F`** | SP1 | SP3 |
+| **`0x80-0xFF`** | SP2 | SP4 |
 
 By default, both the orbinaut and the spike ball are in the same graphics file
 `ExGFX80.bin` at positions `0x40` and `0x60` respectively. In both their JSON
@@ -114,8 +114,8 @@ For the orbinaut the game will take tile `0x12` in GFX02.bin (SP2), because we
 set _Use second graphics page_ to `false` (either SP1 or SP2) and _Extra
 Property Byte 1_ is `0x92` >= `0x80` (so SP2). For the spike ball the game will
 take tile `0x24` in `ExGFX80.bin` (SP3), because we set _Use second graphics
-page_ to `true` (either SP3 or SP4) and its _Extra Property Byte 1_ is `0x24` <
-`0x80` (so SP3).
+page_ to `true` (either SP3 or SP4) and its _Extra Property Byte 1_ is
+`0x24 < 0x80` (so SP3).
 
 ### Customize Palette
 
@@ -135,6 +135,15 @@ The sprite takes 5 sprite slots, 1 for the orbinaut and 4 for the spike balls,
 so be mindful when using it!
 
 ## Changelog
+
+### v1.0.1 (2023-08-16)
+
+#### Fixed:
+
+- Dismount Yoshi when colliding with spike balls.
+- Make spike balls absorb player fireballs.
+- Kill spike balls still attached to orbinaut if orbinaut turns into a coin
+  (because of being hit by fireball or activating silver p-switch).
 
 ### v1.0.0 (2023-08-15)
 
