@@ -38,7 +38,7 @@
 ; @param X: Spike Ball sprite index.
 ; @param <property>: Address to the sprite table to retrieve.
 ; @return A: The value of the property.
-macro get_orbinaut(property)
+macro orbinaut(property)
     PHY : TXY
     LDX !orbinaut,y : LDA <property>,x
     TYX : PLY
@@ -64,8 +64,9 @@ main:
 
     ; Check if orbinaut is dead
     LDA !sprite_speed_x,x : BNE +               ; If ball has not already been thrown...
-    %get_orbinaut(!sprite_status) : CMP #$08 : BEQ + ; ...and orbinaut is dead
-    STZ !sprite_status,x                        ; Then kill spike ball too
+    %orbinaut(!sprite_status) : CMP #$08 : BNE ++ ; ...and orbinaut is dead...
+    %orbinaut(!sprite_num) : CMP #$21 : BNE +   ; ...or orbinaut has been turned into a coin
+++  STZ !sprite_status,x                        ; Then kill spike ball too
     PLB : RTL
 
     ; Render
@@ -83,7 +84,7 @@ main:
 
     LDA !sprite_x_low,x : STA $00               ; ...and it's within player's range
     LDA !sprite_x_high,x : STA $01              ; (preload ball position)
-    %get_orbinaut(!extra_byte_3) : STA $02      ; (preload range, only low byte)
+    %orbinaut(!extra_byte_3) : STA $02          ; (preload range, only low byte)
     STZ $03                                     ; (preload range, high byte is always zero)
     REP #$20 : LDA $7E : SEC : SBC $00 : BPL +  ; (player X - ball X)
     EOR #$FFFF : INC                            ; (take absolute value)
@@ -101,8 +102,7 @@ main:
     JSR orbit
 
 .interactions
-    JSL $01A7DC|!bank                           ; Check for player contact
-    JSL $018032|!bank                           ; Check for sprite contact
+    JSR interact
 
 .return
     PLB : RTL
@@ -135,16 +135,16 @@ render:
 
 ; Set spike ball speed when it is thrown.
 throw:
-    %get_orbinaut(!rotation_h)                  ; Check rotation direction
+    %orbinaut(!rotation_h)                      ; Check rotation direction
     AND #$80 : BEQ .clockwise                   ; (poor people's BLP .clockwise)
 
 .counterclockwise
-    %get_orbinaut(!extra_byte_4)                ; Load speed from extra byte...
+    %orbinaut(!extra_byte_4)                    ; Load speed from extra byte...
     STA !sprite_speed_x,x                       ; ...and store it
     RTS
 
 .clockwise
-    %get_orbinaut(!extra_byte_4)                ; Load speed from extra byte...
+    %orbinaut(!extra_byte_4)                    ; Load speed from extra byte...
     EOR #$FF : INC : STA !sprite_speed_x,x      ; ...negate it, and store it
     RTS
 
@@ -156,8 +156,8 @@ throw:
 ; Orbit spike ball around orbinaut.
 orbit:
 .rotate
-    %get_orbinaut(!rotation_l) : STA $00        ; Load rotation speed low byte
-    %get_orbinaut(!rotation_h) : STA $01        ; Load rotation speed high byte
+    %orbinaut(!rotation_l) : STA $00            ; Load rotation speed low byte
+    %orbinaut(!rotation_h) : STA $01            ; Load rotation speed high byte
     LDA !angle_h,x : XBA : LDA !angle_l,x       ; Load angle
     REP #$20 : CLC : ADC $00                    ; Increase angle by rotation
     AND #$01FF : SEP #$20                       ; And wrap around (modulo)
@@ -170,8 +170,8 @@ orbit:
     REP #$20 : LDA $02 : STA $00 : SEP #$20     ; Transfer result
     JSR scale_radius                            ; Adjust radius amplitude
 
-    %get_orbinaut(!sprite_x_high) : XBA         ; Use orbinaut's coordinates as center
-    %get_orbinaut(!sprite_x_low)
+    %orbinaut(!sprite_x_high) : XBA             ; Use orbinaut's coordinates as center
+    %orbinaut(!sprite_x_low)
     REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
     STA !sprite_x_low,x : XBA                   ; Update Y coordinate
     STA !sprite_x_high,x
@@ -183,14 +183,34 @@ orbit:
     REP #$20 : LDA $02 : STA $00 : SEP #$20     ; Transfer result
     JSR scale_radius                            ; Adjust radius amplitude
 
-    %get_orbinaut(!sprite_y_high) : XBA         ; Use orbinaut's coordinates as center
-    %get_orbinaut(!sprite_y_low)
+    %orbinaut(!sprite_y_high) : XBA             ; Use orbinaut's coordinates as center
+    %orbinaut(!sprite_y_low)
     REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
     STA !sprite_y_low,x : XBA                   ; Update Y coordinate
     STA !sprite_y_high,x
 
 .return
     RTS
+
+
+;-------------------------------------------------------------------------------
+; Interact
+;-------------------------------------------------------------------------------
+
+; Handle interactions with player and other sprites.
+interact:
+    JSL $01A7DC|!bank                          ; Check for player contact
+    BCC + : %LoseYoshi()                       ; If there is contact, lose Yoshi
+
++   JSL $018032|!bank                          ; Check for sprite contact
+
+    %FireballContact() : BCC +                 ; If there is contact with a fireball...
+    LDA !extended_num+8,y : CMP #$05 : BNE +   ; ...and the fireball is not smoke already
+    LDA #$01 : STA $1DF9|!addr                 ; Then play sound effect...
+    LDA #$0F : STA !extended_timer+8,y         ; ...reset fireball timer...
+    LDA #$01 : STA !extended_num+8,y           ; ...and turn fireball into smoke
+
++   RTS
 
 
 ;-------------------------------------------------------------------------------
