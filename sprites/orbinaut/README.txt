@@ -18,6 +18,8 @@ This package contains the following files:
 - `ExGraphics/ExGFX80.bin`: The graphics file containing the images for the
   orbinaut and the spike ball. This is a copy of `GFX02.bin`, adding the new
   graphics in empty tiles.
+- `Palettes/orbinaut.pal`: Base color palette of level 105, replacing palette
+  `F` with orbinaut's colors.
 - `PIXI/list.txt`: A list for PIXI setting orbinat and spike ball sprites to
   numbers 00 and 01 respectively. Feel free to use this file if you don't have
   any other custom sprites already inserted in the hack.
@@ -49,8 +51,9 @@ do the following:
    graphics via Lunar Magic. You can change "80" into any free ExGFX number.
 4. Open "Super GFX Bypass" menu in Lunar Magic and change "SP4" to "80" (or the
    number of your choice).
-5. Run PIXI.
-6. Insert the sprite in Lunar Magic with the "Insert Manual..." command. The
+5. In Lunar Magic, open the "Palette Editor" and import `Palettes/orbinaut.pal`.
+6. Run PIXI.
+7. Insert the sprite in Lunar Magic with the "Insert Manual..." command. The
    sprite accepts four extra bytes and the extra bit; their behavior is
    described in detail in `PIXI/sprites/orbinaut.asm`.
 
@@ -166,6 +169,7 @@ Fixed:
 - Make spike balls absorb player fireballs.
 - Kill spike balls still attached to orbinaut if orbinaut turns into a coin
   (because of being hit by fireball or activating silver p-switch).
+- Include orbinaut's palette in bundle.
 
 ................................................................................
 v1.0.0 (2023-08-15)
