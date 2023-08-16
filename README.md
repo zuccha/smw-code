@@ -12,7 +12,7 @@ A collection of SMW ASM and resources.
 
 | Name                           | Download                                                                                           |
 | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| [Orbinaut](./sprites/orbinaut) | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/orbinaut%2F1.0.0/orbinaut-1.0.0.zip) |
+| [Orbinaut](./sprites/orbinaut) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/orbinaut%2F1.0.1/orbinaut-1.0.1.zip) |
 
 ## UberASM
 
