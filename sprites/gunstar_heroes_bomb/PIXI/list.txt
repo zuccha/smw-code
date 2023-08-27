@@ -1,0 +1,4 @@
+00 gunstar_heroes_bomb.json
+
+CLUSTER:
+10 gunstar_heroes_bomb_blast.asm
