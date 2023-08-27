@@ -6,7 +6,32 @@
 
 
 ;-------------------------------------------------------------------------------
-; Configuration
+; Configuration (extra bytes)
+;-------------------------------------------------------------------------------
+
+; Extra bit: What bomb graphics to use. If set (1), use `!bomb_gfx_2`, otherwise
+; use `!bomb_gfx_1` (check the next section for the defines).
+
+; Extra Byte 1: Bomb's behaviour, like when it should explode, or whether the
+; the parachute is visible or not. The format is %--PFMSGT:
+; - `P`: If 1, the bomb has a parachute until it touches the ground.
+; - `F`: If 1, the bomb explodes when touching Mario's fireballs.
+; - `M`: If 1, the bomb explodes when touching the player (Mario).
+; - `S`: If 1, the bomb explodes when touching another sprite.
+; - `G`: If 1, the bomb explodes when touching the ground.
+; - `T`: If 1, the bomb explodes when the timer (see `!bomb_timer`) goes off.
+; - `-`: Unused, should be set to 0.
+
+; Extra Byte 2: If the `T` flag in `Extra Byte 1` is set, the number of frames
+; before the bomb explodes. This value decrements once each frame.
+
+; Extra Byte 3: Initial X speed.
+
+; Extra Byte 4: Initial Y speed.
+
+
+;-------------------------------------------------------------------------------
+; Configuration (defines)
 ;-------------------------------------------------------------------------------
 
 ; Sprite number for "gunstar_heroes_bomb_blast.asm", as defined in PIXI's
@@ -28,6 +53,13 @@
 ; on a timer. The default value corresponds to 2 seconds, assuming 60 FPS.
 !bomb_blink_threshold = $78
 
+; Graphics tiles to use for the bomb. The first value is used if the extra bit
+; is not set, the second one if it is set. They should be $00-$7F for SP1 and
+; SP3, and $80-$FF for SP2 and SP4. By default they are configured for SP1/SP3
+; ($20, $22), if you want to use SP2/SP4 change the values to $A0 and $A2.
+; Extra bit   0    1
+bomb_gfx: db $20, $22
+
 ; Explosion sound and bank for playing the sound.
 ; Bank can be either $1DF9 or $1DFC. Check these links for the available sounds:
 ; - $1DF9: https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=3312ee563909
@@ -44,45 +76,29 @@
 ; Defines (don't touch these)
 ;-------------------------------------------------------------------------------
 
-; Tile to use for the bomb graphics. It should be $00-$7F for SP1 and SP3,
-; and $80-$FF for SP2 and SP4. With the included graphics file:
-; - SP1/SP3: use $20 for the skull bomb, $22 for the pokéball bomb.
-; - SP2/SP4: use $A0 for the skull bomb, $A2 for the pokéball bomb.
-!bomb_gfx = !sprite_misc_151c
+; Aliases for readability in the code.
+!bomb_mode  = !extra_byte_1
+!bomb_timer = !sprite_misc_154c
 
-; When the bomb should explode, in the format %---FPSGT
-; - `F`: If 1, the bomb explodes when touching Mario's fireballs.
-; - `P`: If 1, the bomb explodes when touching player.
-; - `S`: If 1, the bomb explodes when touching another sprite.
-; - `G`: If 1, the bomb explodes when touching the ground.
-; - `T`: If 1, the bomb explodes when the timer (see `!bomb_timer`) goes off.
-; - `-`: Unused, should be set to 0.
-!bomb_mode = !sprite_misc_1510
+; Utilities for checking the bomb's mode.
+!bomb_mode_P = %00100000
 !bomb_mode_F = %00010000
-!bomb_mode_P = %00001000
+!bomb_mode_M = %00001000
 !bomb_mode_S = %00000100
 !bomb_mode_G = %00000010
 !bomb_mode_T = %00000001
 
-; If the `T` flag of `!bomb_mode` is set, the number of frames before the bomb
-; explodes. This value decrements once each frame.
-!bomb_timer = !sprite_misc_154c
-
-; Whether the parachute is visible or not. $00 = not visible, $01 = visible.
-; The parachute will be removed once the bomb touches the ground.
-!parachute_visibility = !sprite_misc_1504
-
 ; Same as their counterparts in "gunstar_heroes_bomb_blast.asm" (here the
 ; defines are prefixed with "explosion_").
-!explosion_oam_properties    = !cluster_misc_0f4a
-!explosion_center_x_l = !cluster_misc_0f5e
-!explosion_center_x_h = !cluster_misc_0f72
-!explosion_center_y_l = !cluster_misc_0f86
-!explosion_center_y_h = !cluster_misc_0f9a
-!explosion_motion     = !cluster_misc_1e52
-!explosion_angle_l    = !cluster_misc_1e66
-!explosion_angle_h    = !cluster_misc_1e7a
-!explosion_frame      = !cluster_misc_1e8e
+!explosion_oam_properties = !cluster_misc_0f4a
+!explosion_center_x_l     = !cluster_misc_0f5e
+!explosion_center_x_h     = !cluster_misc_0f72
+!explosion_center_y_l     = !cluster_misc_0f86
+!explosion_center_y_h     = !cluster_misc_0f9a
+!explosion_motion         = !cluster_misc_1e52
+!explosion_angle_l        = !cluster_misc_1e66
+!explosion_angle_h        = !cluster_misc_1e7a
+!explosion_frame          = !cluster_misc_1e8e
 
 
 ;-------------------------------------------------------------------------------
@@ -92,12 +108,9 @@
 init:
     PHB : PHK : PLB
 
-    LDA #$22 : STA !bomb_gfx,x
-    LDA #%00001001 : STA !bomb_mode,x
-    LDA #$FF : STA !bomb_timer,x
-    LDA #$01 : STA !parachute_visibility,x
-    LDA #$20 : STA !sprite_speed_x,x
-    LDA #$C0 : STA !sprite_speed_y,x
+    LDA !extra_byte_2,x : STA !bomb_timer,x        ; Initialize X speed
+    LDA !extra_byte_3,x : STA !sprite_speed_x,x    ; Initialize X speed
+    LDA !extra_byte_4,x : STA !sprite_speed_y,x    ; Initialize Y speed
 
     PLB : RTL
 
@@ -136,7 +149,7 @@ update:
     JSR explode : RTS                               ; ...and make the bomb explode
 
     ; Player interaction
-+   LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ +    ; If bomb explodes on player touch...
++   LDA !bomb_mode,x : AND #!bomb_mode_M : BEQ +    ; If bomb explodes on player touch...
     JSL $01A7DC|!bank : BCC +                       ; ...and is touching player
     JSR explode : RTS                               ; Then make the bomb explode
 
@@ -147,8 +160,9 @@ update:
 
     ; Ground interaction
 +   LDA !sprite_blocked_status,x : AND #$04 : BEQ + ; If bomb is touching the ground
-    STZ !parachute_visibility,x                     ; Then remove parachute...
-    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; ...and set speed to zero
+    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; Then set speed to zero...
+    LDA !bomb_mode,x : AND #~!bomb_mode_P           ; ...and remove parachute
+    STA !bomb_mode,x
     LDA !bomb_mode,x : AND #!bomb_mode_G : BEQ +    ; If bomb explodes on ground touch
     JSR explode : RTS                               ; Then make the bomb explode
 
@@ -171,19 +185,22 @@ render:
 
     LDA $00 : STA $0300|!addr,y                     ; X position
     LDA $01 : STA $0301|!addr,y                     ; Y position
-    LDA !bomb_gfx,x : STA $0302|!addr,y             ; Tile number
+    LDA !extra_bits,x : AND #$04 : LSR #2 : PHX     ; Tile number, depending on
+    TAX : LDA bomb_gfx,x : PLX : STA $0302|!addr,y  ; extra bit being set or not
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     JSR alternate_palette : STA $0303|!addr,y       ; Tile properties
 
-    LDA !parachute_visibility,x : BEQ +             ; If parachute is visible...
+    LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ ++   ; If parachute is visible...
     INY #4                                          ; Next OAM slot
     LDA $00 : STA $0300|!addr,y                     ; X position (same as bomb)
     LDA $01 : SEC : SBC #$10 : STA $0301|!addr,y    ; Y position (one tile above bomb)
     LDA #!parachute_gfx : STA $0302|!addr,y         ; Tile number
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     STA $0303|!addr,y                               ; Tile properties
+    LDA #$01 : BRA +                                ; 2 tiles
+++  LDA #$00                                        ; 1 tile
 
-+   LDA !parachute_visibility,x : LDY #$02          ; One-two tiles, 16x16
++   LDY #$02                                        ; 16x16
     JSL $01B7B3|!bank                               ; Finish OAM
 
     RTS

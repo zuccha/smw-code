@@ -54,8 +54,8 @@
   "Type": 1,
   "Extra Property Byte 1": 0,
   "Extra Property Byte 2": 0,
-  "Additional Byte Count (extra bit clear)": 0,
-  "Additional Byte Count (extra bit set)": 0,
+  "Additional Byte Count (extra bit clear)": 4,
+  "Additional Byte Count (extra bit set)": 4,
   "Map16": "",
   "Displays": [
     {
