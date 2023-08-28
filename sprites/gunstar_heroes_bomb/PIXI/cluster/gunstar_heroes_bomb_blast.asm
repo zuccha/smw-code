@@ -9,10 +9,17 @@
 ; Configuration
 ;-------------------------------------------------------------------------------
 
+; Offset applied to all graphics values. Possible values:
+; - $00 = for SP1 and SP3
+; - $80 = for SP2 and SP4
+; N.B.: If you edit this value, make sure to change also its counterpart in
+; "gunstar_heroes_bomb.asm".
+!gfx_offset = $80
+
 ; Which tile to use for explosion animation frames. Every row represents an
 ; animation frame. Every animation frame is composed of four 16x16 tiles, in
 ; order they are top-left, top-right, bottom-left, and bottom-right.
-tile_number:
+tile_gfx:
 ;       TL   TR   BL   BR
     db $00, $00, $00, $00 ; 0
     db $02, $02, $02, $02 ; 1
@@ -23,7 +30,7 @@ tile_number:
     db $48, $4A, $68, $6A ; 6
     db $4C, $4E, $6C, $6E ; 7
 
-; How to flip tiles defined in `tile_number`. Flips can be:
+; How to flip tiles defined in `tile_gfx`. Flips can be:
 ; - $00 = no flip
 ; - $40 = flip X
 ; - $80 = flip Y
@@ -124,7 +131,8 @@ render:
     LDA $01 : STA $0201|!addr,y                    ; Set Y position, with offset from the center
 
     PHX : LDX $05                                  ; Load tile/flip tables index
-    LDA tile_number,x : STA $0202|!addr,y          ; Set tile number
+    LDA tile_gfx,x : CLC : ADC #!gfx_offset        ; Graphics tile, plus offset for SP2 and SP4
+    STA $0202|!addr,y                              ; Set tile number
     LDA $06 : ORA tile_flip,x : STA $0203|!addr,y  ; Tile properties with X/Y flip
     DEX : STX $05 : PLX                            ; Update tile/flip tables index in advance
 

@@ -43,6 +43,13 @@
 ; "list.txt".
 !blast_sprite = $10
 
+; Offset applied to all graphics values. Possible values:
+; - $00 = for SP1 and SP3
+; - $80 = for SP2 and SP4
+; N.B.: If you edit this value, make sure to change also its counterpart in
+; "gunstar_heroes_bomb_blast.asm".
+!gfx_offset = $80
+
 ; Color palette for the bomb if set on a timer. When the bomb is set to explode
 ; on a timer, it blinks changing color palette. The color palette alternates
 ; between the normal one (set with the "Palette" property in the JSON config
@@ -59,9 +66,8 @@
 !bomb_blink_threshold = $78
 
 ; Graphics tiles to use for the bomb. The first value is used if the extra bit
-; is not set, the second one if it is set. They should be $00-$7F for SP1 and
-; SP3, and $80-$FF for SP2 and SP4. By default they are configured for SP1/SP3
-; ($20, $22), if you want to use SP2/SP4 change the values to $A0 and $A2.
+; is not set, the second one if it is set. They should be values from $00-$7F,
+; that is the index of the tile within the graphics file.
 ; Extra bit   0    1
 bomb_gfx: db $20, $22
 
@@ -72,8 +78,8 @@ bomb_gfx: db $20, $22
 !explosion_sfx      = $09
 !explosion_sfx_bank = $1DFC
 
-; Tile to use for the parachute graphics. It should be $00-$7F for SP1 and SP3,
-; and $80-$FF for SP2 and SP4.
+; Tile to use for the parachute graphics. It should be a value from $00-$7F,
+; that is the index of the tile within the graphics file.
 !parachute_gfx = $04
 
 ; Max falling (vertical) speed the bomb can reach when falling with a parachute.
@@ -150,7 +156,8 @@ render:
     LDA $00 : STA $0300|!addr,y                     ; X position
     LDA $01 : STA $0301|!addr,y                     ; Y position
     LDA !extra_bits,x : AND #$04 : LSR #2 : PHX     ; Tile number, depending on
-    TAX : LDA bomb_gfx,x : PLX : STA $0302|!addr,y  ; extra bit being set or not
+    TAX : LDA bomb_gfx,x : CLC : ADC #!gfx_offset   ; extra bit being set or not,
+    PLX : STA $0302|!addr,y                         ; plus the GFX offset
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     JSR alternate_palette : STA $0303|!addr,y       ; Tile properties
 
@@ -159,7 +166,7 @@ render:
     INY #4                                          ; Next OAM slot
     LDA $00 : STA $0300|!addr,y                     ; X position (same as bomb)
     LDA $01 : SEC : SBC #$10 : STA $0301|!addr,y    ; Y position (one tile above bomb)
-    LDA #!parachute_gfx : STA $0302|!addr,y         ; Tile number
+    LDA #!parachute_gfx+!gfx_offset : STA $0302|!addr,y ; Tile number
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     STA $0303|!addr,y                               ; Tile properties
     LDA #$01 : BRA +                                ; 2 tiles

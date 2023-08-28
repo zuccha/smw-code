@@ -61,13 +61,13 @@
     {
       "X": 0,
       "Y": 0,
-      "Description": "Bomb from Gunstar Heroes.",
+      "Description": "Bomb from Gunstar Heroes, using second bomb graphics.",
       "ExtraBit": false,
       "Tiles": [
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 444
+          "map16 tile": 0
         }
       ],
       "GFXInfo": {},
@@ -77,13 +77,13 @@
     {
       "X": 0,
       "Y": 0,
-      "Description": "Bomb from Gunstar Heroes.",
+      "Description": "Bomb from Gunstar Heroes, using second bomb graphics.",
       "ExtraBit": true,
       "Tiles": [
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 42
+          "map16 tile": 0
         }
       ],
       "GFXInfo": {},
