@@ -263,6 +263,7 @@ check_sprite_interaction:
     JSL $03B69F|!bank                               ; Current sprite is clipping A
 -   STY $00 : CPX $00 : BEQ ++                      ; Skip comparison with itself
     LDA !sprite_status,y : CMP #$08 : BCC ++        ; Skip non-active sprites
+    LDA !sprite_tweaker_1686,y : AND #$08 : BNE ++  ; Skip sprites with no interaction
     PHX : TYX : JSL $03B6E5|!bank : PLX             ; Other sprite is clipping B
     JSL $03B72B|!bank : BCS +                       ; If no collision
 ++  DEY : BPL -                                     ; Then go to next sprite
