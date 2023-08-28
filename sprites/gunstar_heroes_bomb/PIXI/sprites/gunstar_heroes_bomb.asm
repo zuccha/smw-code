@@ -114,6 +114,7 @@ bomb_gfx: db $20, $22
 ; Init
 ;-------------------------------------------------------------------------------
 
+; Initialize sprite.
 init:
     PHB : PHK : PLB
 
@@ -128,6 +129,7 @@ init:
 ; Main
 ;-------------------------------------------------------------------------------
 
+; Execute sprite's code.
 main:
     PHB : PHK : PLB
 
@@ -180,11 +182,11 @@ alternate_palette:
     XBA                                             ; Preserve properties
 
     LDA !bomb_mode,x : AND #!bomb_mode_T : BEQ +    ; If bomb is on a timer...
-    LDA $13 : AND #!bomb_blink_interval : BEQ +     ; ...and every other two frames...
+    LDA $13 : AND #!bomb_blink_interval : BEQ +     ; ...and every other frames...
     LDA !bomb_timer,x                               ; ...and the bomb timer is
     CMP #!bomb_blink_threshold : BCS +              ; lower than the blink threshold
-    XBA : AND #%11110001                            ; Then replace current color palette
-    ORA #!bomb_alternate_palette<<1 : RTS           ; with alternate one
+    XBA : AND #%11110001                            ; Then replace current color
+    ORA #!bomb_alternate_palette<<1 : RTS           ; palette with alternate one
 
 +   XBA : RTS                                       ; Return properties with no changes
 
@@ -194,6 +196,7 @@ alternate_palette:
 ;-------------------------------------------------------------------------------
 
 update:
+    LDA #$00 : %SubOffScreen()                      ; Kill sprite if offscreen
     LDA #$01 : STA $18B8|!addr                      ; Run cluster sprite code
 
     ; Game status

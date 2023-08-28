@@ -92,6 +92,7 @@ rotation_radius_denominator: dw $0010, $0020
 ; Main
 ;-------------------------------------------------------------------------------
 
+; Execute sprite's code.
 main:
     PHB : PHK : PLB
 
@@ -107,59 +108,82 @@ main:
 
 ; Draw bomb.
 render:
-    %ClusterGetDrawInfo() : BCS +                  ; Retrieve free OAM slot
-    RTS                                            ; Return if no free slot
-
-+   LDA !animation_frame,x : ASL #2                ; Offset for the animation frame
+    LDA !animation_frame,x : ASL #2                ; Offset for the animation frame
     INC A : INC A : INC A : STA $05                ; in tile and flip tables
 
     LDA !oam_properties,x : STA $06                ; Load palette
 
     PHX : LDX #$03                                 ; 4 tiles
 
--   JSR find_oam_slot                              ; If we don't find a free OAM slot
-    BCC +                                          ; Then stop drawing
+-   LDA .offset_x,x : STA $03                      ; Prepare X offset
+    LDA .offset_y,x : STA $04                      ; Prepare Y offset
+    JSR get_draw_info                              ; If we don't find a free OAM slot
+    BCC +                                          ; Then drawing next
 
-    LDA $00 : CLC : ADC .offset_x,x                ; Set X position, with offset
-    STA $0200|!addr,y                              ; from the center
-
-    LDA $01 : CLC : ADC .offset_y,x                ; Set Y position, with offset
-    STA $0201|!addr,y                              ; from the center
+    LDA $00 : STA $0200|!addr,y                    ; Set X position, with offset from center
+    LDA $01 : STA $0201|!addr,y                    ; Set Y position, with offset from the center
 
     PHX : LDX $05                                  ; Load tile/flip tables index
-
     LDA tile_number,x : STA $0202|!addr,y          ; Set tile number
-
-    LDA $06 : ORA tile_flip,x                      ; Tile properties with X/Y flip
-    STA $0203|!addr,y                              ;
-
+    LDA $06 : ORA tile_flip,x : STA $0203|!addr,y  ; Tile properties with X/Y flip
     DEX : STX $05 : PLX                            ; Update tile/flip tables index in advance
 
-    PHY : TYA : LSR #2 : TAY                       ; Tile is 16x16
-    LDA #$02 : ORA $02 : STA $0420|!addr,y : PLY   ;
+    PHY : TYA : LSR #2 : TAY : LDA #$02            ; Tile is 16x16
+    ORA $02 : STA $0420|!addr,y : PLY              ; Add X position's high bit
 
-    DEX : BPL -                                    ; Draw next tile
++   DEX : BPL -                                    ; Draw next tile
 
-+   PLX : RTS                                      ; Return restoring sprite index
+    PLX : RTS                                      ; Return restoring sprite index
 
 .offset_x: db $F8, $08, $F8, $08
 .offset_y: db $F8, $F8, $08, $08
 
 
 ;-------------------------------------------------------------------------------
-; Find OAM Slot
+; Get Draw Info
 ;-------------------------------------------------------------------------------
 
-; Look for a free OAM slot, if none is found, we kill the sprite.
-; @return Y: The slot index.
-; @return C: 1 if found, 0 otherwise.
-find_oam_slot:
-    LDY #$00 : SEC                                 ; Start searching at index 0
+; Compute drawing coordinates and retrieve an OAM slot.
+; Adapted from the ClusterGetDrawInfo macro.
+; @param $03: X offset.
+; @param $04: Y offset.
+; @return Y: OAM slot index.
+; @return $00: X position on screen.
+; @return $01: Y position on screen.
+; @return $02: X position's high bit.
+; @return C: 1 if can be drawn, 0 otherwise.
+get_draw_info:
+    PHX : LDX $15E9|!addr
+
+    ; Y position
+    LDA !cluster_y_low,x                           ; Y position
+    CLC : ADC $04                                  ; Plus offset
+    SEC : SBC $1C : STA $01                        ; Minus layer 1 position
+    CMP #$E0 : BCC +                               ; If it's not within screen
+    CLC : ADC #$10 : BPL +                         ; boundaries
+    PLX : CLC : RTS                                ; Then return
+
+    ; X position
++   STZ $02                                        ; Initially assume no high bit
+    LDA !cluster_x_low,x : CLC : ADC $03 : XBA     ; X position + offset
+    BIT $03 : BMI ++                               ; Addition, set high byte according to low byte
+    LDA !cluster_x_high,x : ADC #$00 : XBA : BRA + ; - Positive high byte
+++  LDA !cluster_x_high,x : ADC #$FF : XBA         ; - Negative high byte
++   SEC : SBC $1A : STA $00                        ; Minus layer 1 position
+    XBA : SBC $1B : BEQ +                          ; If no high bit, then it's on screen
+    XBA : CLC : ADC #$38 : CMP #$70 : BCC ++       ; If it's not on screen
+    PLX : CLC : RTS                                ; Then return
+++  INC $02                                        ; Else set high bit
+
+    ; Find OAM slot
++   LDY #$00 : SEC                                 ; Start searching at index 0
 -   LDA $0201|!addr,y : CMP #$F0                   ; If OAM slot is offscreen
     BEQ +                                          ; Then we consider it free
     INY #4 : BNE -                                 ; Else we check the next slot
-    STZ !cluster_num,x : CLC                       ; No free slot, kill the sprite
-+   RTS
+    PLX : CLC : RTS                                ; No free slot
+
+    ; Return
++   PLX : SEC : RTS
 
 
 ;-------------------------------------------------------------------------------
@@ -167,8 +191,8 @@ find_oam_slot:
 ;-------------------------------------------------------------------------------
 
 update:
-    LDA $9D : BEQ +                                ; If sprite are locked, then skip
-    RTS
+    LDA $9D : BEQ +                                ; If sprites are locked
+    RTS                                            ; Then skip
 
 +   JSR orbit
 
