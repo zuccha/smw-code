@@ -13,21 +13,26 @@
 ; use `!bomb_gfx_1` (check the next section for the defines).
 
 ; Extra Byte 1: Bomb's behaviour, like when it should explode, or whether the
-; the parachute is visible or not. The format is %--PFMSGT:
-; - `P`: If 1, the bomb has a parachute until it touches the ground.
+; the parachute opens or not. The format is %--PFMSGT:
+; - `P`: If 1, when the bomb is falling its Y speed is limited to the value set
+;   with `!parachute_speed`. Also, a parachute will be draw above the bomb.
 ; - `F`: If 1, the bomb explodes when touching Mario's fireballs.
 ; - `M`: If 1, the bomb explodes when touching the player (Mario), hurting them.
 ; - `S`: If 1, the bomb explodes when touching another sprite, killing it.
-; - `G`: If 1, the bomb explodes when touching the ground.
+; - `G`: If 1, the bomb explodes when touching the ground. If this is not set,
+;   the bomb looses all momentum when touching the ground (i.e., X and Y speed
+;   are set to 0).
 ; - `T`: If 1, the bomb explodes when the timer (see `!bomb_timer`) goes off.
 ; - `-`: Unused, should be set to 0.
 
 ; Extra Byte 2: If the `T` flag in `Extra Byte 1` is set, the number of frames
 ; before the bomb explodes. This value decrements once each frame.
 
-; Extra Byte 3: Initial X speed.
+; Extra Byte 3: Initial X speed. $00-$7F are positive values (move right),
+; $80-$FF are negative values (move left).
 
-; Extra Byte 4: Initial Y speed.
+; Extra Byte 4: Initial Y speed. $00-$7F are positive values (move down),
+; $80-$FF are negative values (move up).
 
 
 ;-------------------------------------------------------------------------------
@@ -70,6 +75,10 @@ bomb_gfx: db $20, $22
 ; Tile to use for the parachute graphics. It should be $00-$7F for SP1 and SP3,
 ; and $80-$FF for SP2 and SP4.
 !parachute_gfx = $04
+
+; Max falling (vertical) speed the bomb can reach when falling with a parachute.
+; It should be a value between $00 and $7F.
+!parachute_speed = $18
 
 
 ;-------------------------------------------------------------------------------
@@ -144,6 +153,7 @@ render:
     JSR alternate_palette : STA $0303|!addr,y       ; Tile properties
 
     LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ ++   ; If parachute is visible...
+    LDA !sprite_speed_y,x : BEQ ++ : BMI ++         ; ...and speed is positive (falling)
     INY #4                                          ; Next OAM slot
     LDA $00 : STA $0300|!addr,y                     ; X position (same as bomb)
     LDA $01 : SEC : SBC #$10 : STA $0301|!addr,y    ; Y position (one tile above bomb)
@@ -190,6 +200,12 @@ update:
     LDA $9D : BEQ +                                 ; If game is frozen
     RTS                                             ; Then do nothing
 
+    ; Falling speed check
++   LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ +    ; If bomb has parachute...
+    LDA !sprite_speed_y,x : BMI +                   ; ...and is falling...
+    CMP #$10 : BCC +                                ; ...too fast
+    LDA #$10 : STA !sprite_speed_y,x                ; Then limit falling speed
+
     ; Movement
 +   JSL $01802A|!bank                               ; Move bomb
 
@@ -212,9 +228,7 @@ update:
 
     ; Ground interaction
 +   LDA !sprite_blocked_status,x : AND #$04 : BEQ + ; If bomb is touching the ground
-    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; Then set speed to zero...
-    LDA !bomb_mode,x : AND #~!bomb_mode_P           ; ...and remove parachute
-    STA !bomb_mode,x
+    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; Then set speed to zero
     LDA !bomb_mode,x : AND #!bomb_mode_G : BEQ +    ; If bomb explodes on ground touch
     JSR explode : RTS                               ; Then make the bomb explode
 
