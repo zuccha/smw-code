@@ -1,6 +1,4 @@
-================================================================================
-|                           BOMB FROM GUNSTAR HEROES                           |
-================================================================================
+# BOMB FROM GUNSTAR HEROES
 
 Author: zuccha, requested by TheXander. The code for orbital movement is based
 on GreenHammerBro and Akagnite routines.
@@ -8,10 +6,9 @@ on GreenHammerBro and Akagnite routines.
 Bomb sprite that explodes in a big blast. The bomb can be set to explode due to
 different triggers (timer, ground contact, player contact, etc.).
 
+<img src="./docs/ghb_1.gif" />
 
---------------------------------------------------------------------------------
-1. Contents
---------------------------------------------------------------------------------
+## Contents
 
 This package contains the following files:
 
@@ -27,16 +24,11 @@ This package contains the following files:
 - `PIXI/sprites/gunstar_heroes_bomb.json`: Configuration for the bomb sprite.
 - `PIXI/cluster/gunstar_heroes_bomb_blast.asm`: Code for the blast sprite.
 
-
---------------------------------------------------------------------------------
-2. Usage
---------------------------------------------------------------------------------
+## Usage
 
 Here follow the instructions on how to use and customize this sprite.
 
-................................................................................
-2.1 Simple insertion
-................................................................................
+### Simple insertion
 
 If you want to insert the sprite with the provided `list.txt` and graphics file,
 do the following:
@@ -52,7 +44,7 @@ do the following:
 6. In Lunar Magic, open the "Palette Editor" and import
    `Palettes/gunstar_heroes_bomb.pal`.
 7. Run PIXI.
-8. Insert the sprite in Lunar Magic with the "Insert Manual..." command. The
+8. Insert the sprite in Lunar Magic with the _Insert Manual..._ command. The
    sprite accepts four extra bytes and the extra bit; their behavior is
    described in detail in `PIXI/sprites/gunstar_heroes_bomb.asm`.
 
@@ -60,9 +52,7 @@ N.B.: You can heavily customize the behaviour of the sprite. For more, check
 `gunstar_heroes_bomb.asm` and `gunstar_heroes_bomb_blast.asm`, where all
 customizable settings have been documented.
 
-................................................................................
-2.2 Customize Sprite Numbers
-................................................................................
+### Customize Sprite Numbers
 
 If you change the number for `gunstar_heroes_bomb_blast.json` in PIXI's
 `list.txt` (anything other than the default "10"), you also have to change the
@@ -79,14 +69,12 @@ CLUSTER:
 
 then you have to open `gunstar_heroes_bomb.asm` and set `!blast_sprite = $2F`.
 
-................................................................................
-2.3 Customize Graphics
-................................................................................
+### Customize Graphics
 
 By default, the sprite is configured for SP4.
 
 If you want to switch to SP1 or SP2, open `gunstar_heroes_bomb.json` and uncheck
-the "Use seconds graphics page" property.
+the _Use seconds graphics page_ property.
 
 If you want to change to SP1 or SP3, you can modify `!gfx_offset` defined both
 in `gunstar_heroes_bomb.asm` and `gunstar_heroes_bomb_blast.asm`.
@@ -95,23 +83,19 @@ You can also change all the graphic tiles used by the sprite. To change the
 bombs and parachute graphics, check `gunstar_heroes_bomb.asm`. To change the
 explosion graphics, check `gunstar_heroes_bomb_blast.asm`.
 
-................................................................................
-2.4 Customize Palette
-................................................................................
+### Customize Palette
 
-By default the sprite uses sprite palette 4 (global palette C) both for the
-bomb and the blasts. It also uses palette 3 (global palette B) when the bomb is
+By default the sprite uses sprite palette 4 (global palette C) both for the bomb
+and the blasts. It also uses palette 3 (global palette B) when the bomb is
 blinking due to the timer going off.
 
 To change the basic palette, you can open the JSON configuration files and
-change the "Palette" property (`0-7`).
+change the _Palette_ property (`0-7`).
 
 To change the blinking animation palette, you can edit `!bomb_alternate_palette`
 in `gunstar_heroes_bomb.asm`.
 
-................................................................................
-2.5 Spawning Bombs in Another Sprite
-................................................................................
+### Spawning Bombs in Another Sprite
 
 If you want to spawn the bomb from another sprite, you can do so by setting its
 extra bytes via code:
@@ -147,15 +131,11 @@ LDA #$00 : STA !extra_byte_3,y       ; No initial X speed
 LDA #$00 : STA !extra_byte_4,y       ; No initial Y speed
 ```
 
---------------------------------------------------------------------------------
-4. Changelog
---------------------------------------------------------------------------------
+## Changelog
 
-................................................................................
-v1.0.0 (2023-08-28)
-................................................................................
+### v1.0.0 (2023-08-28)
 
-Added:
+#### Added:
 
 - Create exploding bombs
 - Allow to choose among two bomb graphics.
@@ -172,6 +152,6 @@ Added:
 - Allow to configure the rotation speed of the explosion blasts.
 - Allow to configure the radius of the explosion blasts.
 
-Documentation:
+#### Documentation:
 
 - Add readme
