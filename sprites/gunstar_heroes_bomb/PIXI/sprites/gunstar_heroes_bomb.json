@@ -4,7 +4,7 @@
     "Can be jumped on": false,
     "Dies when jumped on": false,
     "Hop in/kick shell": false,
-    "Disappears in cloud of smoke": false
+    "Disappears in cloud of smoke": true
   },
   "$1662": {
     "Sprite Clipping": 0,
@@ -24,7 +24,7 @@
     "Invincible to star/cape/fire/bounce blk.": true,
     "Process when off screen": false,
     "Don't change into shell when stunned": false,
-    "Can't be kicked like shell": false,
+    "Can't be kicked like shell": true,
     "Process interaction with Mario every frame": false,
     "Gives power-up when eaten by yoshi": false,
     "Don't use default interaction with Mario": true
@@ -33,7 +33,7 @@
     "Inedible": true,
     "Stay in Yoshi's mouth": false,
     "Weird ground behaviour": false,
-    "Don't interact with other sprites": false,
+    "Don't interact with other sprites": true,
     "Don't change direction if touched": false,
     "Don't turn into coin when goal passed": false,
     "Spawn a new sprite": false,
@@ -42,7 +42,7 @@
   "$190F": {
     "Make platform passable from below": false,
     "Don't erase when goal passed": false,
-    "Can't be killed by sliding": false,
+    "Can't be killed by sliding": true,
     "Takes 5 fireballs to kill": false,
     "Can be jumped on with upwards Y speed": false,
     "Death frame two tiles high": false,
@@ -67,12 +67,23 @@
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 0
-        },
+          "map16 tile": 444
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "X": 0,
+      "Y": 0,
+      "Description": "Bomb from Gunstar Heroes.",
+      "ExtraBit": true,
+      "Tiles": [
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 103
+          "map16 tile": 42
         }
       ],
       "GFXInfo": {},

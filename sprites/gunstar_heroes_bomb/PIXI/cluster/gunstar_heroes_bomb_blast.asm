@@ -102,30 +102,6 @@ main:
 
 
 ;-------------------------------------------------------------------------------
-; Update
-;-------------------------------------------------------------------------------
-
-update:
-    LDA $9D : BEQ +                                ; If sprite are locked, then skip
-    RTS
-
-+   JSR orbit
-
-    LDA $13 : AND.b #!animation_duration-1 : BNE + ; Every some frames...
-    INC !animation_frame,x                         ; ...go to next animation frame
-    LDA !animation_frame,x : CMP #$08 : BCC +      ; If we are done with the animation
-    STZ !cluster_num,x                             ; Then remove sprite
-    RTS
-
-+   JSR get_sprite_clipping_A                      ; Get sprite clipping A
-    JSL $03B664                                    ; Get player clipping B
-    JSL $03B72B : BCC +                            ; Check for contact
-    JSL $00F5B7                                    ; Hurt Mario
-
-+   RTS
-
-
-;-------------------------------------------------------------------------------
 ; Render
 ;-------------------------------------------------------------------------------
 
@@ -160,7 +136,7 @@ render:
     DEX : STX $05 : PLX                            ; Update tile/flip tables index in advance
 
     PHY : TYA : LSR #2 : TAY                       ; Tile is 16x16
-    LDA #$02 : STA $0420|!addr,y : PLY             ;
+    LDA #$02 : ORA $02 : STA $0420|!addr,y : PLY   ;
 
     DEX : BPL -                                    ; Draw next tile
 
@@ -183,6 +159,30 @@ find_oam_slot:
     BEQ +                                          ; Then we consider it free
     INY #4 : BNE -                                 ; Else we check the next slot
     STZ !cluster_num,x : CLC                       ; No free slot, kill the sprite
++   RTS
+
+
+;-------------------------------------------------------------------------------
+; Update
+;-------------------------------------------------------------------------------
+
+update:
+    LDA $9D : BEQ +                                ; If sprite are locked, then skip
+    RTS
+
++   JSR orbit
+
+    LDA $13 : AND.b #!animation_duration-1 : BNE + ; Every some frames...
+    INC !animation_frame,x                         ; ...go to next animation frame
+    LDA !animation_frame,x : CMP #$08 : BCC +      ; If we are done with the animation
+    STZ !cluster_num,x                             ; Then remove sprite
+    RTS
+
++   JSR get_sprite_clipping_A                      ; Get sprite clipping A
+    JSL $03B664|!bank                              ; Get player clipping B
+    JSL $03B72B|!bank : BCC +                      ; Check for contact
+    JSL $00F5B7|!bank                              ; Hurt Mario
+
 +   RTS
 
 

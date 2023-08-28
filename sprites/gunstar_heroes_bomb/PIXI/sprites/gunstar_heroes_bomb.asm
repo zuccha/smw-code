@@ -16,8 +16,8 @@
 ; the parachute is visible or not. The format is %--PFMSGT:
 ; - `P`: If 1, the bomb has a parachute until it touches the ground.
 ; - `F`: If 1, the bomb explodes when touching Mario's fireballs.
-; - `M`: If 1, the bomb explodes when touching the player (Mario).
-; - `S`: If 1, the bomb explodes when touching another sprite.
+; - `M`: If 1, the bomb explodes when touching the player (Mario), hurting them.
+; - `S`: If 1, the bomb explodes when touching another sprite, killing it.
 ; - `G`: If 1, the bomb explodes when touching the ground.
 ; - `T`: If 1, the bomb explodes when the timer (see `!bomb_timer`) goes off.
 ; - `-`: Unused, should be set to 0.
@@ -108,7 +108,7 @@ bomb_gfx: db $20, $22
 init:
     PHB : PHK : PLB
 
-    LDA !extra_byte_2,x : STA !bomb_timer,x        ; Initialize X speed
+    LDA !extra_byte_2,x : STA !bomb_timer,x        ; Initialize timer
     LDA !extra_byte_3,x : STA !sprite_speed_x,x    ; Initialize X speed
     LDA !extra_byte_4,x : STA !sprite_speed_y,x    ; Initialize Y speed
 
@@ -126,53 +126,6 @@ main:
     JSR update
 
     PLB : RTL
-
-
-;-------------------------------------------------------------------------------
-; Update
-;-------------------------------------------------------------------------------
-
-update:
-    LDA #$01 : STA $18B8|!addr                      ; Run cluster sprite code
-
-    ; Game status
-    LDA $9D : BEQ +                                 ; If game is frozen
-    RTS                                             ; Then do nothing
-
-    ; Movement
-+   JSL $01802A|!bank                               ; Move bomb
-
-    ; Player interaction
-    LDA !bomb_mode,x : AND #!bomb_mode_F : BEQ +    ; If bomb explodes on Mario fireball touch...
-    %FireballContact() : BCC +                      ; ...and is touching player
-    LDA #$00 : STA !extended_num+8,y                ; Then kill fireball...
-    JSR explode : RTS                               ; ...and make the bomb explode
-
-    ; Player interaction
-+   LDA !bomb_mode,x : AND #!bomb_mode_M : BEQ +    ; If bomb explodes on player touch...
-    JSL $01A7DC|!bank : BCC +                       ; ...and is touching player
-    JSR explode : RTS                               ; Then make the bomb explode
-
-    ; Sprite interaction
-+   LDA !bomb_mode,x : AND #!bomb_mode_S : BEQ +    ; If bomb explodes on sprite touch...
-    BRA + ; TODO                                    ; ...and is touching another sprite
-    JSR explode : RTS                               ; Then make the bomb explode
-
-    ; Ground interaction
-+   LDA !sprite_blocked_status,x : AND #$04 : BEQ + ; If bomb is touching the ground
-    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; Then set speed to zero...
-    LDA !bomb_mode,x : AND #~!bomb_mode_P           ; ...and remove parachute
-    STA !bomb_mode,x
-    LDA !bomb_mode,x : AND #!bomb_mode_G : BEQ +    ; If bomb explodes on ground touch
-    JSR explode : RTS                               ; Then make the bomb explode
-
-    ; Timer
-+   LDA !bomb_mode,x : AND #!bomb_mode_T : BEQ +    ; If bomb explodes when timer goes off...
-    LDA !bomb_timer,x : BNE +                       ; ...and timer is zero
-    JSR explode : RTS                               ; Then make the bomb explode
-
-    ; Return
-+   RTS
 
 
 ;-------------------------------------------------------------------------------
@@ -227,6 +180,73 @@ alternate_palette:
 
 
 ;-------------------------------------------------------------------------------
+; Update
+;-------------------------------------------------------------------------------
+
+update:
+    LDA #$01 : STA $18B8|!addr                      ; Run cluster sprite code
+
+    ; Game status
+    LDA $9D : BEQ +                                 ; If game is frozen
+    RTS                                             ; Then do nothing
+
+    ; Movement
++   JSL $01802A|!bank                               ; Move bomb
+
+    ; Player interaction
+    LDA !bomb_mode,x : AND #!bomb_mode_F : BEQ +    ; If bomb explodes on Mario fireball touch...
+    %FireballContact() : BCC +                      ; ...and is touching player
+    LDA #$00 : STA !extended_num+8,y                ; Then kill fireball...
+    JSR explode : RTS                               ; ...and make the bomb explode
+
+    ; Player interaction
++   LDA !bomb_mode,x : AND #!bomb_mode_M : BEQ +    ; If bomb explodes on player touch...
+    JSL $01A7DC|!bank : BCC +                       ; ...and is touching player
+    JSR explode : RTS                               ; Then make the bomb explode
+
+    ; Sprite interaction
++   LDA !bomb_mode,x : AND #!bomb_mode_S : BEQ +    ; If bomb explodes on sprite touch...
+    JSR check_sprite_interaction : BCC +            ; ...and is touching another sprite
+    LDA #$00 : STA !sprite_status,y                 ; Then kill other sprite...
+    JSR explode : RTS                               ; ...and make the bomb explode
+
+    ; Ground interaction
++   LDA !sprite_blocked_status,x : AND #$04 : BEQ + ; If bomb is touching the ground
+    STZ !sprite_speed_x,x : STZ !sprite_speed_y,x   ; Then set speed to zero...
+    LDA !bomb_mode,x : AND #~!bomb_mode_P           ; ...and remove parachute
+    STA !bomb_mode,x
+    LDA !bomb_mode,x : AND #!bomb_mode_G : BEQ +    ; If bomb explodes on ground touch
+    JSR explode : RTS                               ; Then make the bomb explode
+
+    ; Timer
++   LDA !bomb_mode,x : AND #!bomb_mode_T : BEQ +    ; If bomb explodes when timer goes off...
+    LDA !bomb_timer,x : BNE +                       ; ...and timer is zero
+    JSR explode : RTS                               ; Then make the bomb explode
+
+    ; Return
++   RTS
+
+
+;-------------------------------------------------------------------------------
+; Check Sprite Interaction
+;-------------------------------------------------------------------------------
+
+; Check collision with all other sprites.
+; @return Y: Index of the sprite colliding, $FF if not colliding.
+; @return C: 1 if there is collision, 0 otherwise.
+check_sprite_interaction:
+    LDY #!SprSize                                   ; Sprite index
+    JSL $03B69F|!bank                               ; Current sprite is clipping A
+-   STY $00 : CPX $00 : BEQ ++                      ; Skip comparison with itself
+    LDA !sprite_status,y : CMP #$08 : BCC ++        ; Skip non-active sprites
+    PHX : TYX : JSL $03B6E5|!bank : PLX             ; Other sprite is clipping B
+    JSL $03B72B|!bank : BCS +                       ; If no collision
+++  DEY : BPL -                                     ; Then go to next sprite
+    CLC : RTS                                       ; No contact
++   SEC : RTS                                       ; Contact
+
+
+;-------------------------------------------------------------------------------
 ; Explode
 ;-------------------------------------------------------------------------------
 
@@ -248,21 +268,21 @@ explode:
 
     LDA #!blast_sprite+!ClusterOffset : XBA         ; Explosion sprite
 
-    LDA #$00 : STA $06 : LDA #$00 : STA $07         ; Angle $0000
+    LDA #$00 : STA $06 : LDA #$00 : STA $07         ; Angle $0000 (0)
     STZ $08                                         ; Inner, clockwise
-    JSR spawn_explosion
+    JSR spawn_explosion_blast
 
-    LDA #$00 : STA $06 : LDA #$01 : STA $07         ; Angle $0100
+    LDA #$00 : STA $06 : LDA #$01 : STA $07         ; Angle $0100 (180)
     STZ $08                                         ; Inner, clockwise
-    JSR spawn_explosion
+    JSR spawn_explosion_blast
 
-    LDA #$80 : STA $06 : LDA #$00 : STA $07         ; Angle $0080
+    LDA #$80 : STA $06 : LDA #$00 : STA $07         ; Angle $0080 (90)
     LDA #$01 : STA $08                              ; Outer, counter-clockwise
-    JSR spawn_explosion
+    JSR spawn_explosion_blast
 
-    LDA #$80 : STA $06 : LDA #$01 : STA $07         ; Angle $0180
+    LDA #$80 : STA $06 : LDA #$01 : STA $07         ; Angle $0180 (270)
     LDA #$01 : STA $08                              ; Outer, counter-clockwise
-    JSR spawn_explosion
+    JSR spawn_explosion_blast
 
     RTS
 
@@ -278,7 +298,7 @@ explode:
 ; @param $04-$05: Y position.
 ; @param $06-$07: Initial rotation angle.
 ; @param $08: Motion. $00 = inner, clockwise; $01 = outer, counter-clockwise.
-spawn_explosion:
+spawn_explosion_blast:
     ; Spawn sprite
     LDA #!blast_sprite+!ClusterOffset : XBA
     %SpawnClusterGeneric()
