@@ -84,7 +84,7 @@ bomb_gfx: db $20, $22
 
 ; Max falling (vertical) speed the bomb can reach when falling with a parachute.
 ; It should be a value between $00 and $7F.
-!parachute_speed = $18
+!parachute_speed = $10
 
 
 ;-------------------------------------------------------------------------------
@@ -202,6 +202,7 @@ alternate_palette:
 ; Update
 ;-------------------------------------------------------------------------------
 
+; Bomb's lifecycle.
 update:
     LDA #$00 : %SubOffScreen()                      ; Kill sprite if offscreen
     LDA #$01 : STA $18B8|!addr                      ; Run cluster sprite code
@@ -213,15 +214,15 @@ update:
     ; Falling speed check
 +   LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ +    ; If bomb has parachute...
     LDA !sprite_speed_y,x : BMI +                   ; ...and is falling...
-    CMP #$10 : BCC +                                ; ...too fast
-    LDA #$10 : STA !sprite_speed_y,x                ; Then limit falling speed
+    CMP #!parachute_speed : BCC +                   ; ...too fast
+    LDA #!parachute_speed : STA !sprite_speed_y,x   ; Then limit falling speed
 
     ; Movement
 +   JSL $01802A|!bank                               ; Move bomb
 
     ; Player interaction
     LDA !bomb_mode,x : AND #!bomb_mode_F : BEQ +    ; If bomb explodes on Mario fireball touch...
-    %FireballContact() : BCC +                      ; ...and is touching player
+    %FireballContact() : BCC +                      ; ...and is touching fireball
     LDA #$00 : STA !extended_num+8,y                ; Then kill fireball...
     JSR explode : RTS                               ; ...and make the bomb explode
 
@@ -277,6 +278,7 @@ check_sprite_interaction:
 
 ; Make the bomb explode. This kills the bomb and spawns four blasts orbting the
 ; position of the bomb.
+; Note that the values stored in $00-$05 are used by `SpawnClusterGeneric`.
 explode:
     STZ !sprite_status,x                            ; Erase bomb sprite
 
@@ -290,8 +292,6 @@ explode:
 
     LDA !sprite_y_low,x : STA $04                   ; Y position
     LDA !sprite_y_high,x : STA $05                  ;
-
-    LDA #!blast_sprite+!ClusterOffset : XBA         ; Explosion sprite
 
     LDA #$00 : STA $06 : LDA #$00 : STA $07         ; Angle $0000 (0)
     STZ $08                                         ; Inner, clockwise

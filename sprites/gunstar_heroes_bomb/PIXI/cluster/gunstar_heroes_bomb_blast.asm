@@ -124,11 +124,11 @@ render:
 
 -   LDA .offset_x,x : STA $03                      ; Prepare X offset
     LDA .offset_y,x : STA $04                      ; Prepare Y offset
-    JSR get_draw_info                              ; If we don't find a free OAM slot
-    BCC +                                          ; Then drawing next
+    JSR get_draw_info                              ; If no free OAM slot or out of screen
+    BCC +                                          ; Then draw next
 
-    LDA $00 : STA $0200|!addr,y                    ; Set X position, with offset from center
-    LDA $01 : STA $0201|!addr,y                    ; Set Y position, with offset from the center
+    LDA $00 : STA $0200|!addr,y                    ; Set X position
+    LDA $01 : STA $0201|!addr,y                    ; Set Y position
 
     PHX : LDX $05                                  ; Load tile/flip tables index
     LDA tile_gfx,x : CLC : ADC #!gfx_offset        ; Graphics tile, plus offset for SP2 and SP4
@@ -152,7 +152,7 @@ render:
 ;-------------------------------------------------------------------------------
 
 ; Compute drawing coordinates and retrieve an OAM slot.
-; Adapted from the ClusterGetDrawInfo macro.
+; Adapted from `ClusterGetDrawInfo`.
 ; @param $03: X offset.
 ; @param $04: Y offset.
 ; @return Y: OAM slot index.
@@ -161,23 +161,23 @@ render:
 ; @return $02: X position's high bit.
 ; @return C: 1 if can be drawn, 0 otherwise.
 get_draw_info:
-    PHX : LDX $15E9|!addr
+    PHX : LDX $15E9|!addr                          ; Load current sprite index
 
     ; Y position
-    LDA !cluster_y_low,x                           ; Y position
-    CLC : ADC $04                                  ; Plus offset
-    SEC : SBC $1C : STA $01                        ; Minus layer 1 position
+    LDA !cluster_y_low,x                           ; Y position...
+    CLC : ADC $04                                  ; ...plus offset
+    SEC : SBC $1C : STA $01                        ; ...minus layer 1 position
     CMP #$E0 : BCC +                               ; If it's not within screen
     CLC : ADC #$10 : BPL +                         ; boundaries
     PLX : CLC : RTS                                ; Then return
 
     ; X position
 +   STZ $02                                        ; Initially assume no high bit
-    LDA !cluster_x_low,x : CLC : ADC $03 : XBA     ; X position + offset
-    BIT $03 : BMI ++                               ; Addition, set high byte according to low byte
-    LDA !cluster_x_high,x : ADC #$00 : XBA : BRA + ; - Positive high byte
-++  LDA !cluster_x_high,x : ADC #$FF : XBA         ; - Negative high byte
-+   SEC : SBC $1A : STA $00                        ; Minus layer 1 position
+    LDA !cluster_x_low,x : CLC : ADC $03 : XBA     ; X position...
+    BIT $03 : BMI ++                               ; ...plus offset...
+    LDA !cluster_x_high,x : ADC #$00 : XBA : BRA + ; (add positive value)
+++  LDA !cluster_x_high,x : ADC #$FF : XBA         ; (add negative value)
++   SEC : SBC $1A : STA $00                        ; ...inus layer 1 position
     XBA : SBC $1B : BEQ +                          ; If no high bit, then it's on screen
     XBA : CLC : ADC #$38 : CMP #$70 : BCC ++       ; If it's not on screen
     PLX : CLC : RTS                                ; Then return
@@ -191,13 +191,14 @@ get_draw_info:
     PLX : CLC : RTS                                ; No free slot
 
     ; Return
-+   PLX : SEC : RTS
++   PLX : SEC : RTS                                ; Slot found and sprite is on screen
 
 
 ;-------------------------------------------------------------------------------
 ; Update
 ;-------------------------------------------------------------------------------
 
+; Blast's lifecycle.
 update:
     LDA $9D : BEQ +                                ; If sprites are locked
     RTS                                            ; Then skip
@@ -234,14 +235,14 @@ get_sprite_clipping_A:
     LDA !animation_frame,x : TAY                   ; Get the hitbox radius of
     LDA hitbox_radius,y : STA $00 : STZ $01        ; the current animation frame
 
-    LDA !cluster_x_high,x : XBA : LDA !cluster_x_low,x ; X position
-    REP #$20 : SEC : SBC $00                       ; Minus the radius
-    CLC : ADC #$0008 : SEP #$20                    ; Plus a fixed offset
+    LDA !cluster_x_high,x : XBA : LDA !cluster_x_low,x ; X position...
+    REP #$20 : SEC : SBC $00                       ; ...minus the radius...
+    CLC : ADC #$0008 : SEP #$20                    ; ...plus half a tile
     STA $04 : XBA : STA $0A                        ; Store low and high bytes
 
-    LDA !cluster_y_high,x : XBA : LDA !cluster_y_low,x ; Y position
-    REP #$20 : SEC : SBC $00                       ; Minus the radius
-    CLC : ADC #$0008 : SEP #$20                    ; Plus a fixed offset
+    LDA !cluster_y_high,x : XBA : LDA !cluster_y_low,x ; Y position...
+    REP #$20 : SEC : SBC $00                       ; ...minus the radius...
+    CLC : ADC #$0008 : SEP #$20                    ; ...plus half a tile
     STA $05 : XBA : STA $0B                        ; Store low and high bytes
 
     LDA $00 : ASL : STA $06 : STA $07              ; Size is twice the radius
@@ -271,7 +272,7 @@ orbit:
     ; Compute X position
     LDA !angle_l,x : STA $00                    ; Load angle low byte
     LDA !angle_h,x : STA $01                    ; Load angle high byte
-    JSR compute_cosine                          ; Compute sine
+    JSR compute_cosine                          ; Compute cosine
     REP #$20 : LDA $02 : STA $00 : SEP #$20     ; Transfer result
     JSR scale_radius                            ; Adjust radius amplitude
 

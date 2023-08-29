@@ -133,6 +133,17 @@ LDA #$00 : STA !extra_byte_4,y       ; No initial Y speed
 
 ## Changelog
 
+### v1.0.1 (2023-08-29)
+
+#### Fixed:
+
+- Actually use the setting controlling max falling speed with parachute in the
+  code.
+
+#### Documentation:
+
+- Improve and fix some comments in the code.
+
 ### v1.0.0 (2023-08-28)
 
 #### Added:
