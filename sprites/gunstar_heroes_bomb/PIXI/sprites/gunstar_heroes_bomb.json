@@ -56,18 +56,18 @@
   "Extra Property Byte 2": 0,
   "Additional Byte Count (extra bit clear)": 4,
   "Additional Byte Count (extra bit set)": 4,
-  "Map16": "",
+  "Map16": "oBGwEaERsRGiEbIRoxGzEYQRlBGFEZUR",
   "Displays": [
     {
       "X": 0,
       "Y": 0,
-      "Description": "Bomb from Gunstar Heroes, using second bomb graphics.",
+      "Description": "Bombs from Gunstar Heroes, here are some variations include here to place easily these directly into the level. You can heavily customize the behaviour of the sprite. For more, check `gunstar_heroes_bomb.asm` and `gunstar_heroes_bomb_blast.asm`, where all customizable settings have been documented to make possible craft your proper version.",
       "ExtraBit": false,
       "Tiles": [
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 0
+          "map16 tile": 768
         }
       ],
       "GFXInfo": {},
@@ -77,13 +77,13 @@
     {
       "X": 0,
       "Y": 0,
-      "Description": "Bomb from Gunstar Heroes, using second bomb graphics.",
+      "Description": "Bombs from Gunstar Heroes, here are some variations include here to place easily these directly into the level. You can heavily customize the behaviour of the sprite. For more, check `gunstar_heroes_bomb.asm` and `gunstar_heroes_bomb_blast.asm`, where all customizable settings have been documented to make possible craft your proper version.",
       "ExtraBit": true,
       "Tiles": [
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 0
+          "map16 tile": 769
         }
       ],
       "GFXInfo": {},
@@ -93,10 +93,74 @@
   ],
   "Collection": [
     {
-      "Name": "Gunstar Heroes Bomb",
+      "Name": "Gunstar Heroes Bomb (no extra bytes configured)",
       "ExtraBit": false,
       "Extra Property Byte 1": 0,
       "Extra Property Byte 2": 0,
+      "Extra Property Byte 3": 0,
+      "Extra Property Byte 4": 0,
+      "Extra Property Byte 5": 0,
+      "Extra Property Byte 6": 0,
+      "Extra Property Byte 7": 0,
+      "Extra Property Byte 8": 0,
+      "Extra Property Byte 9": 0,
+      "Extra Property Byte 10": 0,
+      "Extra Property Byte 11": 0,
+      "Extra Property Byte 12": 0
+    },
+    {
+      "Name": "Gunstar Heroes Bomb",
+      "ExtraBit": false,
+      "Extra Property Byte 1": 30,
+      "Extra Property Byte 2": 0,
+      "Extra Property Byte 3": 0,
+      "Extra Property Byte 4": 0,
+      "Extra Property Byte 5": 0,
+      "Extra Property Byte 6": 0,
+      "Extra Property Byte 7": 0,
+      "Extra Property Byte 8": 0,
+      "Extra Property Byte 9": 0,
+      "Extra Property Byte 10": 0,
+      "Extra Property Byte 11": 0,
+      "Extra Property Byte 12": 0
+    },
+    {
+      "Name": "Gunstar Heroes Parachute Bomb",
+      "ExtraBit": false,
+      "Extra Property Byte 1": 62,
+      "Extra Property Byte 2": 0,
+      "Extra Property Byte 3": 0,
+      "Extra Property Byte 4": 0,
+      "Extra Property Byte 5": 0,
+      "Extra Property Byte 6": 0,
+      "Extra Property Byte 7": 0,
+      "Extra Property Byte 8": 0,
+      "Extra Property Byte 9": 0,
+      "Extra Property Byte 10": 0,
+      "Extra Property Byte 11": 0,
+      "Extra Property Byte 12": 0
+    },
+    {
+      "Name": "Gunstar Heroes \"Pokeball\" Bomb",
+      "ExtraBit": true,
+      "Extra Property Byte 1": 17,
+      "Extra Property Byte 2": 190,
+      "Extra Property Byte 3": 0,
+      "Extra Property Byte 4": 0,
+      "Extra Property Byte 5": 0,
+      "Extra Property Byte 6": 0,
+      "Extra Property Byte 7": 0,
+      "Extra Property Byte 8": 0,
+      "Extra Property Byte 9": 0,
+      "Extra Property Byte 10": 0,
+      "Extra Property Byte 11": 0,
+      "Extra Property Byte 12": 0
+    },
+    {
+      "Name": "Gunstar Heroes \"Pokeball\" Parachute Bomb",
+      "ExtraBit": true,
+      "Extra Property Byte 1": 51,
+      "Extra Property Byte 2": 190,
       "Extra Property Byte 3": 0,
       "Extra Property Byte 4": 0,
       "Extra Property Byte 5": 0,

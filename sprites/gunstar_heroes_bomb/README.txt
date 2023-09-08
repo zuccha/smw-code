@@ -64,7 +64,7 @@ customizable settings have been documented.
 2.2 Customize Sprite Numbers
 ................................................................................
 
-If you change the number for `gunstar_heroes_bomb_blast.json` in PIXI's
+If you change the number for `gunstar_heroes_bomb_blast.asm` in PIXI's
 `list.txt` (anything other than the default "10"), you also have to change the
 `!blast_sprite` define in `gunstar_heroes_bomb.asm` to match that number.
 
@@ -150,6 +150,24 @@ LDA #$00 : STA !extra_byte_4,y       ; No initial Y speed
 --------------------------------------------------------------------------------
 4. Changelog
 --------------------------------------------------------------------------------
+
+................................................................................
+v1.1.0 (2023-09-08)
+................................................................................
+
+Added:
+
+- Allow to set a duration for a shake animation after bomb explosion.
+- Include palmask file for color palette.
+- Specify some presets for the bomb in the JSON file.
+
+Changed:
+
+- Use actual bomb tiles for the bomb preview in Lunar Magic.
+
+Fixed:
+
+- Correct a color in palette C.
 
 ................................................................................
 v1.0.1 (2023-08-29)

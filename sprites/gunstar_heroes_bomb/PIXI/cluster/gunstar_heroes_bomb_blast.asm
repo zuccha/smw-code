@@ -131,7 +131,7 @@ render:
     LDA $01 : STA $0201|!addr,y                    ; Set Y position
 
     PHX : LDX $05                                  ; Load tile/flip tables index
-    LDA tile_gfx,x : CLC : ADC #!gfx_offset        ; Graphics tile, plus offset for SP2 and SP4
+    LDA tile_gfx,x : CLC : ADC.b #!gfx_offset      ; Graphics tile, plus offset for SP2 and SP4
     STA $0202|!addr,y                              ; Set tile number
     LDA $06 : ORA tile_flip,x : STA $0203|!addr,y  ; Tile properties with X/Y flip
     DEX : STX $05 : PLX                            ; Update tile/flip tables index in advance

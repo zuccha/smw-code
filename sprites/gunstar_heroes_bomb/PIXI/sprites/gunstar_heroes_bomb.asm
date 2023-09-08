@@ -86,6 +86,9 @@ bomb_gfx: db $20, $22
 ; It should be a value between $00 and $7F.
 !parachute_speed = $10
 
+; Duration for the shake explosion.
+!shake_duration = $40
+
 
 ;-------------------------------------------------------------------------------
 ; Defines (don't touch these)
@@ -156,7 +159,7 @@ render:
     LDA $00 : STA $0300|!addr,y                     ; X position
     LDA $01 : STA $0301|!addr,y                     ; Y position
     LDA !extra_bits,x : AND #$04 : LSR #2 : PHX     ; Tile number, depending on
-    TAX : LDA bomb_gfx,x : CLC : ADC #!gfx_offset   ; extra bit being set or not,
+    TAX : LDA bomb_gfx,x : CLC : ADC.b #!gfx_offset ; extra bit being set or not,
     PLX : STA $0302|!addr,y                         ; plus the GFX offset
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     JSR alternate_palette : STA $0303|!addr,y       ; Tile properties
@@ -166,7 +169,7 @@ render:
     INY #4                                          ; Next OAM slot
     LDA $00 : STA $0300|!addr,y                     ; X position (same as bomb)
     LDA $01 : SEC : SBC #$10 : STA $0301|!addr,y    ; Y position (one tile above bomb)
-    LDA #!parachute_gfx+!gfx_offset : STA $0302|!addr,y ; Tile number
+    LDA.b #!parachute_gfx+!gfx_offset : STA $0302|!addr,y ; Tile number
     LDA !sprite_oam_properties,x : ORA $64          ; Load CFG properties
     STA $0303|!addr,y                               ; Tile properties
     LDA #$01 : BRA +                                ; 2 tiles
@@ -189,11 +192,11 @@ alternate_palette:
     XBA                                             ; Preserve properties
 
     LDA !bomb_mode,x : AND #!bomb_mode_T : BEQ +    ; If bomb is on a timer...
-    LDA $13 : AND #!bomb_blink_interval : BEQ +     ; ...and every other frames...
+    LDA $13 : AND.b #!bomb_blink_interval : BEQ +   ; ...and every other frames...
     LDA !bomb_timer,x                               ; ...and the bomb timer is
-    CMP #!bomb_blink_threshold : BCS +              ; lower than the blink threshold
+    CMP.b #!bomb_blink_threshold : BCS +            ; lower than the blink threshold
     XBA : AND #%11110001                            ; Then replace current color
-    ORA #!bomb_alternate_palette<<1 : RTS           ; palette with alternate one
+    ORA.b #!bomb_alternate_palette<<1 : RTS         ; palette with alternate one
 
 +   XBA : RTS                                       ; Return properties with no changes
 
@@ -214,8 +217,8 @@ update:
     ; Falling speed check
 +   LDA !bomb_mode,x : AND #!bomb_mode_P : BEQ +    ; If bomb has parachute...
     LDA !sprite_speed_y,x : BMI +                   ; ...and is falling...
-    CMP #!parachute_speed : BCC +                   ; ...too fast
-    LDA #!parachute_speed : STA !sprite_speed_y,x   ; Then limit falling speed
+    CMP.b #!parachute_speed : BCC +                 ; ...too fast
+    LDA.b #!parachute_speed : STA !sprite_speed_y,x ; Then limit falling speed
 
     ; Movement
 +   JSL $01802A|!bank                               ; Move bomb
@@ -282,8 +285,10 @@ check_sprite_interaction:
 explode:
     STZ !sprite_status,x                            ; Erase bomb sprite
 
-    LDA #!explosion_sfx                             ; Play explosion sound
-    STA !explosion_sfx_bank|!addr                   ;
+    LDA.b #!explosion_sfx                           ; Play explosion sound
+    STA.w !explosion_sfx_bank|!addr                 ;
+
+    LDA.b #!shake_duration : STA $1887|!addr        ; Shake ground
 
     STZ $00 : STZ $01                               ; X and Y offset
 
@@ -325,7 +330,7 @@ explode:
 ; @param $08: Motion. $00 = inner, clockwise; $01 = outer, counter-clockwise.
 spawn_explosion_blast:
     ; Spawn sprite
-    LDA #!blast_sprite+!ClusterOffset : XBA
+    LDA.b #!blast_sprite+!ClusterOffset : XBA
     %SpawnClusterGeneric()
 
     ; Set OAM properties
