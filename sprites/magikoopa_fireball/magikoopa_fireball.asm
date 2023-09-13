@@ -261,36 +261,19 @@ StateDisappearing:
     RTS                             ; return
 
 SpawnFireball:
-    LDY.b #!SprSize-3               ; setup loop
--   LDA !14C8,y                     ;\ check if sprite slot is free
-    BEQ +                           ;/ if so, branch
-    DEY                             ;\ if not, check next slot
-    BPL -                           ;/
-    RTS                             ; if no slots left, return
+    STZ $00 : LDA #$0A : STA $01    ; X and Y offsets
+    STZ $02 : STZ $03               ; zero speed
+    LDA.b #!FireballNumber          ; sprite number
+    CLC                             ; not a custom sprite
+    %SpawnSprite()                  ; spawn fireball
+    BCS +                           ; if spawn failed, return
 
-+   LDA.b #!FireballSFX             ;\ sound effect
+    LDA.b #!FireballSFX             ;\ sound effect
     STA.w !FireballBank|!Base2      ;/
-    LDA #$08                        ;\ set sprite status
-    STA !14C8,y                     ;/
-    LDA.b #!FireballNumber          ;\ set sprite number
-    STA.w !9E,y                     ;/
-    LDA !sprite_x_low,x             ;\ set sprite x position
-    STA.w !E4,y                     ; |
-    LDA !sprite_x_high,x            ; |
-    STA !sprite_x_high,y            ;/
-    LDA !sprite_y_low,x             ;\ set sprite y position
-    CLC : ADC #$0A                  ; |
-    STA.w !D8,y                     ; |
-    LDA !sprite_y_high,x            ; |
-    ADC #$00                        ; |
-    STA !sprite_y_high,y            ;/
-    TYX
-    JSL $07F7D2|!BankB              ; clear out old sprite values
-
     PHY : %SubHorzPos() : TYA : PLY ;\ have fireball face player's direction
     STA !sprite_direction,y         ;/
 
-    RTS                             ; return
++   RTS                             ; return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
