@@ -1,0 +1,217 @@
+#amk 2
+
+
+;------------------------------------------------
+; Header
+;------------------------------------------------
+
+#spc
+{
+    #title   "The Goonies 'R' Good Enough"
+    #game    "The Goonies II"
+    #comment "Ported by zuccha"
+}
+
+
+;------------------------------------------------
+; Volume / Tempo
+;------------------------------------------------
+
+w255 t61
+
+
+;------------------------------------------------
+; Instruments
+;------------------------------------------------
+
+"Bass    = @8 v255 l16 o3"
+"Cello   = @4 v100 l4 o3"
+"Drums   = @28 v120 l16 o4"
+"Marimba = @3 v200 l16"
+
+
+;------------------------------------------------
+; Shared melodies
+;------------------------------------------------
+
+"Marimba1 = d r8. > d < r d r g r a r > c r d r <"
+"Marimba2 = r8 d d > d < r d r g r a r > c r d r <"
+"Marimba3 = r8 d d > d < r d r g r f r g r f r"
+"Marimba4 = r8 d d > d < r d r2^16"
+"Marimba5 = r8 d d > d8 < d8 g8 a8 r4"
+
+"DRestD = d r4^16 d r d r4^16 d r"
+
+
+;------------------------------------------------
+; Channel 0
+;------------------------------------------------
+
+#0
+Marimba o4
+
+[Marimba1 Marimba2]2 < ; 4
+[Marimba1 Marimba2]2 > ; 4
+
+[r1]22
+Marimba1 Marimba2 Marimba1 Marimba3 ; 4
+
+[r1]22
+Marimba1 Marimba2 Marimba1 Marimba4 ; 4
+
+r1
+
+
+;------------------------------------------------
+; Channel 1
+;------------------------------------------------
+
+#1
+Marimba o3
+
+Marimba1 Marimba2 Marimba1 Marimba5 ; 4
+
+[[r1]]26
+Marimba1 Marimba2 Marimba1 Marimba3 ; 4
+
+[r1]22
+Marimba1 Marimba2 Marimba1 Marimba4 ; 4
+
+r1
+
+
+;------------------------------------------------
+; Channel 2
+;------------------------------------------------
+
+#2
+Cello
+
+[[r1]]8
+
+[[
+  r a f8 a f8                                  ; 1
+  r16 a+ a g f16 c16 d2.^16 < g8 a8            ; 2
+  r8 d8 d8 d8 e8 f8 g8 f8                      ; 1
+
+  > r a8 a8 a a                                ; 1
+  r16 a+ a g f r16 d8 d8 d8 e8 f c c8 d e f    ; 3
+
+  r > c8 < r8 a+ > c8 < r8                     ; 1
+  < a+ a g a r a8 r8 g a g f e f               ; 3
+
+  r > c8 < r8 a+ > c8 < r8                     ; 1
+  a+ d8 e e8 d8 c8 r f8. f16 f c8. c16 c f f f ; 3
+
+  r d8. d16 d8 d8 d8 f16 e16 d f f4. g16       ; 1 + 15/16
+  a4.. g8 g2... r16 e8 g8 g8 g g a c8 f8 a8    ; 3 + 1/16
+  > f8. e8. d8 c c16 d8. <                     ; 1
+
+  [r1]4
+]]2
+
+r a r2
+
+
+;------------------------------------------------
+; Channel 3
+;------------------------------------------------
+
+#3
+Cello
+
+[[r1]]8
+
+[[
+  r a f8 a f8                                           ; 1
+  a+ a g f8 f16 a2.^16 c8 d8                            ; 2
+  r8 d8 d8 d8 e8 f8 g8 f8                               ; 1
+
+  r a8 a8 a a                                           ; 1
+  a+ a g f r8 f8 f8 f8 g8 a e e8 f g a                  ; 3
+
+  r > c8 < r8 a+ a                                      ; 1
+  g f e f r a8 r8 g f e d c+ d                          ; 3
+
+  r > c8 < r8 a+ a                                      ; 1
+  g f8 a a8 g8 f8 r a8. a16 a f8. f16 f a a a           ; 3
+
+  r a8. a16 a8 g8 f8 a16 g16 f a+ a+4. > c16            ; 1 + 15/16
+  d4.. c8 c2... r16 < a8 > c8 c8 c c d8 < r8 f8 a8 > c8 ; 3 + 1/16
+  f8. e8. d8 c c16 d8.                                  ; 1
+
+  [r1]4
+]]2
+
+r a r2
+
+
+;------------------------------------------------
+; Channel 4
+;------------------------------------------------
+
+#4
+Bass
+
+[[d r]]16 <                                ; 2
+[[d r]]8                                   ; 1
+[[d r]]6 f c < f > r                       ; 1
+
+[[
+  [DRestD r2 < a > r8. c r8.]2             ; 4
+
+  [f r f r > c < r f r]4                   ; 2
+  [d r d r a r d r]3 e r f r g r f r       ; 2
+
+  [f r f r > c < r f r]4                   ; 2
+  [d r d r a r d r]3 d r a r c r > c r < < ; 2
+
+  [a+ r a+ r > f r < a+ r]2 >              ; 1
+  [c r c r g r c r]2                       ; 1
+  [f r f r > c r < f r]2                   ; 1
+
+  g r < g r g r g r a r a r > a+ r > c r < ; 1
+  [a+ r a+ r > f r < a+ r]2 >              ; 1
+  c r c r g r c r c r c r d r e r          ; 1
+
+  [f r > f f <]8                           ; 2
+  [d r > d d <]4 <                         ; 1
+  [a+ r > a+ a+ <]4 >                      ; 1
+  [c r > c c <]8                           ; 2
+
+  < a r8 a > e r a r8. < a r > e r a r     ; 1
+  < a+ r8 a+ > d r f r c r c r d r e r     ; 1
+]]2
+
+[[ DRestD r2 < a > r8. c r8. ]]2           ; 4
+f r f r > c r < f r2^16                    ; 1
+
+
+;------------------------------------------------
+; Channel 5
+;------------------------------------------------
+
+#5
+Drums
+
+"Drums1 = f+ r f+ r d r f+ r"
+"Drums2 = f+ r f+ r d r d r"
+"Drums3 = f+ r f+ r8. f+ r"
+
+[[f+ r]]30 d d d r                           ; 4
+
+[[
+  [DRestD r4 d r8. d r8.]2                   ; 4
+
+  [Drums1]7 Drums2                           ; 4
+  [Drums1]14                                 ; 7
+  Drums3 Drums2                              ; 1
+  [Drums1]3 Drums2                           ; 2
+  [Drums1]12                                 ; 6
+
+  f+ r8. d r4.. d r8.                        ; 1
+  f+ r8. d r8. f+ r f+ r f+ r f+ r           ; 1
+]]2
+
+[[DRestD r4 d r8. d r8.]]2                   ; 4
+Drums1 r2                                    ; 1
