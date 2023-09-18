@@ -29,3 +29,9 @@ A collection of SMW ASM and resources.
 | Name                                                     | Download                                                                                                                              |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | [Overworld Music Editor](./tools/overworld_music_editor) | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/tool%2Foverworld_music_editor%2F1.0.0/overworld_music_editor-1.0.0.zip) |
+
+## Ports
+
+| Name                                                                                                                  | Download                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [The Goonies II - The Goonies 'R' Good Enough](./ports/The%20Goonies%20II%20-%20The%20Goonies%20'R'%20Good%20Enough/) | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/port%2Fthe_goonies_r_good_enough%2F1.0.0/The_Goonies_II-The_Goonies_R_Good_Enough-1.0.0.zip) |
