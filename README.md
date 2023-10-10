@@ -13,6 +13,7 @@ A collection of SMW ASM and resources.
 | Name                                                        | Download                                                                                                                 |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | [Magikoopa Shooting Fireball](./sprites/magikoopa_fireball) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/magikoopa_fireball%2F1.0.1/magikoopa_fireball-1.0.1.zip)   |
+| [Girian](./sprites/girian)                                  | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgirian%2F1.0.0/girian-1.0.0.zip)                  |
 | [Gunstar Heroes Bomb](./sprites/gunstar_heroes_bomb)        | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/gunstar_heroes_bomb%2F1.1.0/gunstar_heroes_bomb-1.1.0.zip) |
 | [Orbinaut](./sprites/orbinaut)                              | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/orbinaut%2F1.0.1/orbinaut-1.0.1.zip)                       |
 
