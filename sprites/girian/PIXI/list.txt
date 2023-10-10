@@ -1,0 +1,4 @@
+00 girian.json
+
+CLUSTER:
+10 girian_fire.asm
