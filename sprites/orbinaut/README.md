@@ -74,15 +74,15 @@ modifying their JSON configuration files.
 If you want to use SP1 or SP2, set the property _Use second graphics page_ to
 `false`. If you want to use SP3 or SP4 set _Use second graphics page_ to `true`.
 
-With _Extra Property Byte 1_ you can define what tile to use. In a graphics file
-tiles range from `0x00` to `0x7F`. If you put the graphics file in slots SP1 or
-SP3, you use the tile value of the graphics file (`0x00`-`0x7F`). If you put the
-graphics file in SP2 or SP4, you need to add `0x80` to the tile value, resulting
-in values ranging from `0x80` to `0xFF`.
+With the `!gfx_tile` define found in the ASM files you can define what tile to
+use. In a graphics file tiles range from `0x00` to `0x7F`. If you put the
+graphics file in slots SP1 or SP3, you use the tile value of the graphics file
+(`0x00`-`0x7F`). If you put the graphics file in SP2 or SP4, you need to add
+`0x80` to the tile value, resulting in values ranging from `0x80` to `0xFF`.
 
 You can check the following table for reference, where columns indicate whether
-_Use second graphics page_ is `false` (1st) or `true` (2nd), and the rows state
-the range values for _Extra Property Byte 1_:
+"Use second graphics page" is `false` (1st) or `true` (2nd), and the rows state
+the range values for `!gfx_tile`:
 
 |                 | 1st | 2nd |
 | --------------- | --- | --- |
@@ -92,9 +92,8 @@ the range values for _Extra Property Byte 1_:
 By default, both the orbinaut and the spike ball are in the same graphics file
 `ExGFX80.bin` at positions `0x40` and `0x60` respectively. In both their JSON
 config file "Use second graphics page" is set to `true` and they are specifying
-values greater than `0x80` in _Extra Property Byte 1_ (_i.e._,
-`0xC0 = 0x40 + 0x80` and `0xE0 = 0x60 + 0x80`), meaning we need to load `80` in
-SP4 via Lunar Magic.
+values greater than `0x80` in `!gfx_tile` (_i.e._, `0xC0 = 0x40 + 0x80` and
+`0xE0 = 0x60 + 0x80`), meaning we need to load `80` in SP4 via Lunar Magic.
 
 Let's take another example. In Lunar Magic, we set the following SP slots:
 
@@ -103,22 +102,21 @@ Let's take another example. In Lunar Magic, we set the following SP slots:
 - **SP3**: 80
 - **SP4**: A2
 
-Also, we have `orbinaut.json` with the following properties:
+Also, we have `orbinaut.asm` and `orbinaut.json` with the following properties:
 
-- **Extra Property Byte 1**: `146` (`0x92`)
+- **!gfx_tile**: `146` (`0x92`)
 - **Use second graphics page**: `false`
 
-and `orbinaut_spike_ball.json`:
+and `orbinaut_spike_ball.asm` and `orbinaut_spike_ball.json`:
 
-- **Extra Property Byte 1**: `36` (`0x24`)
+- **!gfx_tile**: `36` (`0x24`)
 - **Use second graphics page**: `true`
 
 For the orbinaut the game will take tile `0x12` in GFX02.bin (SP2), because we
-set _Use second graphics page_ to `false` (either SP1 or SP2) and _Extra
-Property Byte 1_ is `0x92` >= `0x80` (so SP2). For the spike ball the game will
-take tile `0x24` in `ExGFX80.bin` (SP3), because we set _Use second graphics
-page_ to `true` (either SP3 or SP4) and its _Extra Property Byte 1_ is
-`0x24 < 0x80` (so SP3).
+set "Use second graphics page" to `false` (either SP1 or SP2) and `!gfx_tile` is
+`0x92` >= `0x80` (so SP2). For the spike ball the game will take tile `0x24` in
+`ExGFX80.bin` (SP3), because we set "Use second graphics page" to `true` (either
+SP3 or SP4) and its `!gfx_tile` is `0x24 < 0x80` (so SP3).
 
 ### Customize Palette
 
@@ -138,6 +136,29 @@ The sprite takes 5 sprite slots, 1 for the orbinaut and 4 for the spike balls,
 so be mindful when using it!
 
 ## Changelog
+
+### v1.1.0 (2023-12-24)
+
+#### Added:
+
+- Added palmask for Orbinaut's palette.
+- Allow to configure spike ball's radius from orbinaut's center via extra byte.
+
+#### Changed:
+
+- Moved Orbinaut GFX tile configuration in ASM define instead of using Extra
+  Property Byte 1.
+- Moved Orbinaut' Spike Ball GFX tile configuration in ASM define instead of
+  using Extra Property Byte 1.
+- Moved Orbinaut's Spike Ball tile number configuration in ASM define instead of
+  using Extra Property Byte 2.
+
+#### Fixed:
+
+- Prevent orbinaut from drifting downward when hitting a wall.
+- Disable spike ball hitbox while orbinaut's core is being eaten by Yoshi.
+- Kill spike ball that was on Yoshi's tongue when Mario is hurt and jumps off
+  (before it would snap back to the orbinaut).
 
 ### v1.0.1 (2023-08-16)
 
