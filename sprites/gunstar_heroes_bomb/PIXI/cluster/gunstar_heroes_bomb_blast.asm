@@ -64,9 +64,8 @@ hitbox_radius:
 ; Factor that determines the amplitude of the explosion blast from the center.
 ; One column is for the inner blast, the other is for the outer. In practice,
 ; values are numerator/denominator.
-;                               Inner  Outer
-rotation_radius_numerator:   dw $0001, $0003
-rotation_radius_denominator: dw $0010, $0020
+;                   Inner  Outer
+rotation_radius: db $10,   $18
 
 
 ;-------------------------------------------------------------------------------
@@ -256,42 +255,30 @@ get_sprite_clipping_A:
 
 ; Orbit explosion around center.
 orbit:
-    LDA !motion,x : ASL : TAY                   ; Load motion to index tables
-
-    REP #$20
-    LDA rotation_radius_numerator,y : STA $06   ; Load rotation radius for later
-    LDA rotation_radius_denominator,y : STA $08 ; computations
-    SEP #$20
+    ; Radius
+    LDA !motion,x : TAY                         ; Load motion to index "rotation_radius"
+    LDA rotation_radius,y : STA $06             ; Load radius
+    TYA : ASL : TAY                             ; Double Y to index "rotation_speed"
 
     ; Rotate
     LDA !angle_h,x : XBA : LDA !angle_l,x       ; Load angle
     REP #$20 : CLC : ADC .rotation_speed,y      ; Increase angle by rotation
-    AND #$01FF : SEP #$20                       ; And wrap around (modulo)
+    AND #$01FF : STA $04 : SEP #$20             ; And wrap around (modulo)
     STA !angle_l,x : XBA : STA !angle_h,x       ; Store angle
 
     ; Compute X position
-    LDA !angle_l,x : STA $00                    ; Load angle low byte
-    LDA !angle_h,x : STA $01                    ; Load angle high byte
-    JSR compute_cosine                          ; Compute cosine
-    REP #$20 : LDA $02 : STA $00 : SEP #$20     ; Transfer result
-    JSR scale_radius                            ; Adjust radius amplitude
-
+    %CircleX()
     LDA !center_x_h,x : XBA : LDA !center_x_l,x ; Center of the explosion
-    REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
-    STA !cluster_x_low,x : XBA                  ; Update Y coordinate
-    STA !cluster_x_high,x
+    REP #$20 : CLC : ADC $07 : SEP #$20         ; Add X offset
+    STA !cluster_x_low,x : XBA                  ; And store result
+    STA !cluster_x_high,x                       ;
 
-    ; Compute Y position
-    LDA !angle_l,x : STA $00                    ; Load angle low byte
-    LDA !angle_h,x : STA $01                    ; Load angle high byte
-    JSR compute_sine                            ; Compute sine
-    REP #$20 : LDA $02 : STA $00 : SEP #$20     ; Transfer result
-    JSR scale_radius                            ; Adjust radius amplitude
-
+    ; Compute X position
+    %CircleY()
     LDA !center_y_h,x : XBA : LDA !center_y_l,x ; Center of the explosion
-    REP #$20 : CLC : ADC $00 : SEP #$20         ; Add radius
-    STA !cluster_y_low,x : XBA                  ; Update Y coordinate
-    STA !cluster_y_high,x
+    REP #$20 : CLC : ADC $09 : SEP #$20         ; Add X offset
+    STA !cluster_y_low,x : XBA                  ; And store result
+    STA !cluster_y_high,x                       ;
 
     ; Return
     RTS
@@ -300,113 +287,3 @@ orbit:
 .rotation_speed:
     dw $0000|!rotation_speed                    ; Clockwise
     dw -($0000|!rotation_speed)                 ; Counter-clockwise
-
-
-;-------------------------------------------------------------------------------
-; Compute Sine/Cosine
-;-------------------------------------------------------------------------------
-
-; Compute sine, signed.
-; @param $00-$01: Degree (#$0000-#$01FF).
-; @return $02-$03: Sine.
-compute_sine:
-    PHX
-    REP #$30 : LDA $00 : AND #$00FF             ; Remove high byte (since there are 0-255 items)
-    ASL : TAX : LDA $07F7DB,x : STA $02         ; Load value form table
-    SEP #$30 : LDA $01 : BEQ +                  ; If degree value is >= #$0100 (180)
-    REP #$20 : LDA $02 : EOR #$FFFF : INC       ; Then we need to flip the result...
-    STA $02 : SEP #$20                          ; ...and store the value back
-+   PLX : RTS
-
-; Compute cosine, signed.
-; @param $00-$01: Degree (#$0000-#$01FF).
-; @return $02-$03: Cosine.
-compute_cosine:
-    PHX : REP #$30
-    LDA $00 : CLC : ADC #$0080                  ; Shift by 90 degrees, because cosine = sine + 90
-    CMP #$0100 : BCC .first_half                ; If bigger than 180 degrees...
-    CMP #$0200 : BCS .first_half                ; ...or if approaching final quadrant
-
-.second_half                                    ; $0100-$01FF
-    AND #$00FF                                  ; Modulo by 256
-    ASL : TAX : LDA $07F7DB,x                   ; Load value from table
-    EOR #$FFFF : INC A : STA $02                ; Store the negated value
-    SEP #$30 : PLX : RTS
-
-.first_half                                     ; $0000-$00FF or $0200-$02FF
-    AND #$00FF                                  ; Remove high byte (if final quadrant)
-    ASL : TAX : LDA $07F7DB,x : STA $02         ; Load and store value from table
-    SEP #$30 : PLX : RTS
-
-
-;-------------------------------------------------------------------------------
-; Scale Radius
-;-------------------------------------------------------------------------------
-
-; Scale sine/cosine value. The value can be controlled with the defines below:
-;   sine * !numerator / !denominator
-; By default, those values are 1/16.
-; @param $00-$01: Sine/cosine.
-; @param $06-$07: Numerator.
-; @param $08-$09: Denominator.
-; @return $00-$01: Result of the scaling.
-scale_radius:
-    LDA !motion,x : ASL : TAY                   ; Load motion to index numerator/denominator
-
-.multiplication
-    REP #$20 : LDA $06 : STA $02                ; Load numerator
-    LDA $00 : BMI .negative_multiplication      ; Handle positive and negative differently
-
-.positive_multiplication
-    JSR multiply : BRA .division                ; Multiply and skip ahead
-
-.negative_multiplication
-    EOR #$FFFF : INC : STA $00                  ; Convert multiplier to unsigned
-    JSR multiply                                ; Unsigned multiplication
-    EOR #$FFFF : INC                            ; Convert product to signed
-
-.division
-    STA $00                                     ; Preserve product
-    LDA $08 : STA $02                           ; Load the denumerator
-    LDA $00 : BMI .negative_division            ; Handle positive and negative differently
-
-.positive_division
-    JSR divide                                  ; Divide
-    SEP #$20 : RTS
-
-.negative_division
-    EOR #$FFFF : INC : STA $00                  ; Convert dividend to unsigned
-    JSR divide : REP #$20                       ; Divide (A is 8-bit)
-    LDA $00 : EOR #$FFFF : INC : STA $00        ; Convert result to signed
-    SEP #$20 : RTS
-
-; Multiplication (8/16-bit).
-; @param $00: First multiplicand.
-; @param $02/$04: Second multiplicand.
-; @return A: Product.
-multiply:
-    STA $04
--	LSR $02 : BEQ ++ : BCC +
-    CLC : ADC $00
-+	ASL $00 : BRA -
-++  CLC : ADC $00
-    SEC : SBC $04
-    RTS
-
-; Division (16-bit).
-; @param $00-$01: Dividend.
-; @param $02-$03: Divisor.
-; @return $00-$01: Quotient.
-; @return $02-$03: Remainder.
-divide:
-    REP #$20
-    ASL $00
-    LDY #$0F : LDA #$0000
--   ROL A
-    CMP $02 : BCC +
-    SBC $02
-+   ROL $00
-    DEY : BPL -
-    STA $02
-    SEP #$20
-    RTS

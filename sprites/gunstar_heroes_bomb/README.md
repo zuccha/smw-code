@@ -1,7 +1,6 @@
 # BOMB FROM GUNSTAR HEROES
 
-Author: zuccha, requested by TheXander. The code for orbital movement is based
-on GreenHammerBro and Akagnite routines. Palette and graphics provided by
+Author: zuccha, requested by TheXander. Palette and graphics provided by
 TheXander.
 
 Bomb sprite that explodes in a big blast. The bomb can be set to explode due to
@@ -133,6 +132,13 @@ LDA #$00 : STA !extra_byte_4,y       ; No initial Y speed
 ```
 
 ## Changelog
+
+### v1.2.0 (2023-12-25)
+
+#### Changed:
+
+- Allow to configure inner and outer blast radiuses with pixels, instead of
+  using unintuitive nominator/denominator values.
 
 ### v1.1.0 (2023-09-08)
 
