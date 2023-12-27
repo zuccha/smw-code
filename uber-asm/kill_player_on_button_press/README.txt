@@ -13,10 +13,17 @@ given amount of times.
 --------------------------------------------------------------------------------
 
 This bundle contains the following files:
-- level.asm: The code specific for the level. This is also where you tune the
-  behavior of the UberASM.
-- status_code.asm: Code that draws the amount of times the button has been
-  pressed in the status bar. Needed only if you want the counter to be visible.
+- UberASMTool/level/level.asm: The code specific for the level. This is also
+  where you tune the behavior of the UberASM.
+- UberASMTool/other/status_code.asm: Code that draws the amount of times the
+  button has been pressed in the status bar. Needed only if you want the counter
+  to be visible.
+- PIXI/sprites/indicator.asm: Code for a sprite that shows an indicator with the
+  amount of presses done/left above Mario.
+- PIXI/sprites/indicator.json: Config for a sprite that shows an indicator with
+  the amount of presses done/left above Mario.
+- ExGraphics/ExGFX80.bin: Graphics file that contains the digits to be used for
+  the indicator sprite.
 
 
 --------------------------------------------------------------------------------
@@ -52,19 +59,13 @@ Note that this step is optional, you need to do this only if you want the
 counter to be visible over Mario's head.
 
 You can show the indicator over Mario's head via the sprite "indicator.asm". The
-sprite requires the bundled "ExGFX80.bin" (you can use numbers other than 80).
-
-The graphics file needs to contain the ten digits spread on two lines as follows
-
-  0 1 2 3 4
-  5 6 7 8 9
-
-The initial position (the position of tile "0") can be configured with the
-`!gfx_initial_tile` define, and you can choose which SP slot to use with
-`!gfx_sp`.
+sprite requires the bundled "ExGFX80.bin" (you can use numbers other than 80),
+or any file containing the digits 0-9. In case of a custom ExGFX file, you can
+set the position of the digits tiles with the `gfx_tiles` table in
+"indicator.asm". You can choose which SP slot to use with `!gfx_sp`.
 
 The sprite will follow Mario whenever he goes. You can choose to show the inputs
-done or the input remaining.
+done or the inputs remaining via the extra bit.
 
 ................................................................................
 2.3 Show the counter in the status bar
@@ -95,24 +96,43 @@ or not.
 
 By default, they are defined as follows:
 
-  !ram_button_presses_count       = $140B
-  !ram_show_presses_in_status_bar = $140C
+  !ram_button_presses_count       = $140B|!addr
+  !ram_show_presses_in_status_bar = $140C|!addr
 
 These two addresses are configurable. If you need to change them because of
-conflicts with other patches, remember to change them in "status_code.asm" and
-in all level files you are using.
+conflicts with other patches, remember to change them in all level files you are
+using, in "status_code.asm", and in "indicator.asm".
 
 
 --------------------------------------------------------------------------------
 3. Compatibility
 --------------------------------------------------------------------------------
 
-This UberASM is compatible with SA-1 and KevinM's Retry System.
+This UberASM is compatible with SA-1.
 
 
 --------------------------------------------------------------------------------
 4. Changelog
 --------------------------------------------------------------------------------
+
+................................................................................
+v1.2.0 (2023-12-27)
+................................................................................
+
+Added:
+- Allow to choose whether the counter can be increased (buttons detected) while
+  the player is hurt.
+- Add Lunar Magic display and presets (by replacing the CFG file with a JSON).
+
+Changed:
+- Move files in folders that mimic those of the related tools.
+- Make every digit's position in the ExGFX file independently configurable.
+- Make the indicator sprite's done/left setting configurable via extra bit
+  instead of ASM define.
+
+Fixed:
+- Prevent the game from crashing if the threshold is reached while the game is
+  paused.
 
 ................................................................................
 v1.1.0 (2023-08-11)

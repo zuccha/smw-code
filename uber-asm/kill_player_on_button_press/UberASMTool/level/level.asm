@@ -5,7 +5,7 @@
 ; UberASM that kills the player after a button of your choosing has been pressed
 ; a given amount of times.
 
-; The button(s), amount of presses, behaviour, and other properties can be
+; The button(s), amount of presses, behavior, and other properties can be
 ; configured down below.
 
 
@@ -14,8 +14,8 @@
 ;-------------------------------------------------------------------------------
 
 ; Number of pressed required to hurt/kill the player.
-; Must be a value between 1-255 ($01-$FF). 0 won't do anything, any value above
-; 255 ($FF) will crash the game.
+; Must be a value between 0-254 ($00-$FE). 0 will affect the player instantly,
+; while 255 will not work properly.
 ; N.B.: This needs to be the same as the one defined in the indicator's ASM (if
 ; you are using it)!
 !button_presses_threshold = $0A
@@ -27,7 +27,7 @@
 ; For technical reasons, it is not possible to determine if only Y has been
 ; pressed :(
 !button_A      = 1
-!button_B      = 0
+!button_B      = 1
 !button_X      = 0
 !button_X_or_Y = 0
 !button_L      = 0
@@ -41,7 +41,7 @@
 
 ; Determine if the player should die or being hurt when reaching the threshold.
 ; 0 = hurt, 1 = die
-!kill_player = 1
+!kill_player = 0
 
 ; Determine if the counter should reset after the player has been hurt.
 ; It should be relevant only if !kill_player = 0 (so that the player can be hurt
@@ -49,22 +49,28 @@
 ; 0 = don't reset counter, 1 = reset counter
 !reset_counter = 1
 
+; Determine if should detect button presses when the player is hurt.
+; 0 = don't detect presses if player is being hurt
+; 1 = detect presses if player is being hurt
+!increase_counter_if_player_is_hurt = 0
+
 ; Determine if should detect button presses when the game is paused.
-; Please note that if this is enabled, the counter in the status bar will only
-; be updated once the game is unpaused!
+; Please note that if this is enabled, the player will be affected and the
+; counter in the status bar will be updated only once the game is unpaused!
 ; 0 = don't detect presses if game is paused
 ; 1 = detect pressed even if game is paused
 !increase_counter_if_game_is_paused = 0
 
 ; Whether to show the number of presses is the status bar or not.
-; 0 = hidden, 1 = visible.
+; 0 = hidden
+; 1 = visible.
 ; N.B.: This is relevant only if you are showing the counter in the status bar
 ; with the custom "status_code.asm" file.
 !show_presses_in_status_bar = 1
 
 ; 1 byte of free RAM, keeping track of the number of presses (1 byte).
 ; N.B.: This needs to be the same as the one defined in the status bar's ASM!
-!ram_button_presses_count = $140B
+!ram_button_presses_count = $140B|!addr
 
 ; 1 byte of free RAM, determining whether the status bar should display the
 ; counter or not. You should use an address that resets automatically on level
@@ -73,7 +79,7 @@
 ; N.B.: This is relevant only if you are showing the counter in the status bar
 ; with the custom "status_code.asm" file.
 ; N.B.: This needs to be the same as the one defined in the status bar's ASM!
-!ram_show_presses_in_status_bar = $140C
+!ram_show_presses_in_status_bar = $140C|!addr
 
 
 ;-------------------------------------------------------------------------------
@@ -94,10 +100,10 @@
 ;-------------------------------------------------------------------------------
 
 init:
-    STZ.w !ram_button_presses_count|!addr       ; Reset counter
+    STZ.w !ram_button_presses_count             ; Reset counter
 
     LDA.b #!show_presses_in_status_bar          ; Hide or show the number of
-    STA.w !ram_show_presses_in_status_bar|!addr ; presses in the status bar
+    STA.w !ram_show_presses_in_status_bar       ; presses in the status bar
 
     RTL
 
@@ -107,33 +113,55 @@ init:
 ;-------------------------------------------------------------------------------
 
 main:
-    LDA.w !ram_button_presses_count|!addr       ; If the button has not been
-    CMP.b #!button_presses_threshold            ; pressed enough times
-    BCC +                                       ; Continue
-    RTL                                         ; Else don't count presses
+    ; !ram_button_presses_count determines what needs to be done. If it's
+    ; smaller than the threshold, then we keep monitoring inputs; if it's the
+    ; same, we need to affect the player; otherwise there is nothing more to do.
+    ; We do it this way, instead of triggering the affect part after detecting
+    ; the final button press, to avoid triggering Mario's death while the game
+    ; is paused (which crashes the game).
+    LDA.w !ram_button_presses_count             ; Check how many times the
+    CMP.b #!button_presses_threshold            ; button has been pressed
+    BCC .update_count                           ; count < threshold
+    BEQ .affect_player                          ; count = threshold
+    RTL                                         ; count > threshold
 
+    ; Increase count by one if all conditions are met: player is not hurt or
+    ; it's allowed to be hurt; game is not paused or it's allowed to increase
+    ; when paused; one of the configured buttons has been pressed.
+.update_count
+if !increase_counter_if_player_is_hurt != 1
+    LDA $71 : CMP #$01 : BEQ ++                 ; If player is hurt
+    LDA $1497|!addr : BEQ +                     ; or has iframes
+++  RTL                                         ; Then return
 +
-if !increase_counter_if_game_is_paused != 1
-    LDA $9D : ORA $13D4|!addr                   ; If game is not frozen or paused
-    BEQ +                                       ; Then check button presses
-    RTL                                         ; Else don't count presses
 endif
 
-+   LDA $16 : AND.b #!controller_mask_1         ; If one of the buttons (1) has been pressed
-    BNE +                                       ; Then increase button count
+if !increase_counter_if_game_is_paused != 1
+    LDA $9D : ORA $13D4|!addr : BEQ +           ; If game is paused
+    RTL                                         ; Then return
++
+endif
+
+    LDA $16 : AND.b #!controller_mask_1         ; If one of the buttons (1) has been pressed
+    BNE .increase_counter                       ; Then increase button count
     LDA $18 : AND.b #!controller_mask_2         ; Else if one of the buttons (2) has been pressed
-    BNE +                                       ; Then increase button count
+    BNE .increase_counter                       ; Then increase button count
     RTL                                         ; Else don't increase count
 
-+   INC.w !ram_button_presses_count|!addr       ; Increase button presses count
+.increase_counter
+    INC.w !ram_button_presses_count             ; Increase button presses count
+    RTL
 
-    LDA.w !ram_button_presses_count|!addr       ; If the button has been pressed
-    CMP.b #!button_presses_threshold            ; exactly the required amount
-    BEQ +                                       ; Then kill the player
-    RTL                                         ; Else don't hurt or kill the player
+    ; Affect player by hurting/killing them. We do this only if the game is not
+    ; paused to prevent the game from crashing. After affecting the player, we
+    ; reset the counter if we need to do so and the player is not dying,
+    ; otherwise we increase the counter by one so this routine doesn't trigger
+    ; again.
+.affect_player:
+    LDA $9D : ORA $13D4|!addr : BEQ +           ; If game is paused
+    RTL                                         ; The return
 
 +
-
 if !kill_player == 0
     JSL $00F5B7|!bank                           ; Hurt player
 else
@@ -141,8 +169,11 @@ else
 endif
 
 if !reset_counter
-    LDA $71 : CMP #$09 : BEQ +                  ; If player is dying, then do nothing
-    STZ.w !ram_button_presses_count|!addr       ; Else reset counter
+    LDA $71 : CMP #$09 : BEQ +                  ; If player is not dying
+    STZ.w !ram_button_presses_count             ; Then reset counter
+    RTL
++
 endif
 
-+   RTL
+    INC !ram_button_presses_count               ; Increase the counter over the threshold
+    RTL

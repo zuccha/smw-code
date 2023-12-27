@@ -7,7 +7,16 @@
 
 
 ;-------------------------------------------------------------------------------
-; Configuration
+; Configuration (extra bit)
+;-------------------------------------------------------------------------------
+
+; Extra bit: If 1, the indicator will show the amount of inputs left (when it
+; reaches zero Mario dies), otherwise it shows the inputs done (when it reaches
+; the threshold Mario dies).
+
+
+;-------------------------------------------------------------------------------
+; Configuration (defines)
 ;-------------------------------------------------------------------------------
 
 ; Number of pressed required to hurt/kill the player.
@@ -18,27 +27,25 @@
 
 ; 1 byte of free RAM, keeping track of the number of presses (1 byte).
 ; N.B.: This needs to be the same as the one defined in the level's ASM!
-!ram_button_presses_count = $140B
-
-; Whether to show the inputs left or done.
-; 0 = show inputs done (when it reaches the threshold Mario dies)
-; 1 = show inputs left (when it reaches zero Mario dies)
-!show_inputs_left = 1
+!ram_button_presses_count = $140B|!addr
 
 ; Which SP graphics file to use. Valid values range from 1 to 4.
 !gfx_sp = 3
 
-; Tile for the first digit (0) in the graphics file. Digits must be on two
-; lines, in the following order:
-;   0 1 2 3 4
-;   5 6 7 8 9
-!gfx_initial_tile = $46
+; Tiles for the digits in the graphics file. Each digit must be 8x8 pixels.
+;              0    1    2    3    4    5    6    7    8    9
+gfx_tiles: db $46, $47, $48, $49, $4A, $56, $57, $58, $59, $5A
 
 ; Color palette to use for the digits. Accepted values go from 0 to 7.
 !gfx_palette = 6
 
-; How much space, in pixel, a single digit takes (they should be squared).
+; How much space, in pixels, a single digit takes (they should be squares).
 !digit_size = $08
+
+; Vertical offset, in pixels, relative to the player for the indicator. Needed
+; to shift the indicator slightly up when Mario is big.
+player_offset:
+    db $00, $08, $08, $08 ; Small, Big, Cape, Fire
 
 
 ;-------------------------------------------------------------------------------
@@ -47,9 +54,9 @@
 
 ; Offset for the initial tile, taking into account which SP has been chosen.
 if !gfx_sp == 2 || !gfx_sp == 4
-    !gfx_initial_tile_offset = !gfx_initial_tile+$80
+    !gfx_offset = $80
 else
-    !gfx_initial_tile_offset = !gfx_initial_tile
+    !gfx_offset = $00
 endif
 
 ; Which graphics page to use.
@@ -64,10 +71,23 @@ endif
 
 
 ;-------------------------------------------------------------------------------
+; Macros
+;-------------------------------------------------------------------------------
+
+; Since the value can exceed the threshold, we clamp it.
+macro lda_ram_button_presses_count()
+    LDA.w !ram_button_presses_count
+    CMP.b #!button_presses_threshold : BCC ?+
+    LDA.b #!button_presses_threshold
+?+
+endmacro
+
+
+;-------------------------------------------------------------------------------
 ; Main
 ;-------------------------------------------------------------------------------
 
-print "MAIN ",pc
+main:
     PHB : PHK : PLB
     JSR draw_indicator_as_number
     PLB
@@ -91,16 +111,12 @@ draw_indicator_as_number:
 
     LDY !15EA,x                           ; OAM sprite index
 
-if !show_inputs_left == 0
-    LDA.w !ram_button_presses_count|!Base2
-    STA $00                               ; Number to show = current count
-else
-    LDA.b #!button_presses_threshold
-    SEC : SBC.w !ram_button_presses_count|!Base2
-    STA $00                               ; Number to show = threshold - current count
-endif
+    %lda_ram_button_presses_count() : STA $00 ; Number to show = current count
+    LDA !extra_bits,x : AND #04 : BEQ +  ; If the extra bit is set
+    LDA.b #!button_presses_threshold     ; Then number to show = threshold - current count
+    SEC : SBC $00 : STA $00
 
-    STZ $01                               ; Initial offset for digits is 0
++   STZ $01                               ; Initial offset for digits is 0
 
     CMP #$0A : BCC .digit_1s              ; If number to show < 10, then draw 1 digit
     CMP #$64 : BCC .digit_10s             ; Else if number to show < 100, then draw 2 digits
@@ -151,37 +167,25 @@ draw_digit:
     ; X-position
     LDA $7E                               ; A = Player's X position
     CLC : ADC $01                         ; Add digit offset to player's X position
-    STA $0300|!Base2,y                    ; Save X position to OAM
+    STA $0300|!addr,y                     ; Save X position to OAM
 
     ; Y-position
     LDA $80                               ; A = Player's Y position
-    LDX $19 : SEC : SBC offset,x          ; Subtract Mario's size offset to player's Y position
-    STA $0301|!Base2,y                    ; Save X position to OAM
+    LDX $19 : SEC : SBC player_offset,x   ; Subtract Mario's size offset to player's Y position
+    STA $0301|!addr,y                     ; Save X position to OAM
 
     ; Tile number
-    LDA $02 : CMP #$05 : BCC +            ; If digit >= 5
-    CLC : ADC #$0B                        ; Then move to the next line
-+   CLC : ADC.b #!gfx_initial_tile_offset ; Add the initial tile as offset
-    STA $0302|!Base2,y                    ; Save tile number to OAM
+    LDX $02 : LDA gfx_tiles,x             ; GFX tile based on digit
+    CLC : ADC.b #!gfx_offset              ; Plus the offset (first or second page)
+    STA $0302|!addr,y                     ; Save tile number to OAM
 
     ; Tile properties
     LDA.b !tile_properties                ; No flips, priority 2
-    STA $0303|!Base2,y                    ; Save tile properties to OAM
+    STA $0303|!addr,y                     ; Save tile properties to OAM
 
     ; Draw tile
     TYA : LSR : LSR : TAY                 ; Adjust index for tile size table
-    LDA #$00 : STA $0460|!Base2,y         ; 8x8 tile
+    LDA #$00 : STA $0460|!addr,y          ; 8x8 tile
 
     ; Return
     PLY : PLX : RTS
-
-
-;-------------------------------------------------------------------------------
-; Helper Tables
-;-------------------------------------------------------------------------------
-
-; Vertical offset relative to the player for the indicator. Needed to shift the
-; indicator slightly up when Mario is big.
-; 0 = Small, 1 = Big, 2 = Cape, 3 = Fire
-offset:
-    db $00, $08, $08, $08
