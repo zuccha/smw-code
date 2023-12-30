@@ -1,43 +1,44 @@
-# Multiple Songs on Main Map Patch Editor
+# Byte Table Editor
 
-Author: zuccha, suggested by Heitor Porfirio
+This is an editor for editing ASM tables.
 
-This is an editor for generating the table used by the
-[Multiple Songs on Main Map](https://www.smwcentral.net/?p=section&a=details&id=20814)
-patch, created by smkdan.
+<img src="./docs/byte-table-editor.gif" width="500px" >
 
-## Usage
+## Run locally
 
-The tool can be opened in any major web browser.
+First, you need to install [Node](https://nodejs.org/en) and [NPM](https://www.npmjs.com/).
 
-The grid represents the main map of the overworld, divided in 256 cells. You can
-press on a cell to change its value (the value must be in the range of `$00-$FF`).
+To run locally, you need to run
 
-You can check and copy the ASM table by opening the _Output_ menu.
+```bash
+npm run dev
+```
 
-You can add a screenshot of the overworld through the _Image_ menu. The image
-will be stretched to fit inside the grid. Sadly, I might have to reupload the
-image every time you open the tool.
+To compile to a single HTML file, run
 
-You can import an already existing table by copying it and pasting it in the
-_Input_ field, then clicking _Import_.
+```bash
+npm run build
+```
 
-Through the _Colors_ menu, you can toggle seeing background colors (with or
-without transparency) for the cells on the grid. This helps visualize how music
-is grouped.
+You will find "index.html" in the "dist" folder.
 
 ## Changelog
 
-### 1.0.0 (2023-08-30)
+### v1.0.0 (2023-12-30)
 
-Added:
+#### Added:
 
-- Display editable grid
-- Implement copying output table to clipboard
-- Implement "import" feature
-- Add the possibility to add a background image
-- Toggle display colors for cells on the grid
-
-Documentation:
-
-- Write readme
+- Add grid for editing ASM tables.
+- Allow to create a new table from scratch, by setting width, height,
+  and size (byte or word).
+- Allow to import a table by pasting an existing one.
+- Allow to export the table by copying it to the clipboard, with
+  possibility to customize name, indentation, spaces, and adding labels
+  to columns and rows.
+- Allow to switch between binary, decimal, and hexadecimal encodings.
+- Allow to switch between bytes and words.
+- Assign background colors to different values and allow to set their
+  opacity.
+- Allow to set a background image and to toggle its visibility.
+- Allow to select multiple cells via mouse drag, with multi selection.
+- Allow to select cells with the same value via double click.
