@@ -27,10 +27,10 @@ A collection of SMW ASM and resources.
 
 ## Tools
 
-| Name                                                     | Download                                                                                                                              | Online                                                   |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [Byte Table Editor](./tools/byte_table_editor)           | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_table_editor%2F1.0.0/byte-table-editor-1.0.0.zip)           | [Online](https://zuccha.io/pages/byte-table-editor.html) |
-| [Overworld Music Editor](./tools/overworld_music_editor) | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/tool%2Foverworld_music_editor%2F1.0.0/overworld_music_editor-1.0.0.zip) | -                                                        |
+| Name                                                       | Download                                                                                                                    | Online                                                   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| [Byte Table Editor](./tools/byte_table_editor)             | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_table_editor%2F1.1.0/byte-table-editor-1.1.0.zip) | [Online](https://zuccha.io/pages/byte-table-editor.html) |
+| ~[Overworld Music Editor](./tools/overworld_music_editor)~ | Deprecated, use _Byte Table Editor_                                                                                         | -                                                        |
 
 ## Ports
 
