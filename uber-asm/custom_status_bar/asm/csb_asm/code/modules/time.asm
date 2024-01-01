@@ -79,7 +79,7 @@ handle_time:
 ; @return X/Y (8-bit)
 check_time:
     SEP #$30
-    LDA $1493|!addr : ORA $9D|!addr : BNE +         ; If levels not ending and sprites not locked
+    LDA $1493|!addr : ORA $9D : BNE +               ; If levels not ending and sprites not locked
     LDA $0D9B|!addr : CMP #$C1 : BEQ +              ; If not at Bowser's
     LDA $0F30|!addr : CMP #$FF : BEQ +              ; If timer's timer is not $FF
     DEC $0F30|!addr                                 ; Then decrement timer's timer and
