@@ -24,6 +24,16 @@ You will find "index.html" in the "dist" folder.
 
 ## Changelog
 
+### v1.1.0 (2024-01-01)
+
+#### Changed:
+
+- Improve performance.
+
+#### Fixed:
+
+- Fix rectangle selection.
+
 ### v1.0.0 (2023-12-30)
 
 #### Added:

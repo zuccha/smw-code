@@ -1,3 +1,4 @@
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import {
   Button,
   Flex,
@@ -11,52 +12,41 @@ import {
   SliderThumb,
   SliderTrack,
 } from "@chakra-ui/react";
-import { ValueEncoding, ValueSize } from "../utils/value";
-import { useCallback, useRef, useState } from "preact/hooks";
 import { ChangeEvent } from "preact/compat";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { useCallback, useRef, useState } from "preact/hooks";
+import {
+  useColorOpacity,
+  useImage,
+  useImageIsVisible,
+  useTableEncoding,
+  useTableUnit,
+} from "../hooks/useStore";
+import { ValueEncoding, ValueUnit } from "../store/value";
 
-export type MenuSettingsProps = {
-  colorOpacity: number;
-  encoding: ValueEncoding;
-  isImageVisible: boolean;
-  onChangeColorOpacity: (colorOpacity: number) => void;
-  onChangeEncoding: (encoding: ValueEncoding) => void;
-  onChangeImage: (image: string) => void;
-  onChangeIsImageVisible: (isImageVisible: boolean) => void;
-  onChangeSize: (encoding: ValueSize) => void;
-  onRemoveImage: () => void;
-  size: ValueSize;
-};
+export default function MenuSettings() {
+  const [encoding, setEncoding] = useTableEncoding();
+  const [unit, setUnit] = useTableUnit();
 
-export default function MenuSettings({
-  colorOpacity,
-  encoding,
-  isImageVisible,
-  onChangeColorOpacity,
-  onChangeEncoding,
-  onChangeImage,
-  onChangeIsImageVisible,
-  onChangeSize,
-  onRemoveImage,
-  size,
-}: MenuSettingsProps) {
+  const [colorOpacity, setColorOpacity] = useColorOpacity();
+
+  const [_image, setImage] = useImage();
+  const [imageIsVisible, setImageIsVisible] = useImageIsVisible();
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [imageFilename, setImageFilename] = useState("");
 
   const handleChangeColorOpacity = useCallback(
-    (value: number) => onChangeColorOpacity(value),
-    [onChangeColorOpacity]
+    (value: number) => setColorOpacity(value),
+    [setColorOpacity]
   );
 
   const handleChangeEncoding = useCallback(
-    (value: string) => onChangeEncoding(parseInt(value)),
-    [onChangeEncoding]
+    (value: string) => setEncoding(parseInt(value)),
+    [setEncoding]
   );
 
-  const handleChangeSize = useCallback(
-    (value: string) => onChangeSize(parseInt(value)),
-    [onChangeSize]
+  const handleChangeUnit = useCallback(
+    (value: string) => setUnit(parseInt(value)),
+    [setUnit]
   );
 
   const openImageFileBrowser = useCallback(() => {
@@ -67,21 +57,21 @@ export default function MenuSettings({
     (e: ChangeEvent<HTMLInputElement>) => {
       if (e.currentTarget.files && e.currentTarget.files[0]) {
         setImageFilename(e.currentTarget.files[0]?.name ?? "");
-        onChangeImage(URL.createObjectURL(e.currentTarget.files[0]));
+        setImage(URL.createObjectURL(e.currentTarget.files[0]));
       }
     },
-    [onChangeImage]
+    [setImage]
   );
 
   const handleChangeIsImageVisible = useCallback(() => {
-    onChangeIsImageVisible(!isImageVisible);
-  }, [isImageVisible, onChangeIsImageVisible]);
+    setImageIsVisible(!imageIsVisible);
+  }, [imageIsVisible, setImageIsVisible]);
 
   const handleRemoveImage = useCallback(() => {
     if (imageInputRef.current) imageInputRef.current.value = "";
-    onRemoveImage();
+    setImage("");
     setImageFilename("");
-  }, [onRemoveImage]);
+  }, [setImage]);
 
   return (
     <Flex direction="column" flex={1} gap={2}>
@@ -95,11 +85,11 @@ export default function MenuSettings({
           </Flex>
         </RadioGroup>
 
-        <Flex alignItems="center">Size:</Flex>
-        <RadioGroup onChange={handleChangeSize} value={`${size}`}>
+        <Flex alignItems="center">Unit:</Flex>
+        <RadioGroup onChange={handleChangeUnit} value={`${unit}`}>
           <Flex gap={4}>
-            <Radio value={`${ValueSize.Byte}`}>Byte</Radio>
-            <Radio value={`${ValueSize.Word}`}>Word</Radio>
+            <Radio value={`${ValueUnit.Byte}`}>Byte</Radio>
+            <Radio value={`${ValueUnit.Word}`}>Word</Radio>
           </Flex>
         </RadioGroup>
 
@@ -121,7 +111,7 @@ export default function MenuSettings({
       <Flex flex={1} gap={2}>
         <IconButton
           aria-label="toggle visibility"
-          icon={isImageVisible ? <ViewIcon /> : <ViewOffIcon />}
+          icon={imageIsVisible ? <ViewIcon /> : <ViewOffIcon />}
           onClick={handleChangeIsImageVisible}
         />
 

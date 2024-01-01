@@ -1,23 +1,28 @@
 import { Center, Text } from "@chakra-ui/react";
-import { useMemo } from "preact/hooks";
-import { Colors } from "../utils/color";
-import { ValueEncoding, ValueSize, valueToString } from "../utils/value";
+import { Ref, useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { Colors } from "../store/color";
+import { useTableCellIsSelected, useTableCellValue } from "../hooks/useStore";
+import Signal from "../store/signal";
+import { ValueEncoding, ValueUnit, valueToString } from "../store/value";
 
 export type CellProps = {
-  border: number;
-  colorOpacity: number;
+  x: number;
+  y: number;
+
+  currentValue: Ref<Signal<string>>;
+
   encoding: ValueEncoding;
-  isSelected: boolean;
-  mask: number;
+  unit: ValueUnit;
+
+  colorOpacity: number;
+
+  onMouseUp: () => void;
   onDoubleClick: () => void;
   onMouseDown: () => void;
   onMouseOver: () => void;
-  onMouseUp: () => void;
-  size: ValueSize;
-  decimal: number;
 };
 
-export const Border = {
+const Border = {
   Top: 8,
   Bottom: 4,
   Left: 2,
@@ -25,31 +30,66 @@ export const Border = {
 } as const;
 
 export default function Cell({
-  border,
-  colorOpacity,
+  x,
+  y,
+  currentValue,
   encoding,
-  isSelected,
-  mask,
+  unit,
+  colorOpacity,
   onDoubleClick,
   onMouseDown,
   onMouseOver,
   onMouseUp,
-  size,
-  decimal,
 }: CellProps) {
+  const decimal = useTableCellValue(x, y);
+  const isSelected = useTableCellIsSelected(x, y);
+  const isSelectedB = useTableCellIsSelected(x, y + 1);
+  const isSelectedL = useTableCellIsSelected(x - 1, y);
+  const isSelectedR = useTableCellIsSelected(x + 1, y);
+  const isSelectedT = useTableCellIsSelected(x, y - 1);
+
+  const unsubscribeCurrentValue = useRef<() => void>();
+  const [mask, setMask] = useState(
+    isSelected ? currentValue.current?.get.length ?? 0 : 0
+  );
+
+  useEffect(() => {
+    if (isSelected) {
+      unsubscribeCurrentValue.current =
+        currentValue.current?.subscribe((value) =>
+          setMask(value.length ?? 0)
+        ) ?? (() => {});
+    }
+    return () => {
+      unsubscribeCurrentValue.current?.();
+      unsubscribeCurrentValue.current = undefined;
+    };
+  }, [isSelected]);
+
+  const border = useMemo(() => {
+    let border = 0;
+    if (isSelected) {
+      if (!isSelectedB) border |= Border.Bottom;
+      if (!isSelectedL) border |= Border.Left;
+      if (!isSelectedR) border |= Border.Right;
+      if (!isSelectedT) border |= Border.Top;
+    }
+    return border;
+  }, [isSelected, isSelectedB, isSelectedL, isSelectedR, isSelectedT]);
+
   const [value, blocks] = useMemo(() => {
-    const value = valueToString(decimal, encoding, size);
+    const value = valueToString(decimal, encoding, unit);
     return [
       value,
       [value.slice(0, value.length - mask), value.slice(value.length - mask)],
     ];
-  }, [decimal, encoding, mask, size]);
+  }, [decimal, encoding, mask, unit]);
 
   const color = useMemo(() => {
     const opacity = valueToString(
       Math.floor((colorOpacity * 255) / 100),
       ValueEncoding.Hexadecimal,
-      ValueSize.Byte
+      ValueUnit.Byte
     );
     return `${Colors[decimal % Colors.length]}${opacity}`;
   }, [colorOpacity, decimal]);
@@ -69,7 +109,7 @@ export default function Cell({
       flex={1}
       fontFamily="monospace"
       fontSize="md"
-      lineHeight={3}
+      lineHeight={1}
       onDblClick={onDoubleClick}
       onMouseDown={onMouseDown}
       onMouseOver={onMouseOver}

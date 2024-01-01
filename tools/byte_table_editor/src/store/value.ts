@@ -4,19 +4,19 @@ export enum ValueEncoding {
   Hexadecimal,
 }
 
-export enum ValueSize {
+export enum ValueUnit {
   Byte,
   Word,
 }
 
 export const ValueBoundaries = {
-  [ValueSize.Byte]: { min: 0, max: 255 },
-  [ValueSize.Word]: { min: 0, max: 65535 },
+  [ValueUnit.Byte]: { min: 0, max: 255 },
+  [ValueUnit.Word]: { min: 0, max: 65535 },
 } as const;
 
 export const ValueBytes = {
-  [ValueSize.Byte]: 1,
-  [ValueSize.Word]: 2,
+  [ValueUnit.Byte]: 1,
+  [ValueUnit.Word]: 2,
 } as const;
 
 export const ValueChars = {
@@ -26,12 +26,12 @@ export const ValueChars = {
 } as const;
 
 export const ValueLength = {
-  [ValueSize.Byte]: {
+  [ValueUnit.Byte]: {
     [ValueEncoding.Binary]: 8,
     [ValueEncoding.Decimal]: 3,
     [ValueEncoding.Hexadecimal]: 2,
   },
-  [ValueSize.Word]: {
+  [ValueUnit.Word]: {
     [ValueEncoding.Binary]: 16,
     [ValueEncoding.Decimal]: 5,
     [ValueEncoding.Hexadecimal]: 4,
@@ -51,21 +51,28 @@ export const ValueRadix = {
 } as const;
 
 export const ValueWrite = {
-  [ValueSize.Byte]: "db",
-  [ValueSize.Word]: "dw",
+  [ValueUnit.Byte]: "db",
+  [ValueUnit.Word]: "dw",
 } as const;
 
 export const valueToString = (
   decimal: number,
   encoding: ValueEncoding,
-  size: ValueSize,
+  unit: ValueUnit,
   addPrefix = false
 ): string => {
-  const { min, max } = ValueBoundaries[size];
-  const length = ValueLength[size][encoding];
+  const { min, max } = ValueBoundaries[unit];
+  const length = ValueLength[unit][encoding];
   const prefix = addPrefix ? ValuePrefix[encoding] : "";
   const n = Math.max(Math.min(decimal, max), min)
     .toString(ValueRadix[encoding])
     .toUpperCase();
   return `${prefix}${"0".repeat(length - n.length)}${n}`;
+};
+
+export const stringToValue = (
+  maybeValue: string,
+  encoding: ValueEncoding
+): number => {
+  return Number.parseInt(maybeValue, ValueRadix[encoding]) || 0;
 };

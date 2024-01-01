@@ -1,43 +1,44 @@
 import { Flex, Image } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef } from "preact/hooks";
+import Cell from "./cell";
 import useClickOutside from "../hooks/useClickOutside";
-import useSelection from "../hooks/useSelection";
-import { mapGrid } from "../utils/grid";
 import {
-  ValueChars,
-  ValueEncoding,
-  ValueLength,
-  ValueRadix,
-  ValueSize,
-} from "../utils/value";
-import Cell, { Border } from "./cell";
-
-export type GridProps = {
-  colorOpacity: number;
-  encoding: ValueEncoding;
-  image: string;
-  grid: number[][];
-  onChange: (grid: number[][]) => void;
-  size: ValueSize;
-};
+  useColorOpacity,
+  useImage,
+  useImageIsVisible,
+  useSelection,
+  useTable,
+  useTableEncoding,
+  useTableSize,
+  useTableUnit,
+} from "../hooks/useStore";
+import Signal from "../store/signal";
+import { ValueChars, ValueLength, stringToValue } from "../store/value";
 
 const mod = (n: number, m: number): number => {
   return ((n % m) + m) % m;
 };
 
-export default function Grid({
-  colorOpacity,
-  encoding,
-  grid,
-  image,
-  onChange,
-  size,
-}: GridProps) {
-  const selection = useSelection(grid[0]?.length ?? 0, grid.length);
+const range = (n: number): number[] => {
+  return Array.from(Array(n).keys());
+};
+
+export default function Grid() {
+  const table = useTable();
+  const selection = useSelection();
+  const [encoding] = useTableEncoding();
+  const [unit] = useTableUnit();
+  const [size] = useTableSize();
+
+  const [colorOpacity] = useColorOpacity();
+
+  const [image] = useImage();
+  const [imageIsVisible] = useImageIsVisible();
+
   const multipleSelection = useRef(false);
   const lastSelected = useRef<undefined | { x: number; y: number }>(undefined);
 
-  const currentValue = useRef("");
+  const currentValue = useRef(new Signal("", ""));
 
   const ref = useRef<HTMLElement>(null);
   useClickOutside(
@@ -45,17 +46,9 @@ export default function Grid({
     useCallback(() => {
       selection.clear();
       lastSelected.current = undefined;
-      currentValue.current = "";
+      currentValue.current.set = "";
     }, [selection.clear])
   );
-
-  const updateSelectedCells = useCallback(() => {
-    const value =
-      Number.parseInt(currentValue.current, ValueRadix[encoding]) || 0;
-    onChange(
-      mapGrid(grid, (cell, x, y) => (selection.isSelected(x, y) ? value : cell))
-    );
-  }, [encoding, onChange, selection.isSelected]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -65,48 +58,48 @@ export default function Grid({
         if (e.key === "Enter" || e.key === "Escape") {
           selection.clear();
           lastSelected.current = undefined;
-          currentValue.current = "";
+          currentValue.current.set = "";
           return;
         }
 
         if (e.key === "Escape") {
           selection.clear();
           lastSelected.current = undefined;
-          currentValue.current = "";
+          currentValue.current.set = "";
           return;
         }
 
-        if (e.key === "Backspace") {
-          currentValue.current = currentValue.current.slice(0, -1);
-          updateSelectedCells();
+        if (e.key === "Backspace" || e.key === "Delete") {
+          currentValue.current.set = currentValue.current.get.slice(0, -1);
+          table.setSelected(stringToValue(currentValue.current.get, encoding));
           return;
         }
 
         if (
           ValueChars[encoding].test(e.key) &&
-          currentValue.current.length < ValueLength[size][encoding]
+          currentValue.current.get.length < ValueLength[unit][encoding]
         ) {
-          currentValue.current += e.key;
-          updateSelectedCells();
+          currentValue.current.set = currentValue.current.get + e.key;
+          table.setSelected(stringToValue(currentValue.current.get, encoding));
           return;
         }
 
         const coords = {
           ArrowDown: {
             x: lastSelected.current.x,
-            y: mod(lastSelected.current.y + 1, grid.length),
+            y: mod(lastSelected.current.y + 1, size.height),
           },
           ArrowLeft: {
-            x: mod(lastSelected.current.x - 1, grid.length),
+            x: mod(lastSelected.current.x - 1, size.width),
             y: lastSelected.current.y,
           },
           ArrowRight: {
-            x: mod(lastSelected.current.x + 1, grid.length),
+            x: mod(lastSelected.current.x + 1, size.width),
             y: lastSelected.current.y,
           },
           ArrowUp: {
             x: lastSelected.current.x,
-            y: mod(lastSelected.current.y - 1, grid.length),
+            y: mod(lastSelected.current.y - 1, size.height),
           },
         }[e.key];
 
@@ -114,12 +107,12 @@ export default function Grid({
           selection.restart(coords.x, coords.y);
           selection.stop();
           lastSelected.current = coords;
-          currentValue.current = "";
+          currentValue.current.set = "";
           return;
         }
       }
     },
-    [encoding, grid, selection.restart, size, updateSelectedCells]
+    [encoding, selection, size, unit]
   );
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
@@ -146,11 +139,11 @@ export default function Grid({
       direction="column"
       flex={1}
       minW={500}
-      maxW={(grid[0]?.length ?? 0) * 50}
+      maxW={size.width * 50}
       position="relative"
       ref={ref}
     >
-      {image && (
+      {imageIsVisible && image && (
         <Image
           left={0}
           h="100%"
@@ -162,54 +155,39 @@ export default function Grid({
         />
       )}
 
-      {grid.map((row, y) => (
+      {range(size.height).map((y) => (
         <Flex flex={1}>
-          {row.map((cell, x) => {
-            const isSelected = selection.isSelected(x, y);
-            let border = 0;
-            if (isSelected) {
-              if (!selection.isSelected(x, y - 1)) border |= Border.Top;
-              if (!selection.isSelected(x, y + 1)) border |= Border.Bottom;
-              if (!selection.isSelected(x - 1, y)) border |= Border.Left;
-              if (!selection.isSelected(x + 1, y)) border |= Border.Right;
-            }
-            return (
-              <Cell
-                border={border}
-                colorOpacity={colorOpacity}
-                decimal={cell}
-                encoding={encoding}
-                isSelected={isSelected}
-                mask={isSelected ? currentValue.current.length : 0}
-                onDoubleClick={() => {
-                  if (!multipleSelection.current) selection.clear();
-
-                  const coords: boolean[][] = [];
-                  for (let i = 0; i < grid.length; ++i) {
-                    coords.push([]);
-                    for (let j = 0; j < grid.length; ++j)
-                      coords[i]!.push(grid[i]![j]! === cell);
-                  }
-                  selection.select(coords);
-                }}
-                onMouseDown={() => {
-                  if (multipleSelection.current) {
-                    selection.start(x, y);
-                  } else {
-                    selection.restart(x, y);
-                    lastSelected.current = { x, y };
-                    currentValue.current = "";
-                  }
-                }}
-                onMouseOver={() => selection.update(x, y)}
-                onMouseUp={() => {
-                  selection.stop();
+          {range(size.width).map((x) => (
+            <Cell
+              x={x}
+              y={y}
+              currentValue={currentValue}
+              encoding={encoding}
+              unit={unit}
+              colorOpacity={colorOpacity}
+              onDoubleClick={() => {
+                if (!multipleSelection.current) selection.clear();
+                const cell = table.get(x, y);
+                table.forEach((otherCell, otherX, otherY) => {
+                  if (otherCell === cell) selection.select(otherX, otherY);
+                });
+              }}
+              onMouseDown={() => {
+                if (multipleSelection.current) {
+                  selection.start(x, y);
+                } else {
+                  selection.restart(x, y);
                   lastSelected.current = { x, y };
-                }}
-                size={size}
-              />
-            );
-          })}
+                  currentValue.current.set = "";
+                }
+              }}
+              onMouseOver={() => selection.update(x, y)}
+              onMouseUp={() => {
+                selection.stop();
+                lastSelected.current = { x, y };
+              }}
+            />
+          ))}
         </Flex>
       ))}
     </Flex>

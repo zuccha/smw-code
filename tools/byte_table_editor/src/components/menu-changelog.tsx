@@ -3,6 +3,17 @@ import { Flex, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 export default function MenuChangelog() {
   return (
     <Flex direction="column" gap={2}>
+      <Text fontWeight="bold">v1.1.0 (2024-01-01)</Text>
+      <Text>Added:</Text>
+      <UnorderedList>
+        <ListItem>Improve performance.</ListItem>
+      </UnorderedList>
+
+      <Text>Fixed:</Text>
+      <UnorderedList>
+        <ListItem>Fix rectangle selection.</ListItem>
+      </UnorderedList>
+
       <Text fontWeight="bold">v1.0.0 (2023-12-30)</Text>
       <Text>Added:</Text>
       <UnorderedList>

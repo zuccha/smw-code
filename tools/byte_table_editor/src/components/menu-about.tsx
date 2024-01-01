@@ -4,7 +4,7 @@ export default function MenuAbout() {
   return (
     <Flex direction="column" gap={2}>
       <Text>
-        <i>Byte Table Editor</i> v1.0.0, made by zuccha. You can find the code{" "}
+        Made by zuccha, you can find the code{" "}
         <Link
           color="blue.200"
           href="https://github.com/zuccha/smw-code/"

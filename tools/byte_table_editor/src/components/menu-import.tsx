@@ -1,40 +1,38 @@
 import { Button, Flex, Text, Textarea } from "@chakra-ui/react";
 import { ChangeEvent } from "preact/compat";
 import { useCallback, useState } from "preact/hooks";
-import { stringToGrid } from "../utils/grid";
-import { ValueSize } from "../utils/value";
+import { useTable } from "../hooks/useStore";
+import { ValueUnit } from "../store/value";
 
-export type MenuImportProps = {
-  onImport: (grid: number[][], valueSize: ValueSize) => void;
-};
+export default function MenuImport() {
+  const table = useTable();
 
-export default function MenuImport({ onImport }: MenuImportProps) {
   const [maybeGrid, setMaybeGrid] = useState("");
-  const [gridOrError, setGridOrError] = useState<
-    undefined | [number[][], ValueSize] | string
-  >();
+  const [errorOrGridData, setErrorOrGridData] = useState<
+    undefined | string | { items: number[][]; unit: ValueUnit }
+  >(undefined);
 
-  const isValidGrid = gridOrError && typeof gridOrError !== "string";
+  const isValidGrid = errorOrGridData && typeof errorOrGridData !== "string";
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setMaybeGrid(e.currentTarget.value);
-    setGridOrError(
+    setErrorOrGridData(
       e.currentTarget.value === ""
         ? undefined
-        : stringToGrid(e.currentTarget.value)
+        : table.parse(e.currentTarget.value)
     );
   }, []);
 
   const handleImport = useCallback(() => {
     if (isValidGrid) {
-      onImport(gridOrError[0], gridOrError[1]);
+      table.populate(errorOrGridData.items, errorOrGridData.unit);
+      setErrorOrGridData(undefined);
       setMaybeGrid("");
-      setGridOrError(undefined);
     }
-  }, [gridOrError, isValidGrid, onImport]);
+  }, [errorOrGridData, isValidGrid, table]);
 
   const clear = useCallback(() => {
-    setGridOrError(undefined);
+    setErrorOrGridData(undefined);
     setMaybeGrid("");
   }, []);
 
@@ -48,21 +46,22 @@ export default function MenuImport({ onImport }: MenuImportProps) {
         value={maybeGrid}
         wrap="off"
       />
-      {gridOrError &&
-        (typeof gridOrError === "string" ? (
-          <Text color="red.400">{gridOrError}</Text>
+      {errorOrGridData &&
+        (typeof errorOrGridData === "string" ? (
+          <Text color="red.400">{errorOrGridData}</Text>
         ) : (
           <Flex gap={2}>
             <Flex gap={1}>
               <Flex fontWeight="bold">Width:</Flex>{" "}
-              {gridOrError[0][0]?.length ?? 0},
+              {errorOrGridData.items[0]?.length ?? 0},
             </Flex>
             <Flex gap={1}>
-              <Flex fontWeight="bold">Height:</Flex> {gridOrError[0].length},
+              <Flex fontWeight="bold">Height:</Flex>{" "}
+              {errorOrGridData.items.length},
             </Flex>
             <Flex gap={2}>
-              <Flex fontWeight="bold">Size:</Flex>{" "}
-              {gridOrError[1] === ValueSize.Byte ? "Byte" : "Word"}
+              <Flex fontWeight="bold">Unit:</Flex>{" "}
+              {errorOrGridData.unit === ValueUnit.Byte ? "Byte" : "Word"}
             </Flex>
           </Flex>
         ))}

@@ -1,21 +1,14 @@
 import { StateUpdater, useEffect, useState } from "preact/hooks";
+import Storage from "../store/storage";
 
 export default function useSetting<T>(
   id: string,
   initialState: T
 ): [T, StateUpdater<T>] {
-  const [setting, setSetting] = useState((): T => {
-    try {
-      const stringOrNull = localStorage.getItem(id);
-      return stringOrNull === null ? initialState : JSON.parse(stringOrNull);
-    } catch {
-      localStorage.removeItem(id);
-      return initialState;
-    }
-  });
+  const [setting, setSetting] = useState(() => Storage.load(id, initialState));
 
   useEffect(() => {
-    localStorage.setItem(id, JSON.stringify(setting));
+    Storage.save(id, setting);
   }, [setting]);
 
   return [setting, setSetting];

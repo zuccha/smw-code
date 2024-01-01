@@ -10,16 +10,12 @@ import {
 import { ChangeEvent } from "preact/compat";
 import { useCallback, useState } from "preact/hooks";
 import useSetting from "../hooks/useSetting";
-import { ColumnComment, RowComment, gridToString } from "../utils/grid";
-import { ValueEncoding, ValueSize } from "../utils/value";
+import { ColumnComment, RowComment } from "../store/table";
+import { useTable } from "../hooks/useStore";
 
-export type MenuExportProps = {
-  encoding: ValueEncoding;
-  grid: number[][];
-  size: ValueSize;
-};
+export default function MenuExport() {
+  const table = useTable();
 
-export default function MenuExport({ encoding, grid, size }: MenuExportProps) {
   const toast = useToast();
   const [, render] = useState(0);
 
@@ -74,10 +70,7 @@ export default function MenuExport({ encoding, grid, size }: MenuExportProps) {
   }, []);
 
   const copyToClipboard = useCallback(() => {
-    const output = gridToString(
-      grid,
-      encoding,
-      size,
+    const output = table.serialize(
       rowComment,
       columnComment,
       tableName,
@@ -86,16 +79,7 @@ export default function MenuExport({ encoding, grid, size }: MenuExportProps) {
     );
     navigator.clipboard.writeText(output);
     toast({ title: "Table copied to clipboard" });
-  }, [
-    addSpaces,
-    columnComment,
-    encoding,
-    grid,
-    indentation,
-    rowComment,
-    size,
-    tableName,
-  ]);
+  }, [addSpaces, columnComment, indentation, rowComment, table, tableName]);
 
   return (
     <Flex direction="column" gap={2}>
