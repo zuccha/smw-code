@@ -8,9 +8,9 @@ behaviors whenever possible (except for the layout).
 
 Notes about this showcase:
 
-- We use a modifies _GFX28_ with custom graphics for the sidebar. It is not the
-  default, but I personally like it better. The modified _GFX28_ is shipped with
-  this UberASM.
+- We use a modified _GFX28_ with custom graphics for the status bar. It is not
+  the default, but I personally like it better. The modified _GFX28_ is shipped
+  with this UberASM.
 - There are little to no technical explanations, for that check out the
   [instructions on how to use this UberASM](./how_to_use.md).
 
@@ -61,7 +61,7 @@ Any element in the status bar can be easily made visible or hidden
 
 | <img src="../assets/images/visibility-1.png" width="400px" /> |
 | :-----------------------------------------------------------: |
-|              No score, lives or bonus stars here              |
+|             No score, lives, or bonus stars here              |
 
 By default, when an element is hidden it will also be disabled (_e.g._, coins
 will not be increased, time doesn't run out, _etc._). If you want, you can make
@@ -88,9 +88,9 @@ You can have different configurations of the status bar depending on the level.
 A global configuration defines the base behavior of the status bar, but almost
 any setting can be overridden on a level basis
 
-| <img src="../assets/images/../assets/images/level-1.gif" width="400px" /> |
-| :-----------------------------------------------------------------------: |
-|                In the sublevel there is no coin indicator                 |
+| <img src="../assets/images/level-1.gif" width="400px" /> |
+| :------------------------------------------------------: |
+|        In the sublevel there is no coin indicator        |
 
 ## Dynamic elements positioning
 

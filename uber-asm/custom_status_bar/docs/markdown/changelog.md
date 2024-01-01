@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 (unreleased)
+
+### Fixes
+
+- Fix timer not working on SA-1
+
 ## 0.2.0 (2023-08-06)
 
 ### New features
