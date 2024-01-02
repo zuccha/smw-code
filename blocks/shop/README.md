@@ -13,8 +13,8 @@ score points.
 
 This package comes with the following files:
 
-- `shop__pay.asm`: Utility file that contains the function that checks if the
-  player has enough funds, and uses them.
+- `routines/check_and_pay.asm`: Utility file that contains the function that
+  checks if the player has enough funds and uses them.
 - `shop_item_from_below.asm`: A block for buying an item to be stored in the
   reserve box by hitting it from below.
 - `shop_item_through.asm`: A block for buying an item to be stored in the
@@ -28,8 +28,7 @@ Detailed instructions on how blocks work can be found in their respective files.
 
 ## Instructions
 
-Copy `shop__pay.asm` in your blocks folder. This file is not a block itself, but
-it is required for the shop blocks to work.
+Copy `routines/check_and_pay.asm` in GPS' "routines" folder.
 
 Copy any number of `shop_item_from_below.asm`, `shop_item_through.asm`,
 `shop_powerup_from_below.asm`, and `shop_powerup_through.asm` into your block
@@ -38,9 +37,9 @@ every block you're using, add the following in GPS's "list.txt":
 
 ```
   200:130 shop_item_from_below.asm
-  200:25  shop_item_through.asm
-  200:130 shop_powerup_from_below.asm
-  200:25  shop_powerup_through.asm
+  201:25  shop_item_through.asm
+  202:130 shop_powerup_from_below.asm
+  203:25  shop_powerup_through.asm
 ```
 
 Notice that "from_below" blocks should act as 130 (or anything solid) and
@@ -48,17 +47,28 @@ Notice that "from_below" blocks should act as 130 (or anything solid) and
 
 ## Advanced Usage
 
-The file `shop__pay.asm` defines a `ShopPay` routine that checks a cost
-(specified via defines, for more check the description in the file) and, if the
-player can afford it, it subtracts it from the player's reserve (e.g., if the
-cost is 1 life and 3 coins, the routine will remove 1 life and 3 coins from the
-current player if they have enough of both).
+The file `routines/check_and_pay.asm` defines a `check_and_pay` macro that
+checks a cost (specified via scratch RAM, for more check the description in the
+file) and, if the player can afford it, it subtracts it from the player's
+reserve (e.g., if the cost is 1 life and 3 coins, the routine will remove 1 life
+and 3 coins from the current player if they have enough of both).
 
 This can be used to create any sort of blocks that require payment, in addition
 to those included here that add items to the item box. For instance, you could
 spawn sprites, flip the ON/OFF switch, etc.
 
 ## Changelog
+
+### v2.0.0 (2024-01-02)
+
+#### Breaking:
+
+- Instead of using file "shop\_\_pay.asm", the shop blocks rely on
+  "routines/check_and_pay.asm".
+
+#### Changed:
+
+- Replace "shop\_\_pay.asm" with "routines/check_and_pay.asm"
 
 ### v1.0.1 (2023-08-01)
 

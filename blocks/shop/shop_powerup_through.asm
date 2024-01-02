@@ -48,35 +48,18 @@
 
 
 ;-------------------------------------------------------------------------------
-; Block setup
+; Block Setup
 ;-------------------------------------------------------------------------------
 
 db $42
 
-JMP MarioBelow : JMP MarioAbove : JMP MarioSide
-JMP SpriteV    : JMP SpriteH
-JMP MarioCape  : JMP MarioFireball
-JMP TopCorner  : JMP BodyInside : JMP HeadInside
+JMP Return : JMP Return  : JMP Return   ; MarioBelow, MarioAbove, MarioSide
+JMP Return : JMP Return                 ; SpriteV, SpriteH
+JMP Return : JMP Return                 ; MarioCape, MarioFireball
+JMP Return : JMP BuyItem : JMP Return   ; TopCorner, BodyInside, HeadInside
 
-BodyInside:
-  JMP BuyItem
-MarioBelow:
-MarioAbove:
-MarioSide:
-SpriteV:
-SpriteH:
-MarioCape:
-MarioFireball:
-TopCorner:
-HeadInside:
-  RTL
-
-
-;-------------------------------------------------------------------------------
-; Include
-;-------------------------------------------------------------------------------
-
-incsrc shop__pay.asm
+Return:
+    RTL
 
 
 ;-------------------------------------------------------------------------------
@@ -84,25 +67,31 @@ incsrc shop__pay.asm
 ;-------------------------------------------------------------------------------
 
 BuyItem:
-  ; Don't buy powerup if player already has it
-  LDA $19 : CMP.b #!powerup         ; If player powerup is same as powerup for sale...
-  BEQ .return                       ; ...then don't buy
+    ; Don't buy powerup if player already has it
+    LDA $19 : CMP.b #!powerup         ; If player powerup is same as powerup for sale...
+    BEQ .return                       ; ...then don't buy
 
-  ; Pay (if possible)
-  JSL ShopPay : BEQ .return
+    ; Pay (if possible)
+    LDA.b #!bonus_stars_cost : STA $00
+    LDA.b #!coins_cost       : STA $01
+    LDA.b #!lives_cost       : STA $02
+    LDA.b #(!score_cost)     : STA $03
+    LDA.b #(!score_cost<<8)  : STA $04
+    LDA.b #(!score_cost<<16) : STA $05
+    %check_and_pay() : BCC .return
 
-  ; Add item
-  LDA.b #!powerup : STA $19         ; Add powerup to player
-  LDA.b #!buy_sfx : STA $1DFC|!addr ; Play sound effect
+    ; Add item
+    LDA.b #!powerup : STA $19         ; Add powerup to player
+    LDA.b #!buy_sfx : STA $1DFC|!addr ; Play sound effect
 
-  ; Remove Block
+    ; Remove Block
 if !availability > 0
-  %erase_block()
+    %erase_block()
 endif
 
-  ; Return
+    ; Return
 .return
-  RTL
+    RTL
 
 
 ;-------------------------------------------------------------------------------
