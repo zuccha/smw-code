@@ -6,7 +6,7 @@ A collection of SMW ASM and resources.
 
 | Name                  | Download                                                                                                 |
 | --------------------- | -------------------------------------------------------------------------------------------------------- |
-| [Shop](./blocks/shop) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/block%2Fshop_block%2F1.0.1/shop-1.0.1.zip) |
+| [Shop](./blocks/shop) | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/block%2Fshop_block%2F2.0.0/shop-2.0.0.zip) |
 
 ## Sprites
 
