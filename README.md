@@ -19,11 +19,11 @@ A collection of SMW ASM and resources.
 
 ## UberASM
 
-| Name                                                                              | Download                                                                                                                                                       |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Custom Status Bar](./uber-asm/custom_status_bar)                                 | [v0.2.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fcustom_status_bar%2F0.2.0/custom_status_bar-0.2.0.zip)                                 |
-| [Kill Player on Button Press](./uber-asm/kill_player_on_button_press)             | [v1.2.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fkill_player_on_button_press%2F1.2.0/kill_player_on_button_press-1.2.0.zip)             |
-| [Update Player Overworld Animation](./uber-asm/update_player_overworld_animation) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fupdate_player_overworld_animation%2F1.0.1/update_player_overworld_animation-1.0.1.zip) |
+| Name                                                                             | Download                                                                                                                                                       |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Custom Status Bar](./uberasm/custom_status_bar)                                 | [v0.2.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fcustom_status_bar%2F0.2.0/custom_status_bar-0.2.0.zip)                                 |
+| [Kill Player on Button Press](./uberasm/kill_player_on_button_press)             | [v1.2.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fkill_player_on_button_press%2F1.2.0/kill_player_on_button_press-1.2.0.zip)             |
+| [Update Player Overworld Animation](./uberasm/update_player_overworld_animation) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fupdate_player_overworld_animation%2F1.0.1/update_player_overworld_animation-1.0.1.zip) |
 
 ## Tools
 

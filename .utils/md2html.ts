@@ -68,17 +68,17 @@ type DocFile = {
   htmlPath: string;
 };
 
-type Type = "patch" | "uber-asm";
+type Type = "patch" | "uberasm";
 
 const typeToString = (type: Type): string => {
   if (type === "patch") return "Patch";
-  if (type === "uber-asm") return "UberASM";
+  if (type === "uberasm") return "UberASM";
   return type;
 };
 
 const typeToDir = (type: Type): string => {
   if (type === "patch") return "patches";
-  if (type === "uber-asm") return "uber-asm";
+  if (type === "uberasm") return "uberasm";
   return type;
 };
 
@@ -90,7 +90,7 @@ const isVerbose = args.v;
 if (!projectType) {
   console.error(`\
 No project type provided
-Project type must be one of: patch, uber-asm`);
+Project type must be one of: patch, uberasm`);
   Deno.exit(1);
 }
 
@@ -99,10 +99,10 @@ if (!projectName) {
   Deno.exit(1);
 }
 
-if (projectType !== "patch" && projectType !== "uber-asm") {
+if (projectType !== "patch" && projectType !== "uberasm") {
   console.error(`\
 Invalid type "${projectType}" provided
-Project type must be one of: patch, uber-asm`);
+Project type must be one of: patch, uberasm`);
   Deno.exit(1);
 }
 
