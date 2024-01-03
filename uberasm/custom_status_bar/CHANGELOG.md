@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2024-01-03
+
+## Fixed
+
+- Make timer tick on SA-1.
+
 ## [0.2.0] - 2023-08-06
 
 ### Added
