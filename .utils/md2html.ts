@@ -8,10 +8,10 @@ import {
 import { CSS, render } from "https://deno.land/x/gfm@0.2.5/mod.ts";
 import prettier from "npm:prettier";
 import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
-import "./syntax_asar.js";
-import "./syntax_uberasm.js";
+import "./assets/syntax_asar.js";
+import "./assets/syntax_uberasm.js";
 
-// Usage in top directory: deno run --allow-read --allow-write [-v] <type> <name>
+// Usage in top directory: deno run ./.utils/md2html.ts --allow-read --allow-write [-v] <type> <name>
 
 const extraCSS =
   "body{margin:0;}main{max-width:800px;margin:0 auto;padding:1em 1em 4em 1em;}" +
@@ -68,16 +68,24 @@ type DocFile = {
   htmlPath: string;
 };
 
-type Type = "patch" | "uberasm";
+type Type = "block" | "patch" | "port" | "sprite" | "tool" | "uberasm";
 
 const typeToString = (type: Type): string => {
+  if (type === "block") return "Block";
   if (type === "patch") return "Patch";
+  if (type === "port") return "Port";
+  if (type === "sprite") return "Sprite";
+  if (type === "tool") return "Tool";
   if (type === "uberasm") return "UberASM";
   return type;
 };
 
 const typeToDir = (type: Type): string => {
+  if (type === "block") return "Blocks";
   if (type === "patch") return "patches";
+  if (type === "port") return "ports";
+  if (type === "sprite") return "sprites";
+  if (type === "tool") return "tools";
   if (type === "uberasm") return "uberasm";
   return type;
 };
@@ -106,17 +114,18 @@ Project type must be one of: patch, uberasm`);
   Deno.exit(1);
 }
 
-const projectPath = join(typeToDir(projectType), projectName);
+const projectPath = join("_dist", typeToDir(projectType), projectName);
 const projectDocs = join(projectPath, "docs");
 const projectReadmeMarkdown = join(projectPath, "README.md");
 const projectReadmeHtml = join(projectPath, "README.html");
+const projectChangelogMarkdown = join(projectPath, "CHANGELOG.md");
+const projectChangelogHtml = join(projectPath, "CHANGELOG.html");
 const projectHtml = join(projectDocs, "html");
 const projectMarkdown = join(projectDocs, "markdown");
 const projectCSS = join(projectDocs, "assets", "markdown.css");
 
-const projectLabel = `${typeToString(projectType)} project "${projectName}"`;
-
 if (!(await exists(projectReadmeMarkdown))) {
+  const projectLabel = `${typeToString(projectType)} project "${projectName}"`;
   console.error(`\
 ${projectLabel} doesn't have a readme
 Path "${projectReadmeMarkdown}" doesn't exist`);
@@ -126,6 +135,12 @@ Path "${projectReadmeMarkdown}" doesn't exist`);
 await convertFile(
   projectReadmeMarkdown,
   projectReadmeHtml,
+  join("docs", "assets")
+);
+
+await convertFile(
+  projectChangelogMarkdown,
+  projectChangelogHtml,
   join("docs", "assets")
 );
 

@@ -7,22 +7,4 @@ fireballs by zuccha.
 
 SA-1 compatible.
 
-<img src="magikoopa_fireball.gif" />
-
-## Changelog
-
-### 1.0.1 (2023-09-13)
-
-#### Changed
-
-- Spawn Fireball sprite by using PIXI's `SpawnSprite` macro.
-
-#### Fixed
-
-- Prevent Magikoopa from glitching after shooting fireball.
-
-### 1.0.0 (2023-08-17)
-
-#### Added
-
-- Magikoopa that shoots fireballs, based on the Magikoopa disassembly.
+<img src="./docs/assets/images/magikoopa-1.gif" />

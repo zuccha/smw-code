@@ -31,7 +31,7 @@ Follow these steps in UberASMTool's top folder:
    ```
 
 6. Run UberASMTool
-7. Patch `asm/csb_unpatch.asm` (supplied with this UberASM code) with Asar
+7. Patch `Patches/csb_unpatch.asm` (supplied with this UberASM code) with Asar
 
 ## 2. Clarifications
 

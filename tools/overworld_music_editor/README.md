@@ -25,19 +25,3 @@ _Input_ field, then clicking _Import_.
 Through the _Colors_ menu, you can toggle seeing background colors (with or
 without transparency) for the cells on the grid. This helps visualize how music
 is grouped.
-
-## Changelog
-
-### 1.0.0 (2023-08-30)
-
-Added:
-
-- Display editable grid
-- Implement copying output table to clipboard
-- Implement "import" feature
-- Add the possibility to add a background image
-- Toggle display colors for cells on the grid
-
-Documentation:
-
-- Write readme
