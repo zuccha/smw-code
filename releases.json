@@ -1,0 +1,58 @@
+{
+  "blocks": {
+    "shop": {
+      "name": "Shop",
+      "version": "2.0.0"
+    }
+  },
+  "ports": {
+    "the_goonies_ii_-_the_goonies_r_good_enough": {
+      "name": "The Goonies II - The Goonies 'R' Good Enough",
+      "version": "1.0.0"
+    }
+  },
+  "sprites": {
+    "girian": {
+      "name": "Girian",
+      "version": "1.0.0"
+    },
+    "gunstar_heroes_bomb": {
+      "name": "Gunstar Heroes Bomb",
+      "version": "1.2.0"
+    },
+    "magikoopa_fireball": {
+      "name": "Magikoopa Shooting Fireball",
+      "version": "1.0.1"
+    },
+    "orbinaut": {
+      "name": "Orbinaut",
+      "version": "1.1.0"
+    }
+  },
+  "tools": {
+    "byte_table_editor": {
+      "name": "Byte Table Editor",
+      "version": "1.1.0",
+      "online": "https://zuccha.io/pages/byte-table-editor.html"
+    },
+    "overworld_music_editor": {
+      "name": "Overworld Music Editor",
+      "version": "1.0.0",
+      "deprecated": "Byte Table Editor"
+    }
+  },
+  "uberasm": {
+    "custom_status_bar": {
+      "name": "Custom Status Bar",
+      "version": "0.2.1"
+    },
+    "kill_player_on_button_press": {
+      "name": "Kill Player on Button Press",
+      "version": "1.3.0"
+    },
+    "update_player_overworld_animation": {
+      "name": "Update Player Overworld Animation",
+      "version": "1.0.1"
+    }
+  }
+}

@@ -65,10 +65,15 @@ MD2HTML="./_utils/md2/md2html.ts"
 MD2TEXT="./_utils/md2/md2text.ts"
 GH_GET_TITLE="./_utils/gh/gh_get_title.ts"
 GH_GET_NOTES="./_utils/gh/gh_get_notes.ts"
+SUMMARY_UPDATE="./_utils/summary/update_summary.ts"
 
 # Git
 GIT_TAG="$TYPE/$NAME/$VERSION"
 GIT_BRANCH="feat/$GIT_TAG"
+
+# Summary
+SUMMARY_PATH="./README.md"
+SUMMARY_JSON="./releases.json"
 
 # Source directory and files
 SRC_PATH="./$TYPE_DIR/$NAME"
@@ -188,9 +193,9 @@ zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
 cd - > /dev/null
 
 # Verify that archive has been created
-if [[ -f $ZIP_PATH ]];
-then echo ${BLUE}Archive created: $ZIP_PATH${NC}
-else echo ${RED}Failed to create archive${NC}; exit 1
+if [[ ! -f $ZIP_PATH ]]; then
+  echo ${RED}Failed to create archive${NC}
+  exit 1
 fi
 
 
@@ -199,8 +204,10 @@ fi
 #-------------------------------------------------------------------------------
 
 # Tag is necessary for release
-if [[ ! $(git tag --list $GIT_TAG) ]]; then
-  echo ${BLUE}Skip release: no tag found${NC}
+if [[ $(gh release list | grep $GIT_TAG) ]]; then
+  echo ${BLUE}Skip release: already released${NC}
+elif [[ ! $(git tag --list $GIT_TAG) ]]; then
+  echo ${BLUE}Skip release: tag $GIT_TAG found${NC}
 else
   # Get notes and title
   GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $TYPE $NAME)
@@ -208,4 +215,25 @@ else
 
   # Generate release
   gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag
+fi
+
+
+#-------------------------------------------------------------------------------
+# Update Main README
+#-------------------------------------------------------------------------------
+
+# Update main README
+if [[ -z $(gh release list | grep $GIT_TAG) ]]; then
+  echo ${BLUE}Skip summary: no release for $GIT_TAG${NC}
+elif [[ $(jq ".$TYPE_DIR.$NAME.version" $SUMMARY_JSON) == "\"$VERSION\"" ]]; then
+  echo ${BLUE}Skip summary: already up to date${NC}
+else
+  # Update JSON
+  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME)"
+  jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" $SUMMARY_JSON > $SUMMARY_JSON.temp
+  rm $SUMMARY_JSON
+  mv $SUMMARY_JSON.temp $SUMMARY_JSON
+
+  # Generate README
+  deno run --allow-read --allow-write $SUMMARY_UPDATE $SUMMARY_PATH $SUMMARY_JSON
 fi

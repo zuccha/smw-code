@@ -11,6 +11,16 @@ export const typeToString = (type: Type): string => {
   return type;
 };
 
+export const typeToStringPlural = (type: Type): string => {
+  if (type === "block") return "Blocks";
+  if (type === "patch") return "Patches";
+  if (type === "port") return "Ports";
+  if (type === "sprite") return "Sprites";
+  if (type === "tool") return "Tools";
+  if (type === "uberasm") return "UberASM";
+  return type;
+};
+
 export const typeToDir = (type: Type): string => {
   if (type === "block") return "blocks";
   if (type === "patch") return "patches";
