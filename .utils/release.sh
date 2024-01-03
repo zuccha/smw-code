@@ -95,4 +95,5 @@ if [[ "$DOCS_HTML" != 1 && "$DOCS_MARKDOWN" != 1 && "$DOCS_TEXT" != 1 ]]; then
 fi
 
 # Create archive
-zip -qr $ZIP $OUT -x "*.DS_Store"
+cd $OUT; cd ..
+zip -qr $NAME-$VERSION.zip $NAME-$VERSION -x "*.DS_Store"

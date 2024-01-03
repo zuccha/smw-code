@@ -7,7 +7,7 @@
 - Display indicator sprite as text in Lunar Magic.
 - Rename "ExGFX80.bin" to "Indicator (SP3).bin".
 
-### Fix
+### Fixed
 
 - Remove non-relevant graphics from sprite graphics file.
 
