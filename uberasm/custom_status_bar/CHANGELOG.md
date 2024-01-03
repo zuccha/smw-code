@@ -2,7 +2,7 @@
 
 ## [0.2.1] - 2024-01-03
 
-## Fixed
+### Fixed
 
 - Make timer tick on SA-1.
 

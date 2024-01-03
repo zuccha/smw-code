@@ -1,4 +1,4 @@
-// Usage: deno run ./.utils/md2/md2html.ts --allow-read --allow-write [-v] <type> <name>
+// Usage: deno run ./_utils/md2/md2html.ts --allow-read --allow-write [-v] <type> <name>
 //  -v      Verbose
 //  <type>  Resource type, one of: "block" | "patch" | "port" | "sprite" | "tool" | "uberasm"
 //  <name>  Name of the resource
@@ -73,7 +73,7 @@ type DocFile = {
 };
 
 const args = parseArgs();
-const resource = await validateResource("_dist", args.type, args.name);
+const resource = await validateResource(".dist", args.type, args.name);
 
 await convertFile(
   resource.readme.markdown.path,

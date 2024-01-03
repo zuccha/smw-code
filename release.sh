@@ -2,7 +2,7 @@
 #                                RELEASE SCRIPT                                #
 ################################################################################
 
-# Usage: ./.utils/release [-htmi] <type> <name> <version>
+# Usage: ./_utils/release [-htmi] <type> <name> <version>
 #   -h          Generate HTML documentation
 #   -t          Generate text documentation
 #   -m          Include markdown documentation
@@ -61,10 +61,10 @@ if [[ -z "$VERSION" ]];  then echo Type $VERSION is empty;  exit 1; fi
 #-------------------------------------------------------------------------------
 
 # Tools
-MD2HTML="./.utils/md2/md2html.ts"
-MD2TEXT="./.utils/md2/md2text.ts"
-GH_TITLE="./.utils/gh/gh_title.ts"
-GH_NOTES="./.utils/gh/gh_notes.ts"
+MD2HTML="./_utils/md2/md2html.ts"
+MD2TEXT="./_utils/md2/md2text.ts"
+GH_GET_TITLE="./_utils/gh/gh_get_title.ts"
+GH_GET_NOTES="./_utils/gh/gh_get_notes.ts"
 
 # Git
 GIT_TAG="$TYPE/$NAME/$VERSION"
@@ -78,11 +78,16 @@ CHANGELOG_NAME="CHANGELOG.md"
 CHANGELOG_PATH="$SRC_PATH/$CHANGELOG_NAME"
 
 # Output directory and files
-OUT_DIR="./_dist/$TYPE_DIR"
+OUT_DIR="./.dist/$TYPE_DIR"
 OUT_NAME="$NAME-$VERSION"
 OUT_PATH="$OUT_DIR/$OUT_NAME"
 ZIP_NAME="$OUT_NAME.zip"
 ZIP_PATH="$OUT_DIR/$ZIP_NAME"
+
+# Colors for logging
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
 
 
 #-------------------------------------------------------------------------------
@@ -91,19 +96,19 @@ ZIP_PATH="$OUT_DIR/$ZIP_NAME"
 
 # Check if resource exists
 if [[ ! -d "$SRC_PATH" ]]; then
-  echo Resource $SRC_PATH doesn\'t exist
+  echo ${RED}Resource $SRC_PATH doesn\'t exist${NC}
   exit 1
 fi
 
 # Check if readme exists
 if [[ ! -f "$README_PATH" ]]; then
-  echo Resource $SRC_PATH doesn\'t have a README
+  echo ${RED}Resource $SRC_PATH doesn\'t have a README${NC}
   exit 1
 fi
 
 # Check if changelog exists
 if [[ ! -f "$CHANGELOG_PATH" ]]; then
-  echo Resource $SRC_PATH doesn\'t have a CHANGELOG
+  echo ${RED}Resource $SRC_PATH doesn\'t have a CHANGELOG${NC}
   exit 1
 fi
 
@@ -112,23 +117,26 @@ fi
 # Git
 #-------------------------------------------------------------------------------
 
+# Get Git commit for the release
+GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
+
 # Merge branch only if it exists
-if [[ ! $(git branch --list $GIT_BRANCH) ]]; then
-  echo Skip merge: branch $GIT_BRANCH doesn\'t exist
+if [[ -n $GIT_HASH ]]; then
+  echo ${BLUE}Skip merge: already merged${NC}
+elif [[ ! $(git branch --list $GIT_BRANCH) ]]; then
+  echo ${BLUE}Skip merge: branch $GIT_BRANCH doesn\'t exist${NC}
 else
   git merge --squash $GIT_BRANCH
   git commit -m $GIT_TAG
   git push
+  GIT_HASH=$(git log --all --grep='$GIT_TAG' | grep commit | cut -d\  -f2)
 fi
-
-# Get Git commit for the release
-GIT_HASH=$(git log --all --grep='$GIT_TAG' | grep commit | cut -d\  -f2)
 
 # Tag only if tag doesn't exists
 if [[ -z $GIT_HASH ]]; then
-  echo Skip tag: no commit found for $GIT_TAG
+  echo ${BLUE}Skip tag: no commit found for $GIT_TAG${NC}
 elif [[ $(git tag --list $GIT_TAG) ]]; then
-  echo Skip tag: tag $GIT_TAG already exists
+  echo ${BLUE}Skip tag: tag $GIT_TAG already exists${NC}
 else
   git tag -a $GIT_TAG $GIT_HASH -m $GIT_TAG
   git push origin $GIT_TAG
@@ -177,13 +185,12 @@ fi
 # Create archive
 cd $OUT_DIR
 zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
-cd -
+cd - > /dev/null
 
 # Verify that archive has been created
-echo $ZIP_PATH
 if [[ -f $ZIP_PATH ]];
-then echo Archive created: $ZIP_PATH
-else echo Failed to create archive; exit 1
+then echo ${BLUE}Archive created: $ZIP_PATH${NC}
+else echo ${RED}Failed to create archive${NC}; exit 1
 fi
 
 
@@ -193,14 +200,12 @@ fi
 
 # Tag is necessary for release
 if [[ ! $(git tag --list $GIT_TAG) ]]; then
-  echo Skip release: no tag found
+  echo ${BLUE}Skip release: no tag found${NC}
 else
-  GH_RELEASE_NOTES=$(deno run --allow-read $GH_NOTES $TYPE $NAME)
-  GH_RELEASE_TITLE="$(deno run --allow-read $GH_TITLE $TYPE $NAME) $VERSION"
+  # Get notes and title
+  GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $TYPE $NAME)
+  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME) $VERSION"
 
-  gh release create $GIT_TAG $ZIP_PATH \
-    --latest \
-    --notes $GH_RELEASE_NOTES \
-    --title $GH_RELEASE_TITLE \
-    --verify-tag
+  # Generate release
+  gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag
 fi
