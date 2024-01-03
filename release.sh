@@ -63,6 +63,8 @@ if [[ -z "$VERSION" ]];  then echo Type $VERSION is empty;  exit 1; fi
 # Tools
 MD2HTML="./.utils/md2/md2html.ts"
 MD2TEXT="./.utils/md2/md2text.ts"
+GH_TITLE="./.utils/gh/gh_title.ts"
+GH_NOTES="./.utils/gh/gh_notes.ts"
 
 # Git
 GIT_TAG="$TYPE/$NAME/$VERSION"
@@ -80,7 +82,7 @@ OUT_DIR="./_dist/$TYPE_DIR"
 OUT_NAME="$NAME-$VERSION"
 OUT_PATH="$OUT_DIR/$OUT_NAME"
 ZIP_NAME="$OUT_NAME.zip"
-ZIP_PATH="$OUT_DIR/$ZIP_NAME_NAME"
+ZIP_PATH="$OUT_DIR/$ZIP_NAME"
 
 
 #-------------------------------------------------------------------------------
@@ -112,7 +114,7 @@ fi
 
 # Merge branch only if it exists
 if [[ ! $(git branch --list $GIT_BRANCH) ]]; then
-  echo Branch $GIT_BRANCH doesn\'t exist
+  echo Skip merge: branch $GIT_BRANCH doesn\'t exist
 else
   git merge --squash $GIT_BRANCH
   git commit -m $GIT_TAG
@@ -124,9 +126,9 @@ GIT_HASH=$(git log --all --grep='$GIT_TAG' | grep commit | cut -d\  -f2)
 
 # Tag only if tag doesn't exists
 if [[ -z $GIT_HASH ]]; then
-  echo No commit found for $GIT_TAG
+  echo Skip tag: no commit found for $GIT_TAG
 elif [[ $(git tag --list $GIT_TAG) ]]; then
-  echo Tag $GIT_TAG already exists
+  echo Skip tag: tag $GIT_TAG already exists
 else
   git tag -a $GIT_TAG $GIT_HASH -m $GIT_TAG
   git push origin $GIT_TAG
@@ -137,12 +139,9 @@ fi
 # Generate Archive
 #-------------------------------------------------------------------------------
 
-# Remove old stuff
-if [[ -d $OUT_PATH ]]; then rm -rf $OUT_PATH; fi
-if [[ -f $ZIP_PATH ]]; then rm $ZIP_PATH; fi
-
 # Copy output directory
 mkdir -p $OUT_DIR
+rm -rf $OUT_PATH $ZIP_PATH
 cp -r $SRC_PATH $OUT_PATH
 
 # Remove images
@@ -178,3 +177,30 @@ fi
 # Create archive
 cd $OUT_DIR
 zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
+cd -
+
+# Verify that archive has been created
+echo $ZIP_PATH
+if [[ -f $ZIP_PATH ]];
+then echo Archive created: $ZIP_PATH
+else echo Failed to create archive; exit 1
+fi
+
+
+#-------------------------------------------------------------------------------
+# Create Release
+#-------------------------------------------------------------------------------
+
+# Tag is necessary for release
+if [[ ! $(git tag --list $GIT_TAG) ]]; then
+  echo Skip release: no tag found
+else
+  GH_RELEASE_NOTES=$(deno run --allow-read $GH_NOTES $TYPE $NAME)
+  GH_RELEASE_TITLE="$(deno run --allow-read $GH_TITLE $TYPE $NAME) $VERSION"
+
+  gh release create $GIT_TAG $ZIP_PATH \
+    --latest \
+    --notes $GH_RELEASE_NOTES \
+    --title $GH_RELEASE_TITLE \
+    --verify-tag
+fi

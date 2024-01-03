@@ -3,8 +3,8 @@
 //  <type>  Resource type, one of: "block" | "patch" | "port" | "sprite" | "tool" | "uberasm"
 //  <name>  Name of the resource
 
-import parseArgs from "./args.ts";
-import validateResource from "./resource.ts";
+import parseArgs from "../args.ts";
+import validateResource from "../resource.ts";
 
 const SEPARATOR_1 = "=".repeat(80);
 const SEPARATOR_2 = "-".repeat(80);

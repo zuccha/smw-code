@@ -12,10 +12,10 @@ import {
 import { CSS, render } from "https://deno.land/x/gfm@0.2.5/mod.ts";
 import prettier from "npm:prettier";
 import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
+import parseArgs from "../args.ts";
+import validateResource from "../resource.ts";
 import "./assets/syntax_asar.js";
 import "./assets/syntax_uberasm.js";
-import parseArgs from "./args.ts";
-import validateResource from "./resource.ts";
 
 const extraCSS =
   "body{margin:0;}main{max-width:800px;margin:0 auto;padding:1em 1em 4em 1em;}" +
