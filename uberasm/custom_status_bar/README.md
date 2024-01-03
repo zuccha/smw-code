@@ -3,8 +3,8 @@
 Custom Status Bar (CSB) is a UberASM that allows you to configure SMW's status
 bar in different ways.
 
-| [Download v0.1.0](https://github.com/zuccha/smw-code/releases/download/custom_status_bar%2F0.1.0/custom_status_bar-0.1.0.zip) |
-| :---------------------------------------------------------------------------------------------------------------------------: |
+| [Download v0.2.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fcustom_status_bar%2F0.2.0/custom_status_bar-0.2.0.zip) |
+| :-------------------------------------------------------------------------------------------------------------------------------------: |
 
 | <img src="./docs/assets/images/overview.gif" width="400px" /> |
 | ------------------------------------------------------------- |

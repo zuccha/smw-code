@@ -6,12 +6,13 @@ Instructions for inserting CSB into your ROM hack via UberASMTool.
 
 Follow these steps:
 
-1. Copy `asm/csb_asm/` inside UberASMTool's top folder (at the same level of
-   `gamemode/`, `levels/`, `library/`, _etc._)
-2. Copy `asm/library/csb.asm` inside UberASMTool's `library/` folder
-3. Copy `asm/other/status_code.asm` inside UberASMTool's `other/` folder (note
-   that the file already exists, you can replace it)
-4. Copy `asm/gamemode/csb_gm11.asm` inside UberASMTool's `gamemode/` folder
+1. Copy `UberASMTool/csb_asm/` inside UberASMTool's top folder (at the same
+   level of `gamemode/`, `levels/`, `library/`, _etc._)
+2. Copy `UberASMTool/library/csb.asm` inside UberASMTool's `library/` folder
+3. Copy `UberASMTool/other/status_code.asm` inside UberASMTool's `other/` folder
+   (note that the file already exists, you can replace it)
+4. Copy `UberASMTool/gamemode/csb_gm11.asm` inside UberASMTool's `gamemode/`
+   folder
 5. Add the following in UberASMTool's `list.txt`, under `gamemode:`
 
    ```uberasm
