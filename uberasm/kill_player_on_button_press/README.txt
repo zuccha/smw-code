@@ -22,8 +22,8 @@ This bundle contains the following files:
   amount of presses done/left above Mario.
 - PIXI/sprites/indicator.json: Config for a sprite that shows an indicator with
   the amount of presses done/left above Mario.
-- ExGraphics/ExGFX80.bin: Graphics file that contains the digits to be used for
-  the indicator sprite.
+- ExGraphics/Indicator (SP3).bin: Graphics file that contains the digits to be
+  used for the indicator sprite.
 
 
 --------------------------------------------------------------------------------
@@ -59,10 +59,10 @@ Note that this step is optional, you need to do this only if you want the
 counter to be visible over Mario's head.
 
 You can show the indicator over Mario's head via the sprite "indicator.asm". The
-sprite requires the bundled "ExGFX80.bin" (you can use numbers other than 80),
-or any file containing the digits 0-9. In case of a custom ExGFX file, you can
-set the position of the digits tiles with the `gfx_tiles` table in
-"indicator.asm". You can choose which SP slot to use with `!gfx_sp`.
+sprite requires the bundled "Indicator (SP3).bin", or any graphics file
+containing the digits 0-9. In case of a custom ExGFX file, you can set the
+position of the digits tiles with the `gfx_tiles` table in "indicator.asm". You
+can choose which SP slot to use with `!gfx_sp` (the default is SP3).
 
 The sprite will follow Mario whenever he goes. You can choose to show the inputs
 done or the inputs remaining via the extra bit.
@@ -114,6 +114,17 @@ This UberASM is compatible with SA-1.
 --------------------------------------------------------------------------------
 4. Changelog
 --------------------------------------------------------------------------------
+
+................................................................................
+v1.3.0 (2024-01-02)
+................................................................................
+
+Changed:
+- Display indicator sprite as text in Lunar Magic.
+- Rename "ExGFX80.bin" to "Indicator (SP3).bin".
+
+Fix:
+- Remove non-relevant graphics from sprite graphics file.
 
 ................................................................................
 v1.2.0 (2023-12-27)

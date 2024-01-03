@@ -71,8 +71,8 @@
         }
       ],
       "GFXInfo": {},
-      "DisplayText": "",
-      "UseText": false
+      "DisplayText": "Inputs Done\\n Indicator",
+      "UseText": true
     },
     {
       "X": 0,
@@ -87,8 +87,8 @@
         }
       ],
       "GFXInfo": {},
-      "DisplayText": "",
-      "UseText": false
+      "DisplayText": "Inputs Left\\n Indicator",
+      "UseText": true
     }
   ],
   "Collection": [
