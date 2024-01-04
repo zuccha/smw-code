@@ -19,6 +19,9 @@
 # Make script exit if any command fails
 set -e
 
+# Load env
+source .env
+
 
 #-------------------------------------------------------------------------------
 # Parse Flags and Arguments
@@ -214,7 +217,15 @@ else
   GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME) $VERSION"
 
   # Generate release
-  gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag
+  GH_URL=$(gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
+
+  # Send Discord notification
+  if [[ -z $DISCORD_WEBHOOK ]]; then
+    echo Skip Discord notification: no webhook
+  else
+    GM_EMBED="{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\",\"color\":15258703}"
+    curl -H "Content-Type: application/json" -d "{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\"}]}" $DISCORD_WEBHOOK
+  fi
 fi
 
 
@@ -236,4 +247,9 @@ else
 
   # Generate README
   deno run --allow-read --allow-write $SUMMARY_UPDATE $SUMMARY_PATH $SUMMARY_JSON
+
+  # Commit update
+  git add $SUMMARY_PATH $SUMMARY_JSON
+  git commit -m "Update README"
+  git push
 fi
