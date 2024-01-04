@@ -20,23 +20,3 @@ If you don't know how it works and want to find out more, check out the list of
 7. [Compatibility](./docs/markdown/compatibility.md)
 8. [Credits](./docs/markdown/credits.md)
 9. [Changelog](./CHANGELOG.md)
-
-Phases:
-
-- Merge m 1 00000001
-- Tag t 2 00000010
-- Archive a 4 00000100
-- Release r 8 00001000
-- Discord d 16 00010000
-- Summary s 32 00100000
-
-Documentation:
-
-- Markdown
-- HTML
-- Text
-- Images
-
-Git:
-
-- Commit to tag
