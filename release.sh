@@ -3,6 +3,7 @@
 ################################################################################
 
 # Usage: ./_utils/release [-htmi] <type> <name> <version>
+#   -a          Generate archive without tagging, publishing releases, etc.
 #   -h          Generate HTML documentation
 #   -t          Generate text documentation
 #   -m          Include markdown documentation
@@ -28,8 +29,9 @@ source .env
 #-------------------------------------------------------------------------------
 
 # Parse flags
-while getopts "hmti" flag; do
+while getopts "hmtia" flag; do
   case $flag in
+    a) ARCHIVE_ONLY=1  ;;
     h) DOCS_HTML=1     ;;
     m) DOCS_MARKDOWN=1 ;;
     t) DOCS_TEXT=1     ;;
@@ -93,9 +95,11 @@ ZIP_NAME="$OUT_NAME.zip"
 ZIP_PATH="$OUT_DIR/$ZIP_NAME"
 
 # Colors for logging
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m'
+C_GOOD='\033[0;32m'
+C_INFO='\033[0;34m'
+C_WARN='\033[0;33m'
+C_FAIL='\033[0;31m'
+C_NONE='\033[0m'
 
 
 #-------------------------------------------------------------------------------
@@ -104,19 +108,19 @@ NC='\033[0m'
 
 # Check if resource exists
 if [[ ! -d "$SRC_PATH" ]]; then
-  echo ${RED}Resource $SRC_PATH doesn\'t exist${NC}
+  echo ${C_FAIL}Resource $SRC_PATH doesn\'t exist${C_NONE}
   exit 1
 fi
 
 # Check if readme exists
 if [[ ! -f "$README_PATH" ]]; then
-  echo ${RED}Resource $SRC_PATH doesn\'t have a README${NC}
+  echo ${C_FAIL}Resource $SRC_PATH doesn\'t have a README${C_NONE}
   exit 1
 fi
 
 # Check if changelog exists
 if [[ ! -f "$CHANGELOG_PATH" ]]; then
-  echo ${RED}Resource $SRC_PATH doesn\'t have a CHANGELOG${NC}
+  echo ${C_FAIL}Resource $SRC_PATH doesn\'t have a CHANGELOG${C_NONE}
   exit 1
 fi
 
@@ -129,25 +133,31 @@ fi
 GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
 
 # Merge branch only if it exists
-if [[ -n $GIT_HASH ]]; then
-  echo ${BLUE}Skip merge: already merged${NC}
+if [[ -n $ARCHIVE_ONLY ]]; then
+  echo ${C_WARN}Skip merge: archive only mode${C_NONE}
+elif [[ -n $GIT_HASH ]]; then
+  echo ${C_WARN}Skip merge: already merged${C_NONE}
 elif [[ ! $(git branch --list $GIT_BRANCH) ]]; then
-  echo ${BLUE}Skip merge: branch $GIT_BRANCH doesn\'t exist${NC}
+  echo ${C_WARN}Skip merge: branch $GIT_BRANCH doesn\'t exist${C_NONE}
 else
-  git merge --squash $GIT_BRANCH
-  git commit -m $GIT_TAG
-  git push
+  git merge --squash $GIT_BRANCH > /dev/null
+  git commit -m $GIT_TAG > /dev/null
+  git push > /dev/null
   GIT_HASH=$(git log --all --grep='$GIT_TAG' | grep commit | cut -d\  -f2)
+  echo ${C_INFO}Merge $GIT_BRANCH${C_NONE}
 fi
 
 # Tag only if tag doesn't exists
-if [[ -z $GIT_HASH ]]; then
-  echo ${BLUE}Skip tag: no commit found for $GIT_TAG${NC}
+if [[ -n $ARCHIVE_ONLY ]]; then
+  echo ${C_WARN}Skip tag: archive only mode${C_NONE}
+elif [[ -z $GIT_HASH ]]; then
+  echo ${C_WARN}Skip tag: no commit found for $GIT_TAG${C_NONE}
 elif [[ $(git tag --list $GIT_TAG) ]]; then
-  echo ${BLUE}Skip tag: tag $GIT_TAG already exists${NC}
+  echo ${C_WARN}Skip tag: tag $GIT_TAG already exists${C_NONE}
 else
-  git tag -a $GIT_TAG $GIT_HASH -m $GIT_TAG
-  git push origin $GIT_TAG
+  git tag -a $GIT_TAG $GIT_HASH -m $GIT_TAG > /dev/null
+  git push origin $GIT_TAG > /dev/null
+  echo ${C_INFO}Tag $GIT_TAG${C_NONE}
 fi
 
 
@@ -196,9 +206,9 @@ zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
 cd - > /dev/null
 
 # Verify that archive has been created
-if [[ ! -f $ZIP_PATH ]]; then
-  echo ${RED}Failed to create archive${NC}
-  exit 1
+if [[ ! -f $ZIP_PATH ]];
+then echo ${C_FAIL}Failed to create archive${C_NONE}; exit 1
+else echo ${C_INFO}Create archive $ZIP_PATH${C_NONE}
 fi
 
 
@@ -207,10 +217,12 @@ fi
 #-------------------------------------------------------------------------------
 
 # Tag is necessary for release
-if [[ $(gh release list | grep $GIT_TAG) ]]; then
-  echo ${BLUE}Skip release: already released${NC}
+if [[ -n $ARCHIVE_ONLY ]]; then
+  echo ${C_WARN}Skip release: archive only mode${C_NONE}
+elif [[ $(gh release list | grep $GIT_TAG) ]]; then
+  echo ${C_WARN}Skip release: already released${C_NONE}
 elif [[ ! $(git tag --list $GIT_TAG) ]]; then
-  echo ${BLUE}Skip release: tag $GIT_TAG found${NC}
+  echo ${C_WARN}Skip release: tag $GIT_TAG found${C_NONE}
 else
   # Get notes and title
   GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $TYPE $NAME)
@@ -218,14 +230,25 @@ else
 
   # Generate release
   GH_URL=$(gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
+  echo ${C_INFO}Publish release $GH_URL${C_NONE}
+fi
 
-  # Send Discord notification
-  if [[ -z $DISCORD_WEBHOOK ]]; then
-    echo Skip Discord notification: no webhook
-  else
-    GM_EMBED="{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\",\"color\":15258703}"
-    curl -H "Content-Type: application/json" -d "{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\"}]}" $DISCORD_WEBHOOK
-  fi
+
+#-------------------------------------------------------------------------------
+# Notify Discord
+#-------------------------------------------------------------------------------
+
+# Send Discord notification
+if [[ -n $ARCHIVE_ONLY ]]; then
+  echo ${C_WARN}Skip Discord: archive only mode${C_NONE}
+elif [[ -z $GH_URL ]]; then
+  echo ${C_WARN}Skip Discord: no release${C_NONE}
+elif [[ -z $DISCORD_WEBHOOK ]]; then
+  echo ${C_WARN}Skip Discord: no webhook${C_NONE}
+else
+  GM_EMBED="{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\",\"color\":15258703}"
+  curl -H "Content-Type: application/json" -d "{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\"}]}" $DISCORD_WEBHOOK
+  echo ${C_INFO}Notify Discord${C_NONE}
 fi
 
 
@@ -234,10 +257,12 @@ fi
 #-------------------------------------------------------------------------------
 
 # Update main README
-if [[ -z $(gh release list | grep $GIT_TAG) ]]; then
-  echo ${BLUE}Skip summary: no release for $GIT_TAG${NC}
+if [[ -n $ARCHIVE_ONLY ]]; then
+  echo ${C_WARN}Skip summary: archive only mode${C_NONE}
+elif [[ -z $(gh release list | grep $GIT_TAG) ]]; then
+  echo ${C_WARN}Skip summary: no release for $GIT_TAG${C_NONE}
 elif [[ $(jq ".$TYPE_DIR.$NAME.version" $SUMMARY_JSON) == "\"$VERSION\"" ]]; then
-  echo ${BLUE}Skip summary: already up to date${NC}
+  echo ${C_WARN}Skip summary: already up to date${C_NONE}
 else
   # Update JSON
   GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME)"
@@ -249,7 +274,18 @@ else
   deno run --allow-read --allow-write $SUMMARY_UPDATE $SUMMARY_PATH $SUMMARY_JSON
 
   # Commit update
-  git add $SUMMARY_PATH $SUMMARY_JSON
-  git commit -m "Update README"
-  git push
+  git add $SUMMARY_PATH $SUMMARY_JSON > /dev/null
+  git commit -m "Update README" > /dev/null
+  git push > /dev/null
+
+  # Notify
+  echo ${C_INFO}Update summary${C_NONE}
 fi
+
+
+#-------------------------------------------------------------------------------
+# End
+#-------------------------------------------------------------------------------
+
+# If all went well, print a message
+echo ${C_GOOD}Release success!${C_NONE}
