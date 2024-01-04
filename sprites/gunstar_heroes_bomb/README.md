@@ -1,4 +1,4 @@
-# BOMB FROM GUNSTAR HEROES
+# Gunstar Heroes Bomb
 
 Author: zuccha, requested by TheXander. Palette and graphics provided by
 TheXander.

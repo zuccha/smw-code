@@ -1,4 +1,4 @@
-# Shop Block
+# Shop
 
 Created by zuccha, commissioned by Anas.
 
