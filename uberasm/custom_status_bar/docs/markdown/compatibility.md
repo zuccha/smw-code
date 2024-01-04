@@ -28,7 +28,7 @@ In case of conflicts, this address can be modified in `csb_asm/ram.asm`.
 
 ## SA-1
 
-CSB has not been made compatible with SA-1 yet.
+CSB is compatible with SA-1 yet.
 
 ## KevinM's Retry System
 

@@ -49,12 +49,6 @@ And use custom symbols before bonus stars, coins, lives, and time
 | :-------------------------------------------------------------: |
 |                  Elements with custom symbols                   |
 
-Notice that the newly designed status bar makes use of a few graphic tiles that
-are not present in the original _GFX28_ (_e.g._, the heart before the lives
-counter). This is because this UberASM comes with a modified _GFX28_ that you
-can import in your hack. Usage is completely **optional** and it's not the
-default. In this guide we will use images that make use of it.
-
 ## Control elements visibility
 
 Any element in the status bar can be easily made visible or hidden
