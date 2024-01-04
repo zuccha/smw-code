@@ -2,15 +2,46 @@
 #                                RELEASE SCRIPT                                #
 ################################################################################
 
-# Usage: ./_utils/release [-htmi] <type> <name> <version>
-#   -a          Generate archive without tagging, publishing releases, etc.
-#   -h          Generate HTML documentation
-#   -t          Generate text documentation
-#   -m          Include markdown documentation
-#   -i          Include images and preserve image tags in HTML and markdown
-#   <type>      Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
-#   <name>      Name of the resource
-#   <version>   Version, following semver convention
+# Usage: ./_utils/release [flags] <type> <name> <version>
+#
+#   Go through all the steps to publish a release of a resource on GitHub:
+#     - Merge: Merge a branch named as the resource tag into main. This branch
+#       is supposed to contain the changes from the new version of the resource.
+#     - Tag: Tag the commit of the release. By default, the commit with the
+#       resource tag, but a custom commit can be given.
+#     - Archive: Generate the archive to include in the published release. You
+#       can customize the type of the documentation to include.
+#     - Publish: Publish a new release on GitHub.
+#     - Notify: Post a message on Discord.
+#     - Summary: Update the main README of the repository.
+#
+#   By default, all phases are enabled, but when one is specified via flag, then
+#   they all become opt-in. By default, only text documentation is included in
+#   the release, but it can be controlled either by defining a ".release" file
+#   in the resource that overrides the defaults, or via flags; flags have the
+#   highest priority; upper case flags are negatives (i.e., "don't"s).
+#
+#   Args:
+#     <type>      Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
+#     <name>      Name of the resource
+#     <version>   Version, following semver convention
+#
+#   Git:
+#     -c <hash>   Commit to tag
+#
+#   Phases:
+#     -e          Merge branch
+#     -g          Create tag
+#     -a          Generate archive
+#     -r          Publish release
+#     -d          Notify Discord
+#     -s          Update summary
+#
+#   Documentation:
+#     -h, -H      Generate HTML documentation
+#     -t, -T      Generate text documentation
+#     -m, -M      Include markdown documentation
+#     -i, -I      Include images and preserve image tags in HTML and markdown
 
 
 #-------------------------------------------------------------------------------
@@ -29,13 +60,22 @@ source .env
 #-------------------------------------------------------------------------------
 
 # Parse flags
-while getopts "hmtia" flag; do
+while getopts "eEgGaArRdDsShHtTmMiIc:" flag; do
   case $flag in
-    a) ARCHIVE_ONLY=1  ;;
-    h) DOCS_HTML=1     ;;
-    m) DOCS_MARKDOWN=1 ;;
-    t) DOCS_TEXT=1     ;;
-    i) KEEP_IMAGES=1   ;;
+    e) FLAG_PHASE_MERGE_TEMP=1    ;;
+    g) FLAG_PHASE_TAG_TEMP=1      ;;
+    a) FLAG_PHASE_ARCHIVE_TEMP=1  ;;
+    r) FLAG_PHASE_RELEASE_TEMP=1  ;;
+    d) FLAG_PHASE_DISCORD_TEMP=1  ;;
+    s) FLAG_PHASE_SUMMARY_TEMP=1  ;;
+    m) FLAG_DOC_MARKDOWN_TEMP=1   ;;
+    h) FLAG_DOC_HTML_TEMP=1       ;;
+    H) FLAG_DOC_HTML_TEMP=0       ;;
+    t) FLAG_DOC_TEXT_TEMP=1       ;;
+    T) FLAG_DOC_TEXT_TEMP=0       ;;
+    i) FLAG_DOC_IMAGES_TEMP=1     ;;
+    I) FLAG_DOC_IMAGES_TEMP=0     ;;
+    c) GIT_HASH=$OPTARG           ;;
   esac
 done
 
@@ -59,6 +99,56 @@ if [[ -z "$TYPE" ]];     then echo Type $TYPE is empty;     exit 1; fi
 if [[ -z "$TYPE_DIR" ]]; then echo Type $TYPE is not valid; exit 1; fi
 if [[ -z "$NAME" ]];     then echo Type $NAME is empty;     exit 1; fi
 if [[ -z "$VERSION" ]];  then echo Type $VERSION is empty;  exit 1; fi
+
+
+#-------------------------------------------------------------------------------
+# Flags
+#-------------------------------------------------------------------------------
+
+# Documentation defaults
+FLAG_DOC_MARKDOWN=0
+FLAG_DOC_HTML=0
+FLAG_DOC_TEXT=1
+FLAG_DOC_IMAGES=0
+
+# Resource flags
+if [[ -f "./$TYPE_DIR/$NAME/.release" ]]; then
+  source "./$TYPE_DIR/$NAME/.release"
+fi
+
+# All phases are enabled by default, but they become opt-in if any flag is set
+if [[ -n $FLAG_PHASE_MERGE_TEMP ]]   || \
+   [[ -n $FLAG_PHASE_TAG_TEMP ]]     || \
+   [[ -n $FLAG_PHASE_ARCHIVE_TEMP ]] || \
+   [[ -n $FLAG_PHASE_RELEASE_TEMP ]] || \
+   [[ -n $FLAG_PHASE_DISCORD_TEMP ]] || \
+   [[ -n $FLAG_PHASE_SUMMARY_TEMP ]]; then
+  FLAG_PHASE_DEFAULT=0
+else
+  FLAG_PHASE_DEFAULT=1
+fi
+
+# Phase defaults
+FLAG_PHASE_MERGE=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_TAG=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_ARCHIVE=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_RELEASE=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_DISCORD=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_SUMMARY=$FLAG_PHASE_DEFAULT
+
+# Override phase flags
+if [[ -n $FLAG_PHASE_MERGE_TEMP ]];   then FLAG_PHASE_MERGE=$FLAG_PHASE_MERGE_TEMP;     fi
+if [[ -n $FLAG_PHASE_TAG_TEMP ]];     then FLAG_PHASE_TAG=$FLAG_PHASE_TAG_TEMP;         fi
+if [[ -n $FLAG_PHASE_ARCHIVE_TEMP ]]; then FLAG_PHASE_ARCHIVE=$FLAG_PHASE_ARCHIVE_TEMP; fi
+if [[ -n $FLAG_PHASE_RELEASE_TEMP ]]; then FLAG_PHASE_RELEASE=$FLAG_PHASE_RELEASE_TEMP; fi
+if [[ -n $FLAG_PHASE_DISCORD_TEMP ]]; then FLAG_PHASE_DISCORD=$FLAG_PHASE_DISCORD_TEMP; fi
+if [[ -n $FLAG_PHASE_SUMMARY_TEMP ]]; then FLAG_PHASE_SUMMARY=$FLAG_PHASE_SUMMARY_TEMP; fi
+
+# Override documentation flags
+if [[ -n $FLAG_DOC_MARKDOWN_TEMP ]]; then FLAG_DOC_MARKDOWN=$FLAG_DOC_MARKDOWN_TEMP; fi
+if [[ -n $FLAG_DOC_HTML_TEMP ]];     then FLAG_DOC_HTML=$FLAG_DOC_HTML_TEMP;         fi
+if [[ -n $FLAG_DOC_TEXT_TEMP ]];     then FLAG_DOC_TEXT=$FLAG_DOC_TEXT_TEMP;         fi
+if [[ -n $FLAG_DOC_IMAGES_TEMP ]];   then FLAG_DOC_IMAGES=$FLAG_DOC_IMAGES_TEMP;     fi
 
 
 #-------------------------------------------------------------------------------
@@ -124,16 +214,17 @@ if [[ ! -f "$CHANGELOG_PATH" ]]; then
   exit 1
 fi
 
+# Setup Git commit
+if [[ -z $GIT_HASH ]]; then
+  GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
+fi
+
 
 #-------------------------------------------------------------------------------
-# Git
+# Git Merge
 #-------------------------------------------------------------------------------
 
-# Get Git commit for the release
-GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
-
-# Merge branch only if it exists
-if [[ -n $ARCHIVE_ONLY ]]; then
+if [[ $FLAG_PHASE_MERGE != 1 ]]; then
   echo ${C_WARN}Skip merge: archive only mode${C_NONE}
 elif [[ -n $GIT_HASH ]]; then
   echo ${C_WARN}Skip merge: already merged${C_NONE}
@@ -147,9 +238,13 @@ else
   echo ${C_INFO}Merge $GIT_BRANCH${C_NONE}
 fi
 
-# Tag only if tag doesn't exists
-if [[ -n $ARCHIVE_ONLY ]]; then
-  echo ${C_WARN}Skip tag: archive only mode${C_NONE}
+
+#-------------------------------------------------------------------------------
+# Git Tag
+#-------------------------------------------------------------------------------
+
+if [[ $FLAG_PHASE_TAG != 1 ]]; then
+  echo ${C_WARN}Skip tag: disabled${C_NONE}
 elif [[ -z $GIT_HASH ]]; then
   echo ${C_WARN}Skip tag: no commit found for $GIT_TAG${C_NONE}
 elif [[ $(git tag --list $GIT_TAG) ]]; then
@@ -165,50 +260,57 @@ fi
 # Generate Archive
 #-------------------------------------------------------------------------------
 
-# Copy output directory
-mkdir -p $OUT_DIR
-rm -rf $OUT_PATH $ZIP_PATH
-cp -r $SRC_PATH $OUT_PATH
+if [[ $FLAG_PHASE_ARCHIVE != 1 ]]; then
+  echo ${C_WARN}Skip archive: disabled${C_NONE}
+else
+  # Copy output directory
+  mkdir -p $OUT_DIR
+  rm -rf $OUT_PATH $ZIP_PATH
+  cp -r $SRC_PATH $OUT_PATH
 
-# Remove images
-if [[ "$KEEP_IMAGES" != 1 ]]; then
-  rm -rf $OUT_PATH/docs/assets/images/
-  if [[ -d "$OUT_PATH/docs/markdown" ]];
-  then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
-  else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
+  # Remove images
+  if [[ $FLAG_DOC_IMAGES != 1 ]]; then
+    rm -rf $OUT_PATH/docs/assets/images/
+    if [[ -d "$OUT_PATH/docs/markdown" ]];
+    then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
+    else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
+    fi
   fi
-fi
 
-# Generate HTML documentation
-if [[ "$DOCS_HTML" == 1 ]]; then
-  deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
-fi
+  # Generate HTML documentation
+  if [[ $FLAG_DOC_HTML == 1 ]]; then
+    deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
+  fi
 
-# Generate text documentation (README and CHANGELOG only)
-if [[ "$DOCS_TEXT" == 1 ]]; then
-  deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
-fi
+  # Generate text documentation (README and CHANGELOG only)
+  if [[ $FLAG_DOC_TEXT == 1 ]]; then
+    deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
+  fi
 
-# Remove markdown documentation
-if [[ "$DOCS_MARKDOWN" != 1 ]]; then
-  rm $OUT_PATH/*.md
-  rm -rf $OUT_PATH/docs/markdown/
-fi
+  # Remove markdown documentation
+  if [[ $FLAG_DOC_MARKDOWN != 1 ]]; then
+    rm $OUT_PATH/*.md
+    rm -rf $OUT_PATH/docs/markdown/
+  fi
 
-# Remove all documentation
-if [[ "$DOCS_HTML" != 1 && "$DOCS_MARKDOWN" != 1 && "$DOCS_TEXT" != 1 ]]; then
-  rm -rf $OUT_PATH/docs/
-fi
+  # Remove all documentation
+  if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
+    rm -rf $OUT_PATH/docs/
+  fi
 
-# Create archive
-cd $OUT_DIR
-zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
-cd - > /dev/null
+  # Remove config file
+  if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
 
-# Verify that archive has been created
-if [[ ! -f $ZIP_PATH ]];
-then echo ${C_FAIL}Failed to create archive${C_NONE}; exit 1
-else echo ${C_INFO}Create archive $ZIP_PATH${C_NONE}
+  # Create archive
+  cd $OUT_DIR
+  zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
+  cd - > /dev/null
+
+  # Verify that archive has been created
+  if [[ ! -f $ZIP_PATH ]];
+  then echo ${C_FAIL}Failed to create archive${C_NONE}; exit 1
+  else echo ${C_INFO}Create archive $ZIP_PATH${C_NONE}
+  fi
 fi
 
 
@@ -216,9 +318,8 @@ fi
 # Create Release
 #-------------------------------------------------------------------------------
 
-# Tag is necessary for release
-if [[ -n $ARCHIVE_ONLY ]]; then
-  echo ${C_WARN}Skip release: archive only mode${C_NONE}
+if [[ $FLAG_PHASE_RELEASE != 1 ]]; then
+  echo ${C_WARN}Skip release: disabled${C_NONE}
 elif [[ $(gh release list | grep $GIT_TAG) ]]; then
   echo ${C_WARN}Skip release: already released${C_NONE}
 elif [[ ! $(git tag --list $GIT_TAG) ]]; then
@@ -238,9 +339,8 @@ fi
 # Notify Discord
 #-------------------------------------------------------------------------------
 
-# Send Discord notification
-if [[ -n $ARCHIVE_ONLY ]]; then
-  echo ${C_WARN}Skip Discord: archive only mode${C_NONE}
+if [[ $FLAG_PHASE_DISCORD != 1 ]]; then
+  echo ${C_WARN}Skip Discord: disabled${C_NONE}
 elif [[ -z $GH_URL ]]; then
   echo ${C_WARN}Skip Discord: no release${C_NONE}
 elif [[ -z $DISCORD_WEBHOOK ]]; then
@@ -256,9 +356,8 @@ fi
 # Update Main README
 #-------------------------------------------------------------------------------
 
-# Update main README
-if [[ -n $ARCHIVE_ONLY ]]; then
-  echo ${C_WARN}Skip summary: archive only mode${C_NONE}
+if [[ $FLAG_PHASE_SUMMARY != 1 ]]; then
+  echo ${C_WARN}Skip summary: disabled${C_NONE}
 elif [[ -z $(gh release list | grep $GIT_TAG) ]]; then
   echo ${C_WARN}Skip summary: no release for $GIT_TAG${C_NONE}
 elif [[ $(jq ".$TYPE_DIR.$NAME.version" $SUMMARY_JSON) == "\"$VERSION\"" ]]; then
@@ -288,4 +387,4 @@ fi
 #-------------------------------------------------------------------------------
 
 # If all went well, print a message
-echo ${C_GOOD}Release success!${C_NONE}
+echo ${C_GOOD}Release complete!${C_NONE}
