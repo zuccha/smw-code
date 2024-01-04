@@ -48,6 +48,9 @@
 #     -t, -T      Generate text documentation
 #     -m, -M      Include markdown documentation
 #     -i, -I      Include images and preserve image tags in HTML and markdown
+#
+#   Other:
+#     -o          Open ditribution folder after release.
 
 
 #-------------------------------------------------------------------------------
@@ -66,7 +69,7 @@ source .env
 #-------------------------------------------------------------------------------
 
 # Parse flags
-while getopts "eEgGaArRdDsShHtTmMiIc:" flag; do
+while getopts "eEgGaArRdDsShHtTmMiIc:o" flag; do
   case $flag in
     e) FLAG_PHASE_MERGE_TEMP=1    ;;
     E) FLAG_PHASE_MERGE_TEMP=0    ;;
@@ -88,6 +91,7 @@ while getopts "eEgGaArRdDsShHtTmMiIc:" flag; do
     i) FLAG_DOC_IMAGES_TEMP=1     ;;
     I) FLAG_DOC_IMAGES_TEMP=0     ;;
     c) GIT_HASH=$OPTARG           ;;
+    o) OPEN_OUT_PATH=1            ;;
   esac
 done
 
@@ -422,3 +426,4 @@ fi
 
 # If all went well, print a message
 log_good "Release complete!"
+if [[ $OPEN_OUT_PATH == 1 ]]; then open $OUT_PATH; fi
