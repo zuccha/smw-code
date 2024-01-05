@@ -1,0 +1,18 @@
+.caption {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  user-select: none;
+}
+
+.caption-char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: xx-large;
+  width: 0.75em;
+}
+
+.caption-char > span {
+  font-size: small;
+}

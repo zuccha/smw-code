@@ -7,6 +7,7 @@ import useSetting from "./hooks/use-setting";
 import { Encoding, Unit } from "./hooks/use-value";
 import { classNames } from "./utils";
 import "./app.css";
+import Caption from "./components/caption";
 
 const unitOptions: Option<Unit>[] = [
   { label: "Byte", value: Unit.Byte },
@@ -88,6 +89,10 @@ export function App() {
   return (
     <div class="app" ref={ref}>
       <div class="app-editors">
+        <div />
+        <Caption unit={unit} />
+        <div />
+
         <span class="app-editor-label">Binary</span>
         <div class="app-editor-input">
           <Editor {...props} {...editor0} encoding={Encoding.Binary} />
