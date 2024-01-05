@@ -51,6 +51,7 @@
 #
 #   Other:
 #     -o          Open ditribution folder after release.
+#     -f          First release, skip some checks for files not found
 
 
 #-------------------------------------------------------------------------------
@@ -69,7 +70,7 @@ source .env
 #-------------------------------------------------------------------------------
 
 # Parse flags
-while getopts "eEgGaArRdDsShHtTmMiIc:o" flag; do
+while getopts "eEgGaArRdDsShHtTmMiIc:of" flag; do
   case $flag in
     e) FLAG_PHASE_MERGE_TEMP=1    ;;
     E) FLAG_PHASE_MERGE_TEMP=0    ;;
@@ -92,6 +93,7 @@ while getopts "eEgGaArRdDsShHtTmMiIc:o" flag; do
     I) FLAG_DOC_IMAGES_TEMP=0     ;;
     c) GIT_HASH=$OPTARG           ;;
     o) OPEN_OUT_PATH=1            ;;
+    f) FIRST_RELEASE=1            ;;
   esac
 done
 
@@ -227,29 +229,31 @@ LOG_COLOR_NONE='\033[0m'
 log_good() { printf "${LOG_COLOR_GOOD}$1${LOG_COLOR_NONE}\n"; }
 log_info() { printf "${LOG_COLOR_INFO}$1${LOG_COLOR_NONE}\n"; }
 log_warn() { printf "${LOG_COLOR_WARN}$1${LOG_COLOR_NONE}\n"; }
-log_none() { printf "${LOG_COLOR_FAIL}$1${LOG_COLOR_NONE}\n"; }
+log_fail() { printf "${LOG_COLOR_FAIL}$1${LOG_COLOR_NONE}\n"; }
 
 
 #-------------------------------------------------------------------------------
 # Resource Validation
 #-------------------------------------------------------------------------------
 
-# Check if resource exists
-if [[ ! -d "$SRC_PATH" ]]; then
-  log_fail "Resource $SRC_PATH doesn\'t exist"
-  exit 1
-fi
+if [[ -z $FIRST_RELEASE ]]; then
+  # Check if resource exists
+  if [[ ! -d "$SRC_PATH" ]]; then
+    log_fail "Resource $SRC_PATH doesn\'t exist"
+    exit 1
+  fi
 
-# Check if readme exists
-if [[ ! -f "$README_PATH" ]]; then
-  log_fail "Resource $SRC_PATH doesn\'t have a README"
-  exit 1
-fi
+  # Check if readme exists
+  if [[ ! -f "$README_PATH" ]]; then
+    log_fail "Resource $SRC_PATH doesn\'t have a README"
+    exit 1
+  fi
 
-# Check if changelog exists
-if [[ ! -f "$CHANGELOG_PATH" ]]; then
-  log_fail "Resource $SRC_PATH doesn\'t have a CHANGELOG"
-  exit 1
+  # Check if changelog exists
+  if [[ ! -f "$CHANGELOG_PATH" ]]; then
+    log_fail "Resource $SRC_PATH doesn\'t have a CHANGELOG"
+    exit 1
+  fi
 fi
 
 # Setup Git commit
