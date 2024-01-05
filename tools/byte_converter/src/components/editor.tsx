@@ -1,9 +1,10 @@
 import { forwardRef } from "preact/compat";
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
+  useState,
 } from "preact/hooks";
 import { Encoding, Unit, useValue } from "../hooks/use-value";
 import { clamp, classNames, lastIndexOf, remove } from "../utils";
@@ -15,37 +16,38 @@ export enum InsertMode {
 }
 
 export type EditorProps = {
+  autoFocus?: boolean;
   encoding: Encoding;
-  hasFocus: boolean;
-  index: number;
   insertMode: InsertMode;
   integer: number;
   onChange: (integer: number) => void;
-  onChangeIndex: (index: number) => void;
-  onFocus: () => void;
-  onMove: (direction: -1 | 1) => void;
+  onMoveDown: () => void;
+  onMoveUp: () => void;
   unit: Unit;
 };
 
 export type EditorRef = {
+  blur: () => void;
   copy: () => void;
+  focus: () => void;
 };
 
 export default forwardRef<EditorRef, EditorProps>(function Editor(
   {
-    hasFocus,
-    index,
+    autoFocus,
     insertMode,
     integer,
     encoding,
     onChange,
-    onChangeIndex,
-    onFocus,
-    onMove,
+    onMoveDown,
+    onMoveUp,
     unit,
   },
   ref
 ) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+
   const [value, { parse, validChar }] = useValue(integer, encoding, unit);
   const chars = useMemo(() => value.split(""), [value]);
   const length = value.length;
@@ -76,8 +78,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   );
 
   const updateIndex = useCallback(
-    (newIndex: number) => onChangeIndex(clamp(newIndex, 0, length - 1)),
-    [length, onChangeIndex]
+    (newIndex: number) => setIndex(clamp(newIndex, 0, length - 1)),
+    [length]
   );
 
   const moveLeft = useCallback(
@@ -136,8 +138,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "c") return copy();
       if ((e.ctrlKey || e.metaKey) && e.key === "v") return paste();
-      if (e.key === "ArrowDown") return onMove(1);
-      if (e.key === "ArrowUp") return onMove(-1);
+      if (e.key === "ArrowDown") return onMoveDown();
+      if (e.key === "ArrowUp") return onMoveUp();
       if (e.key === "ArrowLeft") return moveLeft();
       if (e.key === "ArrowRight") return moveRight();
       if (e.key === "Backspace") handleKeyBackspace();
@@ -151,42 +153,48 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       handleKeyBackspace,
       moveLeft,
       moveRight,
-      onMove,
+      onMoveDown,
+      onMoveUp,
       validChar,
     ]
   );
 
-  const handleKeyPress = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") onFocus();
-    },
-    [onFocus]
-  );
+  const blur = useCallback(() => containerRef.current?.blur(), []);
+  const focus = useCallback(() => containerRef.current?.focus(), []);
 
-  useEffect(() => {
-    if (hasFocus) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [handleKeyDown, hasFocus]);
-
-  useImperativeHandle(ref, () => ({ copy }), [copy]);
+  useImperativeHandle(ref, () => ({ blur, copy, focus }), [blur, copy, focus]);
 
   return (
-    <div class="editor" onKeyPress={handleKeyPress} tabIndex={0}>
+    <div
+      autoFocus={autoFocus}
+      class="editor"
+      onKeyDown={handleKeyDown}
+      ref={containerRef}
+      tabIndex={0}
+    >
       {chars.map((char, i) => {
         const className = classNames([
           ["editor-char", true],
-          ["editor-char-focus", hasFocus && i === index],
-          ["editor-char-solid", hasFocus && i !== index && i <= last],
-          ["editor-char-empty", hasFocus && i !== index && i > last],
+          ["selected", i === index && i <= last],
+          ["solid", i !== index && i <= last],
+          ["empty", i !== index && i > last],
+        ]);
+
+        const backgroundClassName = classNames([
+          ["editor-char-background", true],
+          ["selected", i === index],
         ]);
 
         return (
-          <div class={className} onClick={() => onChangeIndex(i)}>
-            <div class="editor-char-background" />
+          <div
+            class={className}
+            onMouseDown={(e: MouseEvent) => {
+              e.preventDefault();
+              setIndex(i);
+              focus();
+            }}
+          >
+            <div class={backgroundClassName} />
             {char}
           </div>
         );

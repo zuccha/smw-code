@@ -1,4 +1,4 @@
-.button-item {
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,14 +11,16 @@
   user-select: none;
 }
 
-.button-item:hover {
+.button:hover,
+.button:focus {
+  outline: none;
   cursor: pointer;
   border: 1px solid var(--color-primary-1);
   color: var(--color-primary-1);
 }
 
-.button-item-selected,
-.button-item-selected:hover {
+.button-selected,
+.button-selected:hover {
   cursor: default;
   border: 1px solid var(--color-primary-2);
   color: var(--color-primary-2);

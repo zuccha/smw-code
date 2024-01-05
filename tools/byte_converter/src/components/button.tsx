@@ -16,13 +16,21 @@ export default function Button({
   const className = useMemo(
     () =>
       classNames([
-        ["button-item", true],
-        ["button-item-selected", isSelected],
+        ["button", true],
+        ["button-selected", isSelected],
       ]),
     [isSelected]
   );
 
-  const handleKeyPress = useCallback(
+  const handleMouseDown = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault();
+      onClick();
+    },
+    [onClick]
+  );
+
+  const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -35,8 +43,8 @@ export default function Button({
   return (
     <div
       class={className}
-      onClick={onClick}
-      onKeyPress={handleKeyPress}
+      onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
       tabIndex={0}
     >
       {label}

@@ -1,13 +1,12 @@
-import { useCallback, useRef, useState } from "preact/hooks";
+import { Ref, useCallback, useRef, useState } from "preact/hooks";
 import Button from "./components/button";
+import Caption from "./components/caption";
 import Editor, { EditorRef, InsertMode } from "./components/editor";
 import Radio, { Option } from "./components/radio";
-import useClickOutside from "./hooks/use-click-outside";
 import useSetting from "./hooks/use-setting";
 import { Encoding, Unit } from "./hooks/use-value";
 import { classNames } from "./utils";
 import "./app.css";
-import Caption from "./components/caption";
 
 const unitOptions: Option<Unit>[] = [
   { label: "Byte", value: Unit.Byte },
@@ -20,42 +19,18 @@ const insertModeOptions: Option<InsertMode>[] = [
 ] as const;
 
 const useEditor = (
-  id: number,
-  selection: number,
-  setSelection: (selection: number) => void
+  ref: Ref<EditorRef>,
+  prevRef: Ref<EditorRef> | undefined,
+  nextRef: Ref<EditorRef> | undefined
 ) => {
-  const ref = useRef<EditorRef>(null);
-  const [index, setIndex] = useState(0);
-  const hasFocus = id === selection;
-
-  const onChangeIndex = useCallback(
-    (newIndex: number) => {
-      setIndex(newIndex);
-      setSelection(id);
-    },
-    [id, setSelection]
-  );
-
-  const onFocus = useCallback(() => {
-    setSelection(id);
-  }, [id, setSelection]);
-
-  const onMove = useCallback(
-    (direction: -1 | 1) => {
-      const newId = id + direction;
-      if (0 <= newId && newId < 3) setSelection(newId);
-    },
-    [id, setSelection]
-  );
-
-  const copy = useCallback(() => ref.current?.copy(), []);
-
-  return { copy, hasFocus, index, onChangeIndex, onFocus, onMove, ref };
+  const onMoveUp = useCallback(() => prevRef?.current?.focus(), [prevRef]);
+  const onMoveDown = useCallback(() => nextRef?.current?.focus(), [nextRef]);
+  const copy = useCallback(() => ref.current?.copy(), [ref]);
+  return { copy, onMoveDown, onMoveUp, ref };
 };
 
 export function App() {
   const [integer, setInteger] = useState(0);
-  const [selection, setSelection] = useState(0);
 
   const [insertMode, setInsertMode] = useSetting(
     "insertion-mode",
@@ -64,16 +39,15 @@ export function App() {
 
   const [unit, setUnit] = useSetting("unit", Unit.Byte);
 
-  const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(
-    ref,
-    useCallback(() => setSelection(-1), [])
-  );
-
   const props = { insertMode, integer, unit, onChange: setInteger };
-  const editor0 = useEditor(0, selection, setSelection);
-  const editor1 = useEditor(1, selection, setSelection);
-  const editor2 = useEditor(2, selection, setSelection);
+
+  const editor0Ref = useRef<EditorRef>(null);
+  const editor1Ref = useRef<EditorRef>(null);
+  const editor2Ref = useRef<EditorRef>(null);
+
+  const editor0 = useEditor(editor0Ref, undefined, editor1Ref);
+  const editor1 = useEditor(editor1Ref, editor0Ref, editor2Ref);
+  const editor2 = useEditor(editor2Ref, editor1Ref, undefined);
 
   const [instructionsVisible, setInstructionsVisible] = useSetting(
     "instructions-visible",
@@ -91,7 +65,7 @@ export function App() {
   const instructionsClassName = classNames([["hidden", !instructionsVisible]]);
 
   return (
-    <div class="app" ref={ref}>
+    <div class="app">
       <div class="app-editors">
         <div />
         <Caption unit={unit} />
@@ -99,7 +73,12 @@ export function App() {
 
         <span class="app-editor-label">Binary</span>
         <div class="app-editor-input">
-          <Editor {...props} {...editor0} encoding={Encoding.Binary} />
+          <Editor
+            {...props}
+            {...editor0}
+            encoding={Encoding.Binary}
+            autoFocus
+          />
         </div>
         <Button label="Copy" onClick={editor0.copy} />
 

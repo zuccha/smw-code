@@ -1,7 +1,6 @@
 .caption {
   display: flex;
   flex-direction: row;
-  cursor: pointer;
   user-select: none;
 }
 

@@ -12,22 +12,6 @@
   width: 0.75em;
 }
 
-.editor-char-focus {
-  color: var(--color-background);
-}
-
-.editor-char-focus > .editor-char-background {
-  background-color: var(--color-primary-2);
-}
-
-.editor-char-solid {
-  color: var(--color-primary-2);
-}
-
-.editor-char-empty {
-  color: var(--color-primary-1);
-}
-
 .editor-char-background {
   position: absolute;
   width: 100%;
@@ -35,4 +19,28 @@
   z-index: -1;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.editor:focus {
+  outline: none;
+}
+
+.editor:focus .editor-char {
+  color: var(--color-background);
+}
+
+.editor:focus .editor-char-background.selected {
+  background-color: var(--color-primary-2);
+}
+
+.editor:focus .editor-char.selected {
+  color: var(--color-background);
+}
+
+.editor:focus .editor-char.solid {
+  color: var(--color-primary-2);
+}
+
+.editor:focus .editor-char.empty {
+  color: var(--color-primary-1);
 }
