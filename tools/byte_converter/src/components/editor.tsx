@@ -10,19 +10,19 @@ import { Encoding, Unit, useValue } from "../hooks/use-value";
 import { clamp, classNames, lastIndexOf, remove } from "../utils";
 import "./editor.css";
 
-export enum InsertMode {
-  AddAndShiftRight,
-  Replace,
+export enum TypeMode {
+  Insert,
+  Overwrite,
 }
 
 export type EditorProps = {
   autoFocus?: boolean;
   encoding: Encoding;
-  insertMode: InsertMode;
   integer: number;
   onChange: (integer: number) => void;
   onMoveDown: () => void;
   onMoveUp: () => void;
+  typeMode: TypeMode;
   unit: Unit;
 };
 
@@ -35,12 +35,12 @@ export type EditorRef = {
 export default forwardRef<EditorRef, EditorProps>(function Editor(
   {
     autoFocus,
-    insertMode,
     integer,
     encoding,
     onChange,
     onMoveDown,
     onMoveUp,
+    typeMode,
     unit,
   },
   ref
@@ -60,16 +60,16 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     [chars, index]
   );
 
-  const insertChar = useCallback(
+  const typeChar = useCallback(
     (char: string) => {
-      switch (insertMode) {
-        case InsertMode.AddAndShiftRight:
+      switch (typeMode) {
+        case TypeMode.Insert:
           return [...chars.slice(0, index), char, ...chars.slice(index)];
-        case InsertMode.Replace:
+        case TypeMode.Overwrite:
           return [...chars.slice(0, index), char, ...chars.slice(index + 1)];
       }
     },
-    [chars, index, insertMode]
+    [chars, index, typeMode]
   );
 
   const charsToString = useCallback(
@@ -113,14 +113,14 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
   const handleKeyChar = useCallback(
     (char: string) => {
-      const maybeValue = charsToString(insertChar(char));
+      const maybeValue = charsToString(typeChar(char));
       const newInteger = parse(maybeValue);
       if (newInteger !== undefined) {
         onChange(newInteger);
         moveRight();
       }
     },
-    [charsToString, insertChar, moveRight, onChange, parse]
+    [charsToString, typeChar, moveRight, onChange, parse]
   );
 
   const copy = useCallback(() => {

@@ -1,7 +1,7 @@
 import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "./components/button";
 import Caption from "./components/caption";
-import Editor, { EditorRef, InsertMode } from "./components/editor";
+import Editor, { EditorRef, TypeMode } from "./components/editor";
 import Radio, { Option } from "./components/radio";
 import useSetting from "./hooks/use-setting";
 import { Encoding, Unit } from "./hooks/use-value";
@@ -13,9 +13,9 @@ const unitOptions: Option<Unit>[] = [
   { label: "Word", value: Unit.Word },
 ] as const;
 
-const insertModeOptions: Option<InsertMode>[] = [
-  { label: "Add&Shift", value: InsertMode.AddAndShiftRight },
-  { label: "Replace", value: InsertMode.Replace },
+const typeModeOptions: Option<TypeMode>[] = [
+  { label: "Insert", value: TypeMode.Insert },
+  { label: "Overwrite", value: TypeMode.Overwrite },
 ] as const;
 
 const binaryOptions: Option<boolean>[] = [
@@ -37,19 +37,11 @@ const useEditor = (
 export function App() {
   const [integer, setInteger] = useState(0);
 
-  const [insertMode, setInsertMode] = useSetting(
-    "insertion-mode",
-    InsertMode.Replace
-  );
-
+  const [typeMode, setInsertMode] = useSetting("type-mode", TypeMode.Overwrite);
   const [unit, setUnit] = useSetting("unit", Unit.Byte);
+  const [hotkeysEnabled, setHotkeysEnabled] = useSetting("hotkeys", false);
 
-  const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
-    "hotkeys-enabled",
-    false
-  );
-
-  const props = { insertMode, integer, unit, onChange: setInteger };
+  const props = { typeMode, integer, unit, onChange: setInteger };
 
   const editor0Ref = useRef<EditorRef>(null);
   const editor1Ref = useRef<EditorRef>(null);
@@ -76,14 +68,14 @@ export function App() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "h") return setHotkeysEnabled((prev) => !prev);
+      if (e.key === "k") return setHotkeysEnabled((prev) => !prev);
 
       if (!hotkeysEnabled) return;
-      if (e.key === "i") return toggleInstructions();
+      if (e.key === "h") return toggleInstructions();
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
-      if (e.key === "s") return setInsertMode(InsertMode.AddAndShiftRight);
-      if (e.key === "r") return setInsertMode(InsertMode.Replace);
+      if (e.key === "i") return setInsertMode(TypeMode.Insert);
+      if (e.key === "o") return setInsertMode(TypeMode.Overwrite);
     },
     [
       hotkeysEnabled,
@@ -138,12 +130,12 @@ export function App() {
           <Radio onChange={setUnit} options={unitOptions} value={unit} />
         </div>
 
-        <span class="app-setting-label">Insertion:</span>
+        <span class="app-setting-label">Type Mode:</span>
         <div class="app-setting-input">
           <Radio
             onChange={setInsertMode}
-            options={insertModeOptions}
-            value={insertMode}
+            options={typeModeOptions}
+            value={typeMode}
           />
         </div>
 
@@ -182,31 +174,31 @@ export function App() {
             <b>Unit:</b> <i>Byte</i> is 8-bit; <i>Word</i> is 16-bit.
           </li>
           <li>
-            <b>Insertion:</b> <i>Add&Shift</i> inserts the typed digit and
-            shifts everything that follows the selected digit to the right;{" "}
-            <i>Replace</i> replaces the selected digit.
+            <b>Type Mode:</b> <i>Insert</i> inserts the typed digit where the
+            selected digit is; <i>Overwrite</i> replaces the selected digit with
+            the typed digit.
           </li>
           <li>
             <b>Hotkeys:</b> When on, it is possible to control settings with
             keys:
             <ul>
               <li>
-                <code>Y</code> - unit <i>Byte</i>
+                <code>Y</code> - Set unit to <i>Byte</i>
               </li>
               <li>
-                <code>W</code> - unit <i>Word</i>
+                <code>W</code> - Set unit to <i>Word</i>
               </li>
               <li>
-                <code>S</code> - insert <i>Add&Shift</i>
+                <code>I</code> - Set type mode to <i>Insert</i>
               </li>
               <li>
-                <code>R</code> - insert <i>Replace</i>
+                <code>O</code> - Set type mode to <i>Overwrite</i>
               </li>
               <li>
-                <code>I</code> - toggle instructions visibility
+                <code>H</code> - Toggle instructions visibility
               </li>
               <li>
-                <code>H</code> - toggle hotkeys (this is always enabled)
+                <code>K</code> - Toggle hotkeys (this is always enabled)
               </li>
             </ul>
           </li>
