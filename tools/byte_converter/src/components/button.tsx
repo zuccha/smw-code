@@ -1,14 +1,17 @@
+import { ReactNode } from "preact/compat";
 import { useCallback, useMemo } from "preact/hooks";
 import { classNames } from "../utils";
 import "./button.css";
 
 type ButtonProps = {
+  isRound?: boolean;
   isSelected?: boolean;
-  label: string;
+  label: ReactNode;
   onClick: () => void;
 };
 
 export default function Button({
+  isRound = false,
   isSelected = false,
   label,
   onClick,
@@ -17,9 +20,10 @@ export default function Button({
     () =>
       classNames([
         ["button", true],
-        ["button-selected", isSelected],
+        ["selected", isSelected],
+        ["round", isRound],
       ]),
-    [isSelected]
+    [isRound, isSelected]
   );
 
   const handleMouseDown = useCallback(

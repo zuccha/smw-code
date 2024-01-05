@@ -1,3 +1,4 @@
+import { Copy } from "lucide-preact";
 import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "./components/button";
 import Caption from "./components/caption";
@@ -91,6 +92,8 @@ export function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  const copyButtonLabel = <Copy size={20} />;
+
   return (
     <div class="app">
       <div class="app-editors">
@@ -107,19 +110,19 @@ export function App() {
             autoFocus
           />
         </div>
-        <Button label="Copy" onClick={editor0.copy} />
+        <Button isRound label={copyButtonLabel} onClick={editor0.copy} />
 
         <span class="app-editor-label">Decimal</span>
         <div class="app-editor-input">
           <Editor {...props} {...editor1} encoding={Encoding.Decimal} />
         </div>
-        <Button label="Copy" onClick={editor1.copy} />
+        <Button isRound label={copyButtonLabel} onClick={editor1.copy} />
 
         <span class="app-editor-label">Hexadecimal</span>
         <div class="app-editor-input">
           <Editor {...props} {...editor2} encoding={Encoding.Hexadecimal} />
         </div>
-        <Button label="Copy" onClick={editor2.copy} />
+        <Button isRound label={copyButtonLabel} onClick={editor2.copy} />
       </div>
 
       <div class="app-divider" />

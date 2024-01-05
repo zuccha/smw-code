@@ -1,7 +1,10 @@
 :root {
-  --color-primary-1: #dca87d;
-  --color-primary-2: #de8f4e;
-  --color-primary-3: #cb5601;
+  --color-primary-1: #f0e1d6;
+  --color-primary-2: #dca87d;
+  --color-primary-3: #de8f4e;
+  --color-primary-4: #cb5601;
+  --color-primary-5: #8a3900;
+  --color-primary-6: #572400;
 
   --color-neutral-1: rgba(255, 255, 255, 0.87);
   --color-neutral-2: rgba(255, 255, 255, 0.6);
