@@ -1,0 +1,25 @@
+.button-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--color-neutral-3);
+  color: var(--color-neutral-2);
+  padding: 0 0.4em;
+  margin: 0.3em 0;
+
+  user-select: none;
+}
+
+.button-item:hover {
+  cursor: pointer;
+  border: 1px solid var(--color-primary-1);
+  color: var(--color-primary-1);
+}
+
+.button-item-selected,
+.button-item-selected:hover {
+  cursor: default;
+  border: 1px solid var(--color-primary-2);
+  color: var(--color-primary-2);
+}

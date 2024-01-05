@@ -1,0 +1,24 @@
+.editor {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  user-select: none;
+}
+
+.editor-char {
+  display: flex;
+  justify-content: center;
+  width: 0.75em;
+}
+
+.editor-char-focus {
+  color: var(--color-primary-3);
+}
+
+.editor-char-solid {
+  color: var(--color-primary-2);
+}
+
+.editor-char-empty {
+  color: var(--color-primary-1);
+}
