@@ -11,18 +11,18 @@ export enum Unit {
   Word,
 }
 
-const Boundaries = {
+export const Boundaries = {
   [Unit.Byte]: { min: 0, max: 255 },
   [Unit.Word]: { min: 0, max: 65535 },
 } as const;
 
-const Chars = {
+export const Chars = {
   [Encoding.Binary]: /^[0-1]$/,
   [Encoding.Decimal]: /^[0-9]$/,
   [Encoding.Hexadecimal]: /^[0-9a-fA-F]$/,
 } as const;
 
-const Length = {
+export const Length = {
   [Unit.Byte]: {
     [Encoding.Binary]: 8,
     [Encoding.Decimal]: 3,
@@ -35,7 +35,7 @@ const Length = {
   },
 } as const;
 
-const Radix = {
+export const Radix = {
   [Encoding.Binary]: 2,
   [Encoding.Decimal]: 10,
   [Encoding.Hexadecimal]: 16,
@@ -76,7 +76,7 @@ export function useValue(
       if (i > max) return bounds.max;
       return Number.isNaN(i) ? undefined : i;
     },
-    [encoding]
+    [encoding, unit]
   );
 
   const validChar = useCallback(
