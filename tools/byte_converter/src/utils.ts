@@ -1,3 +1,7 @@
+export function clamp(n: number, min: number, max: number): number {
+  return Math.min(Math.max(n, min), max);
+}
+
 export function classNames(options: [string, boolean][]): string {
   return options
     .filter((option) => option[1])
@@ -12,4 +16,16 @@ export function lastIndexOf<T>(
   for (let i = items.length - 1; i >= 0; --i)
     if (predicate(items[i]!, i)) return i;
   return -1;
+}
+
+export function insert<T>(items: T[], index: number, item: T): T[] {
+  return [...items.slice(0, index), item, ...items.slice(index)];
+}
+
+export function replace<T>(items: T[], index: number, item: T): T[] {
+  return [...items.slice(0, index), item, ...items.slice(index + 1)];
+}
+
+export function remove<T>(items: T[], index: number): T[] {
+  return [...items.slice(0, index), ...items.slice(index + 1)];
 }

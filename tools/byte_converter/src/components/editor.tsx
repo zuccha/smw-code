@@ -6,7 +6,7 @@ import {
   useMemo,
 } from "preact/hooks";
 import { Encoding, Unit, useValue } from "../hooks/use-value";
-import { classNames, lastIndexOf } from "../utils";
+import { clamp, classNames, lastIndexOf, remove } from "../utils";
 import "./editor.css";
 
 export enum InsertMode {
@@ -73,35 +73,33 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     [length]
   );
 
-  const moveLeft = useCallback(() => {
-    if (index - 1 >= 0) onChangeIndex(index - 1);
-  }, [index, onChangeIndex]);
+  const updateIndex = useCallback(
+    (newIndex: number) => onChangeIndex(clamp(newIndex, 0, length - 1)),
+    [length, onChangeIndex]
+  );
 
-  const moveRight = useCallback(() => {
-    if (index + 1 < length) onChangeIndex(index + 1);
-  }, [index, onChangeIndex]);
+  const moveLeft = useCallback(
+    () => updateIndex(index - 1),
+    [index, updateIndex]
+  );
 
-  const adjust = useCallback(
-    (newLength: number) => {
-      if (index >= newLength) onChangeIndex(newLength - 1);
-    },
-    [index, onChangeIndex]
+  const moveRight = useCallback(
+    () => updateIndex(index + 1),
+    [index, updateIndex]
   );
 
   const handleKeyDelete = useCallback(() => {
-    const newChars = [...chars.slice(0, index), ...chars.slice(index + 1), "0"];
-    const maybeValue = charsToString(newChars);
+    const maybeValue = charsToString([...remove(chars, index), "0"]);
     const newInteger = parse(maybeValue, { max: 0 });
     if (newInteger !== undefined) {
       onChange(newInteger);
-      adjust(maybeValue.length);
+      updateIndex(index);
     }
-  }, [adjust, chars, charsToString, index, onChange, parse]);
+  }, [chars, charsToString, index, onChange, parse, updateIndex]);
 
   const handleKeyBackspace = useCallback(() => {
     if (index === 0) return handleKeyDelete();
-    const newChars = [...chars.slice(0, index - 1), ...chars.slice(index), "0"];
-    const maybeValue = charsToString(newChars);
+    const maybeValue = charsToString([...remove(chars, index - 1), "0"]);
     const newInteger = parse(maybeValue, { max: 0 });
     if (newInteger !== undefined) {
       onChange(newInteger);
@@ -118,7 +116,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         moveRight();
       }
     },
-    [adjust, charsToString, insertChar, moveRight, onChange, parse]
+    [charsToString, insertChar, moveRight, onChange, parse]
   );
 
   const copy = useCallback(() => {
