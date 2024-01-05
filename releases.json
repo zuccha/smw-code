@@ -33,7 +33,7 @@
     "byte_table_editor": {
       "name": "Byte Table Editor",
       "version": "1.1.0",
-      "online": "https://zuccha.io/pages/byte-table-editor.html"
+      "online": "https://zuccha.io/pages/byte_table_editor.html"
     },
     "overworld_music_editor": {
       "name": "Overworld Music Editor",
@@ -42,7 +42,8 @@
     },
     "byte_converter": {
       "name": "Byte Converter",
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "online": "https://zuccha.io/pages/byte_converter.html"
     }
   },
   "uberasm": {
