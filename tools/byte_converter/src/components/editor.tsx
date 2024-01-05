@@ -177,6 +177,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
         return (
           <div class={className} onClick={() => onChangeIndex(i)}>
+            <div class="editor-char-background" />
             {char}
           </div>
         );

@@ -7,13 +7,15 @@
   --color-neutral-2: rgba(255, 255, 255, 0.6);
   --color-neutral-3: rgba(255, 255, 255, 0.4);
 
+  --color-background: #242424;
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: var(--color-neutral-1);
-  background-color: #242424;
+  background-color: var(--color-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
