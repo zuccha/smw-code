@@ -39,6 +39,10 @@
       "name": "Overworld Music Editor",
       "version": "1.0.0",
       "deprecated": "Byte Table Editor"
+    },
+    "byte_converter": {
+      "name": "Byte Converter",
+      "version": "1.0.0"
     }
   },
   "uberasm": {
