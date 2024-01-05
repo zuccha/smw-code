@@ -110,6 +110,16 @@ case $TYPE in
   uberasm) TYPE_DIR=uberasm ;;
 esac
 
+# Determine type label
+case $TYPE in
+  block)   TYPE_LABEL=Block   ;;
+  patch)   TYPE_LABEL=Patch   ;;
+  port)    TYPE_LABEL=Port    ;;
+  sprite)  TYPE_LABEL=Sprite  ;;
+  tool)    TYPE_LABEL=Tool    ;;
+  uberasm) TYPE_LABEL=UberASM ;;
+esac
+
 # Args validation
 if [[ -z "$TYPE" ]];     then echo Type $TYPE is empty;     exit 1; fi
 if [[ -z "$TYPE_DIR" ]]; then echo Type $TYPE is not valid; exit 1; fi
@@ -188,6 +198,7 @@ SUMMARY_JSON="./releases.json"
 
 # Source directory and files
 SRC_PATH="./$TYPE_DIR/$NAME"
+SRC_BUILD="$SRC/build.sh"
 README_NAME="README.md"
 README_PATH="$SRC_PATH/$README_NAME"
 CHANGELOG_NAME="CHANGELOG.md"
@@ -297,7 +308,19 @@ else
   # Copy output directory
   mkdir -p $OUT_DIR
   rm -rf $OUT_PATH $ZIP_PATH
-  cp -r $SRC_PATH $OUT_PATH
+
+  if [[ -f $SRC_BUILD ]]; then
+    log_info "Create archive $ZIP_PATH"
+
+    pushd $SRC_PATH > /dev/null
+    source $SRC_BUILD
+    popd > /dev/null
+
+    mkdir -p $OUT_DIR
+    cp -r "$SRC_PATH/$BUILD_OUT_PATH" $OUT_PATH
+  else
+    cp -r $SRC_PATH $OUT_PATH
+  fi
 
   # Remove images
   if [[ $FLAG_DOC_IMAGES == 1 ]]; then
@@ -387,7 +410,8 @@ else
   log_info "Notify Discord"
 
   GM_EMBED="{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\",\"color\":15258703}"
-  curl -H "Content-Type: application/json" -d "{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\"}]}" $DISCORD_WEBHOOK
+  DISCORD_PAYLOAD="{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"author\":\"zuccha\",\"title\":\"$GH_TITLE\",\"description\":\"$TYPE_LABEL\",\"url\":\"$GH_URL\"}]}"
+  curl -H "Content-Type: application/json" -d $DISCORD_PAYLOAD $DISCORD_WEBHOOK
 fi
 
 
