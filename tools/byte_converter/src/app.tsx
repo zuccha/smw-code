@@ -1,4 +1,4 @@
-import { Ref, useCallback, useRef, useState } from "preact/hooks";
+import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "./components/button";
 import Caption from "./components/caption";
 import Editor, { EditorRef, InsertMode } from "./components/editor";
@@ -63,6 +63,22 @@ export function App() {
     : "Show Instructions";
 
   const instructionsClassName = classNames([["hidden", !instructionsVisible]]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "h") return toggleInstructions();
+      if (e.key === "y") return setUnit(Unit.Byte);
+      if (e.key === "w") return setUnit(Unit.Word);
+      if (e.key === "s") return setInsertMode(InsertMode.AddAndShiftRight);
+      if (e.key === "r") return setInsertMode(InsertMode.Replace);
+    },
+    [setInsertMode, setUnit, toggleInstructions]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <div class="app">
