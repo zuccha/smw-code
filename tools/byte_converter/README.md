@@ -2,6 +2,8 @@
 
 Tool for converting values from and to binary, decimal, and hexadecimal.
 
+<img src="./docs/assets/images/byte_converter.gif" width="500px" />
+
 ## Run locally
 
 First, you need to install [Node](https://nodejs.org/en) and [NPM](https://www.npmjs.com/).

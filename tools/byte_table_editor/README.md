@@ -2,7 +2,7 @@
 
 This is an editor for editing ASM tables.
 
-<img src="./docs/assets/images/byte-table-editor.gif" width="500px" >
+<img src="./docs/assets/images/byte-table-editor.gif" width="500px" />
 
 ## Run locally
 
