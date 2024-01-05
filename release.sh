@@ -326,44 +326,56 @@ else
     cp -r $SRC_PATH $OUT_PATH
   fi
 
-  # Remove images
-  if [[ $FLAG_DOC_IMAGES == 1 ]]; then
-    log_info "\t...with images"
+
+  if [[ -f $SRC_BUILD ]]; then
+    log_info "Create archive $ZIP_PATH"
+
+    pushd $SRC_PATH > /dev/null
+    source $SRC_BUILD
+    popd > /dev/null
+
+    mkdir -p $OUT_DIR
+    cp -r "$SRC_PATH/$BUILD_OUT_PATH" $OUT_PATH
   else
-    rm -rf $OUT_PATH/docs/assets/images/
-    if [[ -d "$OUT_PATH/docs/markdown" ]];
-    then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
-    else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
+    # Remove images
+    if [[ $FLAG_DOC_IMAGES == 1 ]]; then
+      log_info "\t...with images"
+    else
+      rm -rf $OUT_PATH/docs/assets/images/
+      if [[ -d "$OUT_PATH/docs/markdown" ]];
+      then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
+      else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
+      fi
     fi
-  fi
 
-  # Generate HTML documentation
-  if [[ $FLAG_DOC_HTML == 1 ]]; then
-    deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
-    log_info "\t...with HTML"
-  fi
+    # Generate HTML documentation
+    if [[ $FLAG_DOC_HTML == 1 ]]; then
+      deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
+      log_info "\t...with HTML"
+    fi
 
-  # Generate text documentation (README and CHANGELOG only)
-  if [[ $FLAG_DOC_TEXT == 1 ]]; then
-    deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
-    log_info "\t...with text"
-  fi
+    # Generate text documentation (README and CHANGELOG only)
+    if [[ $FLAG_DOC_TEXT == 1 ]]; then
+      deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
+      log_info "\t...with text"
+    fi
 
-  # Remove markdown documentation
-  if [[ $FLAG_DOC_MARKDOWN == 1 ]]; then
-    log_info "\t...with markdown"
-  else
-    rm $OUT_PATH/*.md
-    rm -rf $OUT_PATH/docs/markdown/
-  fi
+    # Remove markdown documentation
+    if [[ $FLAG_DOC_MARKDOWN == 1 ]]; then
+      log_info "\t...with markdown"
+    else
+      rm $OUT_PATH/*.md
+      rm -rf $OUT_PATH/docs/markdown/
+    fi
 
-  # Remove all documentation
-  if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
-    rm -rf $OUT_PATH/docs/
-  fi
+    # Remove all documentation
+    if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
+      rm -rf $OUT_PATH/docs/
+    fi
 
-  # Remove config file
-  if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
+    # Remove config file
+    if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
+  fi
 
   # Create archive
   cd $OUT_DIR
