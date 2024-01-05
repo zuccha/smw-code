@@ -18,6 +18,11 @@ const insertModeOptions: Option<InsertMode>[] = [
   { label: "Replace", value: InsertMode.Replace },
 ] as const;
 
+const binaryOptions: Option<boolean>[] = [
+  { label: "On", value: true },
+  { label: "Off", value: false },
+] as const;
+
 const useEditor = (
   ref: Ref<EditorRef>,
   prevRef: Ref<EditorRef> | undefined,
@@ -38,6 +43,11 @@ export function App() {
   );
 
   const [unit, setUnit] = useSetting("unit", Unit.Byte);
+
+  const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
+    "hotkeys-enabled",
+    false
+  );
 
   const props = { insertMode, integer, unit, onChange: setInteger };
 
@@ -66,13 +76,22 @@ export function App() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "h") return toggleInstructions();
+      if (e.key === "h") return setHotkeysEnabled((prev) => !prev);
+
+      if (!hotkeysEnabled) return;
+      if (e.key === "i") return toggleInstructions();
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
       if (e.key === "s") return setInsertMode(InsertMode.AddAndShiftRight);
       if (e.key === "r") return setInsertMode(InsertMode.Replace);
     },
-    [setInsertMode, setUnit, toggleInstructions]
+    [
+      hotkeysEnabled,
+      setHotkeysEnabled,
+      setInsertMode,
+      setUnit,
+      toggleInstructions,
+    ]
   );
 
   useEffect(() => {
@@ -127,6 +146,15 @@ export function App() {
             value={insertMode}
           />
         </div>
+
+        <span class="app-setting-label">Hotkeys:</span>
+        <div class="app-setting-input">
+          <Radio
+            onChange={setHotkeysEnabled}
+            options={binaryOptions}
+            value={hotkeysEnabled}
+          />
+        </div>
       </div>
 
       <div class="app-divider" />
@@ -157,6 +185,30 @@ export function App() {
             <b>Insertion:</b> <i>Add&Shift</i> inserts the typed digit and
             shifts everything that follows the selected digit to the right;{" "}
             <i>Replace</i> replaces the selected digit.
+          </li>
+          <li>
+            <b>Hotkeys:</b> When on, it is possible to control settings with
+            keys:
+            <ul>
+              <li>
+                <code>Y</code> - unit <i>Byte</i>
+              </li>
+              <li>
+                <code>W</code> - unit <i>Word</i>
+              </li>
+              <li>
+                <code>S</code> - insert <i>Add&Shift</i>
+              </li>
+              <li>
+                <code>R</code> - insert <i>Replace</i>
+              </li>
+              <li>
+                <code>I</code> - toggle instructions visibility
+              </li>
+              <li>
+                <code>H</code> - toggle hotkeys (this is always enabled)
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
