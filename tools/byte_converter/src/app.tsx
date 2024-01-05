@@ -36,6 +36,10 @@ const useEditor = (
     [id, setSelection]
   );
 
+  const onFocus = useCallback(() => {
+    setSelection(id);
+  }, [id, setSelection]);
+
   const onMove = useCallback(
     (direction: -1 | 1) => {
       const newId = id + direction;
@@ -46,7 +50,7 @@ const useEditor = (
 
   const copy = useCallback(() => ref.current?.copy(), []);
 
-  return { copy, hasFocus, index, onChangeIndex, onMove, ref };
+  return { copy, hasFocus, index, onChangeIndex, onFocus, onMove, ref };
 };
 
 export function App() {

@@ -22,6 +22,7 @@ export type EditorProps = {
   integer: number;
   onChange: (integer: number) => void;
   onChangeIndex: (index: number) => void;
+  onFocus: () => void;
   onMove: (direction: -1 | 1) => void;
   unit: Unit;
 };
@@ -39,6 +40,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     encoding,
     onChange,
     onChangeIndex,
+    onFocus,
     onMove,
     unit,
   },
@@ -154,6 +156,13 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     ]
   );
 
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") onFocus();
+    },
+    [onFocus]
+  );
+
   useEffect(() => {
     if (hasFocus) {
       window.addEventListener("keydown", handleKeyDown);
@@ -166,7 +175,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   useImperativeHandle(ref, () => ({ copy }), [copy]);
 
   return (
-    <div class="editor">
+    <div class="editor" onKeyPress={handleKeyPress} tabIndex={0}>
       {chars.map((char, i) => {
         const className = classNames([
           ["editor-char", true],

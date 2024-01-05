@@ -1,4 +1,4 @@
-import { useMemo } from "preact/hooks";
+import { useCallback, useMemo } from "preact/hooks";
 import { classNames } from "../utils";
 import "./button.css";
 
@@ -22,8 +22,23 @@ export default function Button({
     [isSelected]
   );
 
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
   return (
-    <div class={className} onClick={onClick}>
+    <div
+      class={className}
+      onClick={onClick}
+      onKeyPress={handleKeyPress}
+      tabIndex={0}
+    >
       {label}
     </div>
   );
