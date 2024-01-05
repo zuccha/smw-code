@@ -200,7 +200,8 @@ SUMMARY_JSON="./releases.json"
 
 # Source directory and files
 SRC_PATH="./$TYPE_DIR/$NAME"
-SRC_BUILD="$SRC/build.sh"
+SRC_BUILD_NAME="build.sh"
+SRC_BUILD_PATH="$SRC_PATH/$SRC_BUILD_NAME"
 README_NAME="README.md"
 README_PATH="$SRC_PATH/$README_NAME"
 CHANGELOG_NAME="CHANGELOG.md"
@@ -278,7 +279,7 @@ else
   git merge --squash $GIT_BRANCH > /dev/null
   git commit -m $GIT_TAG > /dev/null
   git push > /dev/null
-  GIT_HASH=$(git log --all --grep='$GIT_TAG' | grep commit | cut -d\  -f2)
+  GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
 fi
 
 
@@ -313,11 +314,9 @@ else
   mkdir -p $OUT_DIR
   rm -rf $OUT_PATH $ZIP_PATH
 
-  if [[ -f $SRC_BUILD ]]; then
-    log_info "Create archive $ZIP_PATH"
-
+  if [[ -f $SRC_BUILD_PATH ]]; then
     pushd $SRC_PATH > /dev/null
-    source $SRC_BUILD
+    source $SRC_BUILD_NAME
     popd > /dev/null
 
     mkdir -p $OUT_DIR
@@ -326,56 +325,44 @@ else
     cp -r $SRC_PATH $OUT_PATH
   fi
 
-
-  if [[ -f $SRC_BUILD ]]; then
-    log_info "Create archive $ZIP_PATH"
-
-    pushd $SRC_PATH > /dev/null
-    source $SRC_BUILD
-    popd > /dev/null
-
-    mkdir -p $OUT_DIR
-    cp -r "$SRC_PATH/$BUILD_OUT_PATH" $OUT_PATH
+  # Remove images
+  if [[ $FLAG_DOC_IMAGES == 1 ]]; then
+    log_info "\t...with images"
   else
-    # Remove images
-    if [[ $FLAG_DOC_IMAGES == 1 ]]; then
-      log_info "\t...with images"
-    else
-      rm -rf $OUT_PATH/docs/assets/images/
-      if [[ -d "$OUT_PATH/docs/markdown" ]];
-      then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
-      else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
-      fi
+    rm -rf $OUT_PATH/docs/assets/images/
+    if [[ -d "$OUT_PATH/docs/markdown" ]];
+    then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
+    else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
     fi
-
-    # Generate HTML documentation
-    if [[ $FLAG_DOC_HTML == 1 ]]; then
-      deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
-      log_info "\t...with HTML"
-    fi
-
-    # Generate text documentation (README and CHANGELOG only)
-    if [[ $FLAG_DOC_TEXT == 1 ]]; then
-      deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
-      log_info "\t...with text"
-    fi
-
-    # Remove markdown documentation
-    if [[ $FLAG_DOC_MARKDOWN == 1 ]]; then
-      log_info "\t...with markdown"
-    else
-      rm $OUT_PATH/*.md
-      rm -rf $OUT_PATH/docs/markdown/
-    fi
-
-    # Remove all documentation
-    if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
-      rm -rf $OUT_PATH/docs/
-    fi
-
-    # Remove config file
-    if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
   fi
+
+  # Generate HTML documentation
+  if [[ $FLAG_DOC_HTML == 1 ]]; then
+    deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
+    log_info "\t...with HTML"
+  fi
+
+  # Generate text documentation (README and CHANGELOG only)
+  if [[ $FLAG_DOC_TEXT == 1 ]]; then
+    deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
+    log_info "\t...with text"
+  fi
+
+  # Remove markdown documentation
+  if [[ $FLAG_DOC_MARKDOWN == 1 ]]; then
+    log_info "\t...with markdown"
+  else
+    rm $OUT_PATH/*.md
+    rm -rf $OUT_PATH/docs/markdown/
+  fi
+
+  # Remove all documentation
+  if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
+    rm -rf $OUT_PATH/docs/
+  fi
+
+  # Remove config file
+  if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
 
   # Create archive
   cd $OUT_DIR
@@ -424,10 +411,7 @@ elif [[ -z $DISCORD_WEBHOOK ]]; then
   log_warn "Skip Discord: no webhook"
 else
   log_info "Notify Discord"
-
-  GM_EMBED="{\"title\":\"$GH_TITLE\",\"url\":\"$GH_URL\",\"color\":15258703}"
-  DISCORD_PAYLOAD="{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"author\":\"zuccha\",\"title\":\"$GH_TITLE\",\"description\":\"$TYPE_LABEL\",\"url\":\"$GH_URL\"}]}"
-  curl -H "Content-Type: application/json" -d $DISCORD_PAYLOAD $DISCORD_WEBHOOK
+  curl -H "Content-Type: application/json" -d "{\"username\":\"Release\",\"content\":\"\",\"embeds\":[{\"title\":\"$GH_TITLE\",\"description\":\"$TYPE_LABEL\",\"url\":\"$GH_URL\"}]}" $DISCORD_WEBHOOK
 fi
 
 
