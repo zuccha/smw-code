@@ -1,8 +1,35 @@
-.collapsible.collapsed .collapsible-children {
-  display: none;
+.collapsible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.collapsible-button {
+.collapsible-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-self: flex-start;
+  width: 100%;
+  cursor: pointer;
+  padding: 1em;
+}
+
+.collapsible-header:hover {
+  background-color: var(--color-background-0);
+}
+
+.collapsible-header:focus {
+  outline-color: var(--color-primary-2);
+}
+
+.collapsible-children {
+  padding: 2em;
+  padding-top: 1em;
+}
+
+.collapsible-header > span {
+  font-variant: small-caps;
+}
+
+.collapsible.collapsed .collapsible-children {
+  display: none;
 }

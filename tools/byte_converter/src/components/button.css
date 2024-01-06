@@ -6,9 +6,10 @@
   border: 1px solid var(--color-neutral-3);
   color: var(--color-neutral-2);
   padding: 0 0.4em;
-  margin: 0.3em 0;
 
   user-select: none;
+
+  outline-color: var(--color-primary-2);
 }
 
 .button:active:not(.button.selected) {
@@ -22,9 +23,8 @@
   color: var(--color-primary-3);
 }
 
-.button:hover,
-.button:focus {
-  outline: none;
+.button:focus,
+.button:hover {
   cursor: pointer;
   border: 1px solid var(--color-primary-2);
   color: var(--color-primary-2);
@@ -35,4 +35,5 @@
   border-radius: 100%;
   border-color: transparent;
   padding: 0.3em;
+  outline: none;
 }

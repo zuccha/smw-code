@@ -19,6 +19,8 @@ import AppEditor from "./app-editor";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
 import "./app.css";
+import Collapsible from "../components/collapsible";
+import Section from "../components/section";
 
 //==============================================================================
 // Radio Options
@@ -100,6 +102,12 @@ export function App() {
     z.boolean().parse
   );
 
+  const [settingsVisible, setSettingsVisible] = useSetting(
+    "settings-visible",
+    true,
+    z.boolean().parse
+  );
+
   const [typingDirection, setTypingDirection] = useSetting(
     "typing-direction",
     TypingDirection.Right,
@@ -145,6 +153,7 @@ export function App() {
       if (e.key === "k") return setHotkeysEnabled((prev) => !prev);
 
       if (!hotkeysEnabled) return;
+      if (e.key === "s") return setSettingsVisible((prev) => !prev);
       if (e.key === "h") return setInstructionsVisible((prev) => !prev);
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
@@ -168,74 +177,75 @@ export function App() {
 
   return (
     <div class="app">
-      <div class="app-editors">
-        <div />
-        <Caption unit={unit} />
-        <div />
+      <Section label="Byte Converter">
+        <div class="app-editors">
+          <div />
+          <Caption unit={unit} />
+          <div />
+          <AppEditor label="Binary" onCopy={editorBin.copy}>
+            <Editor
+              {...props}
+              {...editorBin}
+              encoding={Encoding.Binary}
+              autoFocus
+            />
+          </AppEditor>
+          <AppEditor label="Decimal" onCopy={editorDec.copy}>
+            <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
+          </AppEditor>
+          <AppEditor label="Hexadecimal" onCopy={editorHex.copy}>
+            <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
+          </AppEditor>
+        </div>
+      </Section>
 
-        <AppEditor label="Binary" onCopy={editorBin.copy}>
-          <Editor
-            {...props}
-            {...editorBin}
-            encoding={Encoding.Binary}
-            autoFocus
-          />
-        </AppEditor>
+      <Collapsible
+        isVisible={settingsVisible}
+        label="Settings"
+        onChange={setSettingsVisible}
+      >
+        <div class="app-settings">
+          <AppSetting label="Unit">
+            <Radio onChange={setUnit} options={unitOptions} value={unit} />
+          </AppSetting>
 
-        <AppEditor label="Decimal" onCopy={editorDec.copy}>
-          <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
-        </AppEditor>
+          <AppSetting label="Typing Mode">
+            <Radio
+              onChange={setTypingMode}
+              options={typingModeOptions}
+              value={typingMode}
+            />
+          </AppSetting>
 
-        <AppEditor label="Hexadecimal" onCopy={editorHex.copy}>
-          <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
-        </AppEditor>
-      </div>
+          <AppSetting label="Typing Direction">
+            <Radio
+              onChange={setTypingDirection}
+              options={typingDirectionOptions}
+              value={typingDirection}
+            />
+          </AppSetting>
 
-      <div class="app-divider" />
+          <AppSetting label="Move Cursor">
+            <Radio
+              onChange={setMoveAfterTypingEnabled}
+              options={binaryOptions}
+              value={moveAfterTypingEnabled}
+            />
+          </AppSetting>
 
-      <div class="app-settings">
-        <AppSetting label="Unit">
-          <Radio onChange={setUnit} options={unitOptions} value={unit} />
-        </AppSetting>
+          <AppSetting label="Caret">
+            <Radio onChange={setCaret} options={caretOptions} value={caret} />
+          </AppSetting>
 
-        <AppSetting label="Typing Mode">
-          <Radio
-            onChange={setTypingMode}
-            options={typingModeOptions}
-            value={typingMode}
-          />
-        </AppSetting>
-
-        <AppSetting label="Typing Direction">
-          <Radio
-            onChange={setTypingDirection}
-            options={typingDirectionOptions}
-            value={typingDirection}
-          />
-        </AppSetting>
-
-        <AppSetting label="Move After Typing">
-          <Radio
-            onChange={setMoveAfterTypingEnabled}
-            options={binaryOptions}
-            value={moveAfterTypingEnabled}
-          />
-        </AppSetting>
-
-        <AppSetting label="Caret">
-          <Radio onChange={setCaret} options={caretOptions} value={caret} />
-        </AppSetting>
-
-        <AppSetting label="Hotkeys">
-          <Radio
-            onChange={setHotkeysEnabled}
-            options={binaryOptions}
-            value={hotkeysEnabled}
-          />
-        </AppSetting>
-      </div>
-
-      <div class="app-divider" />
+          <AppSetting label="Hotkeys">
+            <Radio
+              onChange={setHotkeysEnabled}
+              options={binaryOptions}
+              value={hotkeysEnabled}
+            />
+          </AppSetting>
+        </div>
+      </Collapsible>
 
       <AppInstructions
         isVisible={instructionsVisible}

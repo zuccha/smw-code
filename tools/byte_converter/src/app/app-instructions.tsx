@@ -62,7 +62,7 @@ const settings = [
     hotkey: "R",
   },
   {
-    name: "Move After Typing",
+    name: "Move Cursor",
     description:
       "If enabled, after typing a digit, the cursor will move in the relevant direction, otherwise it will stay where it is. Removing a digit with backspace will always move.",
     hotkey: "M",
@@ -88,69 +88,73 @@ export default function AppInstructions({
   return (
     <div class="app-instructions">
       <Collapsible
-        label="Instructions"
         isVisible={isVisible}
+        label="Instructions"
         onChange={onChangeVisibility}
       >
-        <p>
-          <b>Settings:</b>
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Value</th>
-              <th>Description</th>
-              <th>Hotkey</th>
-            </tr>
-          </thead>
-          <tbody>
-            {settings.map((setting) => (
-              <tr>
-                {setting.name && (
-                  <td
-                    colSpan={setting.value ? 1 : 2}
-                    rowSpan={setting.rowSpan ?? 1}
-                  >
-                    {setting.name}
-                  </td>
-                )}
-                {setting.value && <td>{setting.value}</td>}
-                <td>{setting.description}</td>
-                <td>
-                  <code>{setting.hotkey}</code>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div class="app-instructions-sections">
+          <div>
+            <div class="app-instructions-section-label">Settings:</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th>Hotkey</th>
+                </tr>
+              </thead>
+              <tbody>
+                {settings.map((setting) => (
+                  <tr>
+                    {setting.name && (
+                      <td
+                        colSpan={setting.value ? 1 : 2}
+                        rowSpan={setting.rowSpan ?? 1}
+                      >
+                        {setting.name}
+                      </td>
+                    )}
+                    {setting.value && <td>{setting.value}</td>}
+                    <td>{setting.description}</td>
+                    <td>
+                      <code>{setting.hotkey}</code>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        <p>
-          <b>Generic Keybindings:</b>
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Keybinding</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {keybindings.map((keybinding) => (
-              <tr>
-                <td>
-                  {keybinding.hotkeys.map((hotkey, index) => (
-                    <>
-                      <code>{hotkey}</code>
-                      {index < keybinding.hotkeys.length - 1 && " "}
-                    </>
-                  ))}
-                </td>
-                <td>{keybinding.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div>
+            <div class="app-instructions-section-label">
+              Generic Keybindings:
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Keybinding</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {keybindings.map((keybinding) => (
+                  <tr>
+                    <td>
+                      {keybinding.hotkeys.map((hotkey, index) => (
+                        <>
+                          <code>{hotkey}</code>
+                          {index < keybinding.hotkeys.length - 1 && " "}
+                        </>
+                      ))}
+                    </td>
+                    <td>{keybinding.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </Collapsible>
     </div>
   );

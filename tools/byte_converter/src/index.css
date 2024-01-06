@@ -10,6 +10,7 @@
   --color-neutral-2: rgba(255, 255, 255, 0.6);
   --color-neutral-3: rgba(255, 255, 255, 0.4);
 
+  --color-background-0: #3b3b3b;
   --color-background-1: #242424;
   --color-background-2: #141414;
 
@@ -27,6 +28,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   display: flex;
@@ -39,4 +44,8 @@ code {
   background-color: var(--color-background-2);
   padding: 0.2em 0.4em;
   border-radius: 0.2em;
+}
+
+.card {
+  border: 1px solid var(--color-neutral-3);
 }

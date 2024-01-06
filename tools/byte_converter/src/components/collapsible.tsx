@@ -1,5 +1,5 @@
+import { ChevronDown, ChevronUp } from "lucide-preact";
 import { ReactNode, useCallback } from "preact/compat";
-import Button from "./button";
 import { classNames } from "../utils";
 import "./collapsible.css";
 
@@ -20,16 +20,38 @@ export default function Collapsible({
 
   const className = classNames([
     ["collapsible", true],
+    ["card", true],
     ["collapsed", !isVisible],
   ]);
 
+  const handleMouseDown = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault();
+      toggle();
+    },
+    [toggle]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    },
+    [toggle]
+  );
+
   return (
     <div class={className}>
-      <div class="collapsible-button">
-        <Button
-          label={isVisible ? `Hide ${label}` : `Show ${label}`}
-          onClick={toggle}
-        />
+      <div
+        class="collapsible-header"
+        onKeyDown={handleKeyDown}
+        onMouseDown={handleMouseDown}
+        tabIndex={0}
+      >
+        <span>{label}</span>
+        {isVisible ? <ChevronUp /> : <ChevronDown />}
       </div>
 
       <div class="collapsible-children">{children}</div>
