@@ -1,0 +1,17 @@
+.caption {
+  display: flex;
+  flex-direction: row;
+  user-select: none;
+}
+
+.caption-char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  width: 0.75em;
+}
+
+.caption-char > span {
+  font-size: small;
+}

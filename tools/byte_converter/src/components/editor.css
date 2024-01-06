@@ -1,24 +1,61 @@
 .editor {
+  position: relative;
   display: flex;
   flex-direction: row;
   cursor: pointer;
   user-select: none;
+
+  --caret-height: 1.2em;
+  --caret-width: 0.75em;
 }
 
 .editor-char {
   display: flex;
   justify-content: center;
-  width: 0.75em;
+  width: var(--caret-width);
 }
 
-.editor-char-focus {
+.editor-caret {
+  position: absolute;
+  z-index: -1;
+}
+
+.editor.caret-bar .editor-caret {
+  width: 2px;
+  height: var(--caret-height);
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.editor.caret-box .editor-caret {
+  width: var(--caret-width);
+  height: var(--caret-height);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.editor.caret-underline .editor-caret {
+  width: var(--caret-width);
+  height: 2px;
+  bottom: 0;
+}
+
+.editor:focus .editor-caret {
+  background-color: var(--color-primary-3);
+}
+
+.editor:focus {
+  outline: none;
+}
+
+.editor:focus .editor-char.solid {
   color: var(--color-primary-3);
 }
 
-.editor-char-solid {
+.editor:focus .editor-char.empty {
   color: var(--color-primary-2);
 }
 
-.editor-char-empty {
-  color: var(--color-primary-1);
+.editor.caret-box:focus .editor-char.selected {
+  color: var(--color-background-1);
 }

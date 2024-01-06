@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.0] - 2024-01-07
+
+### Added
+
+- Allow to switch typing direction from right to left.
+- Allow to disable movement after typing a digit.
+- Allow to flip binary bits when clicking on a digit.
+- Allow to customize caret appearance (bar, box, underline).
+- Allow to use tab to move between elements.
+- Add hotkeys for changing settings.
+- Add bit-index labels above digits.
+
+### Changed
+
+- Restyle entire page.
+- Rename "Insertion" to "Typing Mode","Add&Shift" to "Insert", and "Replace" to "Overwrite".
+
+### Fixed
+
+- Make page responsive.
+
 ## [1.0.0] - 2024-01-05
 
 ### Added

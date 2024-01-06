@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "lucide-preact": "^0.306.0",
+    "zod": "^3.22.4"
+  }
+}

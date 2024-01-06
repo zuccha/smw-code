@@ -1,125 +1,140 @@
 import { forwardRef } from "preact/compat";
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
+  useState,
 } from "preact/hooks";
-import { Encoding, Unit, useValue } from "../hooks/use-value";
-import { classNames, lastIndexOf } from "../utils";
+import useChars from "../hooks/use-chars";
+import { useValue } from "../hooks/use-value";
+import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
+import {
+  classNames,
+  differsFrom0,
+  firstIndexOf,
+  lastIndexOf,
+  replace,
+} from "../utils";
 import "./editor.css";
 
-export enum InsertMode {
-  AddAndShiftRight,
-  Replace,
-}
-
 export type EditorProps = {
+  autoFocus?: boolean;
+  caret: Caret;
   encoding: Encoding;
-  hasFocus: boolean;
-  index: number;
-  insertMode: InsertMode;
+  flipBitEnabled?: boolean;
   integer: number;
+  moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
-  onChangeIndex: (index: number) => void;
-  onMove: (direction: -1 | 1) => void;
+  onMoveDown: () => void;
+  onMoveUp: () => void;
+  typingDirection: TypingDirection;
+  typingMode: TypingMode;
   unit: Unit;
 };
 
 export type EditorRef = {
+  blur: () => void;
   copy: () => void;
+  focus: () => void;
 };
 
 export default forwardRef<EditorRef, EditorProps>(function Editor(
   {
-    hasFocus,
-    index,
-    insertMode,
-    integer,
+    autoFocus,
+    caret,
     encoding,
+    flipBitEnabled = false,
+    integer,
+    moveAfterTypingEnabled,
     onChange,
-    onChangeIndex,
-    onMove,
+    onMoveDown,
+    onMoveUp,
+    typingDirection,
+    typingMode,
     unit,
   },
   ref
 ) {
+  //----------------------------------------------------------------------------
+  // State
+  //----------------------------------------------------------------------------
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [index, setIndex] = useState(0);
   const [value, { parse, validChar }] = useValue(integer, encoding, unit);
   const chars = useMemo(() => value.split(""), [value]);
-  const length = value.length;
+
+  const { insertChar, replaceChar, deleteChar, removeChar } = useChars(
+    chars,
+    index,
+    typingDirection,
+    moveAfterTypingEnabled
+  );
+
+  //----------------------------------------------------------------------------
+  // Chars Styles
+  //----------------------------------------------------------------------------
+
   const last = useMemo(
     () =>
-      Math.max(
-        lastIndexOf(chars, (char) => char !== "0"),
-        index
-      ),
-    [chars, index]
+      typingDirection === TypingDirection.Right
+        ? Math.max(lastIndexOf(chars, differsFrom0), index - 1)
+        : Math.min(firstIndexOf(chars, differsFrom0), index),
+    [chars, index, typingDirection]
   );
 
-  const insertChar = useCallback(
-    (char: string) => {
-      switch (insertMode) {
-        case InsertMode.AddAndShiftRight:
-          return [...chars.slice(0, index), char, ...chars.slice(index)];
-        case InsertMode.Replace:
-          return [...chars.slice(0, index), char, ...chars.slice(index + 1)];
+  const isSolid = useCallback(
+    (i: number) =>
+      typingDirection === TypingDirection.Right ? i <= last : i >= last,
+    [last, typingDirection]
+  );
+
+  const isEmpty = useCallback(
+    (i: number) =>
+      typingDirection === TypingDirection.Right ? i > last : i < last,
+    [last, typingDirection]
+  );
+
+  const caretClassName = {
+    [Caret.Bar]: "caret-bar",
+    [Caret.Box]: "caret-box",
+    [Caret.Underline]: "caret-underline",
+  }[caret];
+
+  //----------------------------------------------------------------------------
+  // Chars/Index Utilities
+  //----------------------------------------------------------------------------
+
+  const update = useCallback(
+    (nextChars: string[], nextIndex: number) => {
+      const nextInteger = parse(nextChars.join(""), { max: 0 });
+      if (nextInteger !== undefined) {
+        onChange(nextInteger);
+        setIndex(nextIndex);
       }
     },
-    [chars, index, insertMode]
-  );
-
-  const charsToString = useCallback(
-    (newChars: string[]): string => newChars.slice(0, length).join(""),
-    [length]
+    [onChange, parse]
   );
 
   const moveLeft = useCallback(() => {
-    if (index - 1 >= 0) onChangeIndex(index - 1);
-  }, [index, onChangeIndex]);
+    const nextIndex = index - 1;
+    if (nextIndex < 0) return setIndex(0);
+    if (nextIndex >= value.length) return setIndex(value.length - 1);
+    setIndex(nextIndex);
+  }, [index, value.length]);
 
   const moveRight = useCallback(() => {
-    if (index + 1 < length) onChangeIndex(index + 1);
-  }, [index, onChangeIndex]);
+    const nextIndex = index + 1;
+    if (nextIndex < 0) return setIndex(0);
+    if (nextIndex >= value.length) return setIndex(value.length - 1);
+    setIndex(nextIndex);
+  }, [index, value.length]);
 
-  const adjust = useCallback(
-    (newLength: number) => {
-      if (index >= newLength) onChangeIndex(newLength - 1);
-    },
-    [index, onChangeIndex]
-  );
-
-  const handleKeyDelete = useCallback(() => {
-    const newChars = [...chars.slice(0, index), ...chars.slice(index + 1), "0"];
-    const maybeValue = charsToString(newChars);
-    const newInteger = parse(maybeValue, { max: 0 });
-    if (newInteger !== undefined) {
-      onChange(newInteger);
-      adjust(maybeValue.length);
-    }
-  }, [adjust, chars, charsToString, index, onChange, parse]);
-
-  const handleKeyBackspace = useCallback(() => {
-    if (index === 0) return handleKeyDelete();
-    const newChars = [...chars.slice(0, index - 1), ...chars.slice(index), "0"];
-    const maybeValue = charsToString(newChars);
-    const newInteger = parse(maybeValue, { max: 0 });
-    if (newInteger !== undefined) {
-      onChange(newInteger);
-      moveLeft();
-    }
-  }, [chars, charsToString, handleKeyDelete, index, moveLeft, onChange, parse]);
-
-  const handleKeyChar = useCallback(
-    (char: string) => {
-      const maybeValue = charsToString(insertChar(char));
-      const newInteger = parse(maybeValue);
-      if (newInteger !== undefined) {
-        onChange(newInteger);
-        moveRight();
-      }
-    },
-    [adjust, charsToString, insertChar, moveRight, onChange, parse]
-  );
+  //----------------------------------------------------------------------------
+  // Clipboard
+  //----------------------------------------------------------------------------
 
   const copy = useCallback(() => {
     navigator.clipboard.writeText(value);
@@ -132,57 +147,97 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     });
   }, [onChange, parse]);
 
+  //----------------------------------------------------------------------------
+  // Keyboard Event Listener
+  //----------------------------------------------------------------------------
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "c") return copy();
       if ((e.ctrlKey || e.metaKey) && e.key === "v") return paste();
-      if (e.key === "ArrowDown") return onMove(1);
-      if (e.key === "ArrowUp") return onMove(-1);
+      if (e.key === "ArrowDown") return onMoveDown();
+      if (e.key === "ArrowUp") return onMoveUp();
       if (e.key === "ArrowLeft") return moveLeft();
       if (e.key === "ArrowRight") return moveRight();
-      if (e.key === "Backspace") handleKeyBackspace();
-      if (e.key === "Delete") handleKeyDelete();
-      if (validChar(e.key)) handleKeyChar(e.key);
+      if (e.key === "Backspace") return update(...removeChar());
+      if (e.key === "Delete") return update(...deleteChar());
+
+      if (validChar(e.key)) {
+        switch (typingMode) {
+          case TypingMode.Insert:
+            return update(...insertChar(e.key));
+          case TypingMode.Overwrite:
+            return update(...replaceChar(e.key));
+        }
+      }
     },
     [
       copy,
-      handleKeyChar,
-      handleKeyDelete,
-      handleKeyBackspace,
+      deleteChar,
+      insertChar,
       moveLeft,
       moveRight,
-      onMove,
+      onMoveDown,
+      onMoveUp,
+      removeChar,
+      replaceChar,
+      typingMode,
+      update,
       validChar,
     ]
   );
 
-  useEffect(() => {
-    if (hasFocus) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [handleKeyDown, hasFocus]);
+  //----------------------------------------------------------------------------
+  // Ref
+  //----------------------------------------------------------------------------
 
-  useImperativeHandle(ref, () => ({ copy }), [copy]);
+  const blur = useCallback(() => containerRef.current?.blur(), []);
+  const focus = useCallback(() => containerRef.current?.focus(), []);
+
+  useImperativeHandle(ref, () => ({ blur, copy, focus }), [blur, copy, focus]);
+
+  //----------------------------------------------------------------------------
+  // Render
+  //----------------------------------------------------------------------------
 
   return (
-    <div class="editor">
+    <div
+      autoFocus={autoFocus}
+      class={`editor ${caretClassName}`}
+      onKeyDown={handleKeyDown}
+      ref={containerRef}
+      tabIndex={0}
+    >
       {chars.map((char, i) => {
         const className = classNames([
           ["editor-char", true],
-          ["editor-char-focus", hasFocus && i === index],
-          ["editor-char-solid", hasFocus && i !== index && i <= last],
-          ["editor-char-empty", hasFocus && i !== index && i > last],
+          ["selected", i === index],
+          ["solid", isSolid(i)],
+          ["empty", isEmpty(i)],
         ]);
 
         return (
-          <div class={className} onClick={() => onChangeIndex(i)}>
+          <div
+            class={className}
+            onMouseDown={(e: MouseEvent) => {
+              e.preventDefault();
+              focus();
+              if (flipBitEnabled && encoding === Encoding.Binary)
+                update(replace(chars, i, chars[i] === "0" ? "1" : "0"), i);
+              else setIndex(i);
+            }}
+          >
             {char}
           </div>
         );
       })}
+
+      {0 <= index && index < value.length && (
+        <div
+          class="editor-caret"
+          style={{ left: `calc(${index} * var(--caret-width))` }}
+        />
+      )}
     </div>
   );
 });

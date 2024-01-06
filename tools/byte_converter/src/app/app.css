@@ -1,0 +1,94 @@
+#app {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 50em;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1em;
+  gap: 1em;
+}
+
+.app-editors {
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  column-gap: 1em;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+}
+
+.app-editor-label {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 2em;
+  margin-right: 1em;
+}
+
+.app-editor-input {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 2em;
+}
+
+.app-editor-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-settings {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 2em;
+  row-gap: 1em;
+}
+
+.app-setting-label {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  font-variant: small-caps;
+}
+
+.app-setting-input {
+  display: flex;
+  align-items: center;
+  font-size: 1.4em;
+}
+
+.app-instructions {
+  align-self: flex-start;
+  min-width: 100%;
+  max-width: min-content;
+}
+
+.app-instructions table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-instructions td,
+.app-instructions th {
+  border: 1px solid var(--color-neutral-3);
+  padding: 0.2em 0.5em;
+}
+
+.app-instructions-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+
+.app-instructions-section-label {
+  font-weight: bold;
+  margin-bottom: 1em;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.8em;
+}
