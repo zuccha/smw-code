@@ -9,13 +9,20 @@ import {
 import useChars from "../hooks/use-chars";
 import { useValue } from "../hooks/use-value";
 import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
-import { classNames, differsFrom0, firstIndexOf, lastIndexOf } from "../utils";
+import {
+  classNames,
+  differsFrom0,
+  firstIndexOf,
+  lastIndexOf,
+  replace,
+} from "../utils";
 import "./editor.css";
 
 export type EditorProps = {
   autoFocus?: boolean;
   caret: Caret;
   encoding: Encoding;
+  flipBitEnabled?: boolean;
   integer: number;
   moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
@@ -36,8 +43,9 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   {
     autoFocus,
     caret,
-    integer,
     encoding,
+    flipBitEnabled = false,
+    integer,
     moveAfterTypingEnabled,
     onChange,
     onMoveDown,
@@ -213,8 +221,10 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
             class={className}
             onMouseDown={(e: MouseEvent) => {
               e.preventDefault();
-              setIndex(i);
               focus();
+              if (flipBitEnabled && encoding === Encoding.Binary)
+                update(replace(chars, i, chars[i] === "0" ? "1" : "0"), i);
+              else setIndex(i);
             }}
           >
             {char}

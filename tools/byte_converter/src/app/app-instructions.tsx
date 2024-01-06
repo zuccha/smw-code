@@ -78,6 +78,18 @@ const settings = [
     description: "Don't move cursor after typing.",
   },
   {
+    name: "Flip Bit",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Flip a bit of the binary editor when clicking on it.",
+    hotkey: "T",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Don't flip any bit when clicking on the editors.",
+  },
+  {
     name: "Caret",
     value: "Bar, Box, Underline",
     description: "Caret appearance.",

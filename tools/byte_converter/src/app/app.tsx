@@ -84,6 +84,12 @@ export function App() {
 
   const [caret, setCaret] = useSetting("caret", Caret.Box, CaretSchema.parse);
 
+  const [flipBitEnabled, setFlipBitEnabled] = useSetting(
+    "flip-bit-enabled",
+    false,
+    z.boolean().parse
+  );
+
   const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
     "hotkeys-enabled",
     false,
@@ -128,6 +134,7 @@ export function App() {
 
   const props = {
     caret,
+    flipBitEnabled,
     integer,
     moveAfterTypingEnabled,
     onChange,
@@ -155,6 +162,7 @@ export function App() {
       if (!hotkeysEnabled) return;
       if (e.key === "s") return setSettingsVisible((prev) => !prev);
       if (e.key === "h") return setInstructionsVisible((prev) => !prev);
+      if (e.key === "t") return setFlipBitEnabled((prev) => !prev);
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
       if (e.key === "i") return setTypingMode(TypingMode.Insert);
@@ -230,6 +238,14 @@ export function App() {
               onChange={setMoveAfterTypingEnabled}
               options={binaryOptions}
               value={moveAfterTypingEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting label="Flip Bit">
+            <Radio
+              onChange={setFlipBitEnabled}
+              options={binaryOptions}
+              value={flipBitEnabled}
             />
           </AppSetting>
 
