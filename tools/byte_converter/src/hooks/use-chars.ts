@@ -5,7 +5,8 @@ import { insert, remove, replace } from "../utils";
 export default function useChars(
   chars: string[],
   index: number,
-  typingDirection: TypingDirection
+  typingDirection: TypingDirection,
+  moveAfterTypingEnabled: boolean
 ): {
   insertChar: (char: string) => [string[], number];
   replaceChar: (char: string) => [string[], number];
@@ -26,15 +27,20 @@ export default function useChars(
     [chars, index, prepare]
   );
 
+  const moveRight = useCallback(
+    () => Math.min(_chars.length, _index + 1),
+    [_chars.length, _index]
+  );
+
   const insertChar = useCallback(
     (char: string): [string[], number] => {
       if (_index < 0) return prepare(_chars, 0);
       if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
       const nextChars = insert(_chars, _index, char);
-      const nextIndex = _index < _chars.length - 1 ? _index + 1 : _index;
+      const nextIndex = moveAfterTypingEnabled ? moveRight() : _index;
       return prepare(nextChars, nextIndex);
     },
-    [_chars, _index, prepare]
+    [_chars, _index, moveAfterTypingEnabled, moveRight, prepare]
   );
 
   const replaceChar = useCallback(
@@ -42,10 +48,10 @@ export default function useChars(
       if (_index < 0) return prepare(_chars, 0);
       if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
       const nextChars = replace(_chars, _index, char);
-      const nextIndex = _index < _chars.length - 1 ? _index + 1 : _index;
+      const nextIndex = moveAfterTypingEnabled ? moveRight() : _index;
       return prepare(nextChars, nextIndex);
     },
-    [_chars, _index, prepare]
+    [_chars, _index, moveAfterTypingEnabled, moveRight, prepare]
   );
 
   const deleteChar = useCallback((): [string[], number] => {

@@ -84,6 +84,12 @@ export function App() {
     TypingDirectionSchema.parse
   );
 
+  const [moveAfterTypingEnabled, setMoveAfterTypingEnabled] = useSetting(
+    "move-after-typing-enabled",
+    true,
+    z.boolean().parse
+  );
+
   const [unit, setUnit] = useSetting("unit", Unit.Byte, UnitSchema.parse);
 
   const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
@@ -102,7 +108,14 @@ export function App() {
   // Editors
   //----------------------------------------------------------------------------
 
-  const props = { integer, unit, onChange, typingDirection, typingMode };
+  const props = {
+    integer,
+    unit,
+    moveAfterTypingEnabled,
+    onChange,
+    typingDirection,
+    typingMode,
+  };
 
   const editor0Ref = useRef<EditorRef>(null);
   const editor1Ref = useRef<EditorRef>(null);
@@ -128,6 +141,7 @@ export function App() {
       if (e.key === "o") return setTypingMode(TypingMode.Overwrite);
       if (e.key === "l") return setTypingDirection(TypingDirection.Left);
       if (e.key === "r") return setTypingDirection(TypingDirection.Right);
+      if (e.key === "m") return setMoveAfterTypingEnabled((prev) => !prev);
     },
     [hotkeysEnabled, setHotkeysEnabled, setTypingMode, setUnit]
   );
@@ -186,6 +200,14 @@ export function App() {
             onChange={setTypingDirection}
             options={typingDirectionOptions}
             value={typingDirection}
+          />
+        </AppSetting>
+
+        <AppSetting label="Move After Typing">
+          <Radio
+            onChange={setMoveAfterTypingEnabled}
+            options={binaryOptions}
+            value={moveAfterTypingEnabled}
           />
         </AppSetting>
 

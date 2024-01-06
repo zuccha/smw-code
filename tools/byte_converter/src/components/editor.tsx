@@ -16,6 +16,7 @@ export type EditorProps = {
   autoFocus?: boolean;
   encoding: Encoding;
   integer: number;
+  moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
   onMoveDown: () => void;
   onMoveUp: () => void;
@@ -35,6 +36,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     autoFocus,
     integer,
     encoding,
+    moveAfterTypingEnabled,
     onChange,
     onMoveDown,
     onMoveUp,
@@ -57,7 +59,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   const { insertChar, replaceChar, deleteChar, removeChar } = useChars(
     chars,
     index,
-    typingDirection
+    typingDirection,
+    moveAfterTypingEnabled
   );
 
   //----------------------------------------------------------------------------

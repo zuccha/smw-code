@@ -68,3 +68,14 @@
   min-width: 100%;
   max-width: min-content;
 }
+
+.app-instructions table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-instructions td,
+.app-instructions th {
+  border: 1px solid var(--color-neutral-3);
+  padding: 0.2em 0.5em;
+}
