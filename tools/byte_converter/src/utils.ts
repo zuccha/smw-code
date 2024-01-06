@@ -9,6 +9,14 @@ export function classNames(options: [string, boolean][]): string {
     .join(" ");
 }
 
+export function firstIndexOf<T>(
+  items: T[],
+  predicate: (item: T, index: number) => boolean
+): number {
+  for (let i = 0; i < items.length; ++i) if (predicate(items[i]!, i)) return i;
+  return items.length;
+}
+
 export function lastIndexOf<T>(
   items: T[],
   predicate: (item: T, index: number) => boolean
@@ -19,13 +27,18 @@ export function lastIndexOf<T>(
 }
 
 export function insert<T>(items: T[], index: number, item: T): T[] {
-  return [...items.slice(0, index), item, ...items.slice(index)];
+  const end = items.length - 1;
+  return [...items.slice(0, index), item, ...items.slice(index, end)];
 }
 
 export function replace<T>(items: T[], index: number, item: T): T[] {
   return [...items.slice(0, index), item, ...items.slice(index + 1)];
 }
 
-export function remove<T>(items: T[], index: number): T[] {
-  return [...items.slice(0, index), ...items.slice(index + 1)];
+export function remove<T>(items: T[], index: number, fill: T): T[] {
+  return [...items.slice(0, index), ...items.slice(index + 1), fill];
+}
+
+export function differsFrom0(char: string): boolean {
+  return char !== "0";
 }

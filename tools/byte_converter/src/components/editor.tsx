@@ -6,9 +6,12 @@ import {
   useRef,
   useState,
 } from "preact/hooks";
+import useChars, { TypeDirection } from "../hooks/use-chars";
 import { Encoding, Unit, useValue } from "../hooks/use-value";
-import { clamp, classNames, lastIndexOf, remove } from "../utils";
+import { classNames, differsFrom0, firstIndexOf, lastIndexOf } from "../utils";
 import "./editor.css";
+
+export { TypeDirection } from "../hooks/use-chars";
 
 export enum TypeMode {
   Insert,
@@ -22,6 +25,7 @@ export type EditorProps = {
   onChange: (integer: number) => void;
   onMoveDown: () => void;
   onMoveUp: () => void;
+  typeDirection: TypeDirection;
   typeMode: TypeMode;
   unit: Unit;
 };
@@ -40,88 +44,62 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     onChange,
     onMoveDown,
     onMoveUp,
+    typeDirection,
     typeMode,
     unit,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
 
+  const [index, setIndex] = useState(0);
   const [value, { parse, validChar }] = useValue(integer, encoding, unit);
   const chars = useMemo(() => value.split(""), [value]);
-  const length = value.length;
+
+  const { insertChar, replaceChar, deleteChar, removeChar } = useChars(
+    chars,
+    index,
+    typeDirection
+  );
+
   const last = useMemo(
     () =>
-      Math.max(
-        lastIndexOf(chars, (char) => char !== "0"),
-        index
-      ),
-    [chars, index]
+      typeDirection === TypeDirection.Right
+        ? Math.max(lastIndexOf(chars, differsFrom0), index)
+        : Math.min(firstIndexOf(chars, differsFrom0), index),
+    [chars, index, typeDirection]
   );
 
-  const typeChar = useCallback(
-    (char: string) => {
-      switch (typeMode) {
-        case TypeMode.Insert:
-          return [...chars.slice(0, index), char, ...chars.slice(index)];
-        case TypeMode.Overwrite:
-          return [...chars.slice(0, index), char, ...chars.slice(index + 1)];
+  const isSolid = useCallback(
+    (i: number) =>
+      typeDirection === TypeDirection.Right ? i <= last : i >= last,
+    [last, typeDirection]
+  );
+
+  const isEmpty = useCallback(
+    (i: number) =>
+      typeDirection === TypeDirection.Right ? i > last : i < last,
+    [last, typeDirection]
+  );
+
+  const update = useCallback(
+    (nextChars: string[], nextIndex: number) => {
+      const nextInteger = parse(nextChars.join(""), { max: 0 });
+      if (nextInteger !== undefined) {
+        onChange(nextInteger);
+        setIndex(nextIndex);
       }
     },
-    [chars, index, typeMode]
+    [onChange, parse]
   );
 
-  const charsToString = useCallback(
-    (newChars: string[]): string => newChars.slice(0, length).join(""),
-    [length]
-  );
+  const moveLeft = useCallback(() => {
+    if (index > 0) setIndex(index - 1);
+  }, [index]);
 
-  const updateIndex = useCallback(
-    (newIndex: number) => setIndex(clamp(newIndex, 0, length - 1)),
-    [length]
-  );
-
-  const moveLeft = useCallback(
-    () => updateIndex(index - 1),
-    [index, updateIndex]
-  );
-
-  const moveRight = useCallback(
-    () => updateIndex(index + 1),
-    [index, updateIndex]
-  );
-
-  const handleKeyDelete = useCallback(() => {
-    const maybeValue = charsToString([...remove(chars, index), "0"]);
-    const newInteger = parse(maybeValue, { max: 0 });
-    if (newInteger !== undefined) {
-      onChange(newInteger);
-      updateIndex(index);
-    }
-  }, [chars, charsToString, index, onChange, parse, updateIndex]);
-
-  const handleKeyBackspace = useCallback(() => {
-    if (index === 0) return handleKeyDelete();
-    const maybeValue = charsToString([...remove(chars, index - 1), "0"]);
-    const newInteger = parse(maybeValue, { max: 0 });
-    if (newInteger !== undefined) {
-      onChange(newInteger);
-      moveLeft();
-    }
-  }, [chars, charsToString, handleKeyDelete, index, moveLeft, onChange, parse]);
-
-  const handleKeyChar = useCallback(
-    (char: string) => {
-      const maybeValue = charsToString(typeChar(char));
-      const newInteger = parse(maybeValue);
-      if (newInteger !== undefined) {
-        onChange(newInteger);
-        moveRight();
-      }
-    },
-    [charsToString, typeChar, moveRight, onChange, parse]
-  );
+  const moveRight = useCallback(() => {
+    if (index < chars.length - 1) setIndex(index + 1);
+  }, [chars.length, index]);
 
   const copy = useCallback(() => {
     navigator.clipboard.writeText(value);
@@ -142,19 +120,30 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       if (e.key === "ArrowUp") return onMoveUp();
       if (e.key === "ArrowLeft") return moveLeft();
       if (e.key === "ArrowRight") return moveRight();
-      if (e.key === "Backspace") handleKeyBackspace();
-      if (e.key === "Delete") handleKeyDelete();
-      if (validChar(e.key)) handleKeyChar(e.key);
+      if (e.key === "Backspace") return update(...removeChar());
+      if (e.key === "Delete") return update(...deleteChar());
+
+      if (validChar(e.key)) {
+        switch (typeMode) {
+          case TypeMode.Insert:
+            return update(...insertChar(e.key));
+          case TypeMode.Overwrite:
+            return update(...replaceChar(e.key));
+        }
+      }
     },
     [
       copy,
-      handleKeyChar,
-      handleKeyDelete,
-      handleKeyBackspace,
+      deleteChar,
+      insertChar,
       moveLeft,
       moveRight,
       onMoveDown,
       onMoveUp,
+      removeChar,
+      replaceChar,
+      typeMode,
+      update,
       validChar,
     ]
   );
@@ -175,9 +164,9 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       {chars.map((char, i) => {
         const className = classNames([
           ["editor-char", true],
-          ["selected", i === index && i <= last],
-          ["solid", i !== index && i <= last],
-          ["empty", i !== index && i > last],
+          ["selected", i === index],
+          ["solid", i !== index && isSolid(i)],
+          ["empty", i !== index && isEmpty(i)],
         ]);
 
         const backgroundClassName = classNames([

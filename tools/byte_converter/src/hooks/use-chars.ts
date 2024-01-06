@@ -1,0 +1,73 @@
+import { useCallback, useMemo } from "preact/hooks";
+import { insert, remove, replace } from "../utils";
+
+export enum TypeDirection {
+  Right,
+  Left,
+}
+
+export default function useChars(
+  chars: string[],
+  index: number,
+  typeDirection: TypeDirection
+): {
+  insertChar: (char: string) => [string[], number];
+  replaceChar: (char: string) => [string[], number];
+  deleteChar: () => [string[], number];
+  removeChar: () => [string[], number];
+} {
+  const prepare = useCallback(
+    (nextChars: string[], nextIndex: number): [string[], number] => {
+      return typeDirection === TypeDirection.Right
+        ? [nextChars, nextIndex]
+        : [nextChars.slice().reverse(), nextChars.length - nextIndex - 1];
+    },
+    [typeDirection]
+  );
+
+  const [_chars, _index] = useMemo(
+    () => prepare(chars, index),
+    [chars, index, prepare]
+  );
+
+  const insertChar = useCallback(
+    (char: string): [string[], number] => {
+      if (_index < 0) return prepare(_chars, 0);
+      if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
+      const nextChars = insert(_chars, _index, char);
+      const nextIndex = _index < _chars.length - 1 ? _index + 1 : _index;
+      return prepare(nextChars, nextIndex);
+    },
+    [_chars, _index, prepare]
+  );
+
+  const replaceChar = useCallback(
+    (char: string): [string[], number] => {
+      if (_index < 0) return prepare(_chars, 0);
+      if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
+      const nextChars = replace(_chars, _index, char);
+      const nextIndex = _index < _chars.length - 1 ? _index + 1 : _index;
+      return prepare(nextChars, nextIndex);
+    },
+    [_chars, _index, prepare]
+  );
+
+  const deleteChar = useCallback((): [string[], number] => {
+    if (_index < 0) return prepare(_chars, 0);
+    if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
+    const nextChars = remove(_chars, _index, "0");
+    const nextIndex = _index;
+    return prepare(nextChars, nextIndex);
+  }, [_chars, _index, prepare]);
+
+  const removeChar = useCallback((): [string[], number] => {
+    if (_index < 0) return prepare(_chars, 0);
+    if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
+    if (_index === 0) return deleteChar();
+    const nextChars = remove(_chars, _index - 1, "0");
+    const nextIndex = _index - 1;
+    return prepare(nextChars, nextIndex);
+  }, [_chars, _index, deleteChar, prepare]);
+
+  return { deleteChar, insertChar, removeChar, replaceChar };
+}

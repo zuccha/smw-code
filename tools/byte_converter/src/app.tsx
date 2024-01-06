@@ -2,7 +2,11 @@ import { Copy } from "lucide-preact";
 import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "./components/button";
 import Caption from "./components/caption";
-import Editor, { EditorRef, TypeMode } from "./components/editor";
+import Editor, {
+  EditorRef,
+  TypeDirection,
+  TypeMode,
+} from "./components/editor";
 import Radio, { Option } from "./components/radio";
 import useSetting from "./hooks/use-setting";
 import { Encoding, Unit } from "./hooks/use-value";
@@ -12,6 +16,11 @@ import "./app.css";
 const unitOptions: Option<Unit>[] = [
   { label: "Byte", value: Unit.Byte },
   { label: "Word", value: Unit.Word },
+] as const;
+
+const typeDirectionOptions: Option<TypeDirection>[] = [
+  { label: "Left", value: TypeDirection.Left },
+  { label: "Right", value: TypeDirection.Right },
 ] as const;
 
 const typeModeOptions: Option<TypeMode>[] = [
@@ -36,13 +45,17 @@ const useEditor = (
 };
 
 export function App() {
-  const [integer, setInteger] = useState(0);
+  const [integer, onChange] = useState(0);
 
-  const [typeMode, setInsertMode] = useSetting("type-mode", TypeMode.Overwrite);
+  const [typeMode, setTypeMode] = useSetting("type-mode", TypeMode.Overwrite);
+  const [typeDirection, setTypeDirection] = useSetting(
+    "type-direction",
+    TypeDirection.Right
+  );
   const [unit, setUnit] = useSetting("unit", Unit.Byte);
   const [hotkeysEnabled, setHotkeysEnabled] = useSetting("hotkeys", false);
 
-  const props = { typeMode, integer, unit, onChange: setInteger };
+  const props = { integer, unit, onChange, typeDirection, typeMode };
 
   const editor0Ref = useRef<EditorRef>(null);
   const editor1Ref = useRef<EditorRef>(null);
@@ -75,13 +88,15 @@ export function App() {
       if (e.key === "h") return toggleInstructions();
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
-      if (e.key === "i") return setInsertMode(TypeMode.Insert);
-      if (e.key === "o") return setInsertMode(TypeMode.Overwrite);
+      if (e.key === "i") return setTypeMode(TypeMode.Insert);
+      if (e.key === "o") return setTypeMode(TypeMode.Overwrite);
+      if (e.key === "l") return setTypeDirection(TypeDirection.Left);
+      if (e.key === "r") return setTypeDirection(TypeDirection.Right);
     },
     [
       hotkeysEnabled,
       setHotkeysEnabled,
-      setInsertMode,
+      setTypeMode,
       setUnit,
       toggleInstructions,
     ]
@@ -133,12 +148,21 @@ export function App() {
           <Radio onChange={setUnit} options={unitOptions} value={unit} />
         </div>
 
-        <span class="app-setting-label">Type Mode:</span>
+        <span class="app-setting-label">Typing Mode:</span>
         <div class="app-setting-input">
           <Radio
-            onChange={setInsertMode}
+            onChange={setTypeMode}
             options={typeModeOptions}
             value={typeMode}
+          />
+        </div>
+
+        <span class="app-setting-label">Typing Direction:</span>
+        <div class="app-setting-input">
+          <Radio
+            onChange={setTypeDirection}
+            options={typeDirectionOptions}
+            value={typeDirection}
           />
         </div>
 
@@ -177,9 +201,14 @@ export function App() {
             <b>Unit:</b> <i>Byte</i> is 8-bit; <i>Word</i> is 16-bit.
           </li>
           <li>
-            <b>Type Mode:</b> <i>Insert</i> inserts the typed digit where the
+            <b>Typing Mode:</b> <i>Insert</i> inserts the typed digit where the
             selected digit is; <i>Overwrite</i> replaces the selected digit with
             the typed digit.
+          </li>
+          <li>
+            <b>Typing Direction:</b> <i>Right</i> moves the cursor to the right
+            after typing; <i>Left</i> moves the cursors to the left after
+            typing. Deletion direction is also inverted.
           </li>
           <li>
             <b>Hotkeys:</b> When on, it is possible to control settings with
@@ -192,10 +221,16 @@ export function App() {
                 <code>W</code> - Set unit to <i>Word</i>
               </li>
               <li>
-                <code>I</code> - Set type mode to <i>Insert</i>
+                <code>I</code> - Set typing mode to <i>Insert</i>
               </li>
               <li>
-                <code>O</code> - Set type mode to <i>Overwrite</i>
+                <code>O</code> - Set typing mode to <i>Overwrite</i>
+              </li>
+              <li>
+                <code>L</code> - Set typing direction to <i>Left</i>
+              </li>
+              <li>
+                <code>R</code> - Set typing direction to <i>Right</i>
               </li>
               <li>
                 <code>H</code> - Toggle instructions visibility
