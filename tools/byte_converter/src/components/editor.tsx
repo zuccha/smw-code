@@ -8,12 +8,13 @@ import {
 } from "preact/hooks";
 import useChars from "../hooks/use-chars";
 import { useValue } from "../hooks/use-value";
-import { Encoding, TypingDirection, TypingMode, Unit } from "../types";
+import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
 import { classNames, differsFrom0, firstIndexOf, lastIndexOf } from "../utils";
 import "./editor.css";
 
 export type EditorProps = {
   autoFocus?: boolean;
+  caret: Caret;
   encoding: Encoding;
   integer: number;
   moveAfterTypingEnabled: boolean;
@@ -34,6 +35,7 @@ export type EditorRef = {
 export default forwardRef<EditorRef, EditorProps>(function Editor(
   {
     autoFocus,
+    caret,
     integer,
     encoding,
     moveAfterTypingEnabled,
@@ -64,13 +66,13 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   );
 
   //----------------------------------------------------------------------------
-  // Solid/Empty Chars
+  // Chars Styles
   //----------------------------------------------------------------------------
 
   const last = useMemo(
     () =>
       typingDirection === TypingDirection.Right
-        ? Math.max(lastIndexOf(chars, differsFrom0), index)
+        ? Math.max(lastIndexOf(chars, differsFrom0), index - 1)
         : Math.min(firstIndexOf(chars, differsFrom0), index),
     [chars, index, typingDirection]
   );
@@ -86,6 +88,12 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       typingDirection === TypingDirection.Right ? i > last : i < last,
     [last, typingDirection]
   );
+
+  const caretClassName = {
+    [Caret.Bar]: "caret-bar",
+    [Caret.Box]: "caret-box",
+    [Caret.Underline]: "caret-underline",
+  }[caret];
 
   //----------------------------------------------------------------------------
   // Chars/Index Utilities
@@ -103,12 +111,18 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   );
 
   const moveLeft = useCallback(() => {
-    if (index > 0) setIndex(index - 1);
-  }, [index]);
+    const nextIndex = index - 1;
+    if (nextIndex < 0) return setIndex(0);
+    if (nextIndex >= value.length) return setIndex(value.length - 1);
+    setIndex(nextIndex);
+  }, [index, value.length]);
 
   const moveRight = useCallback(() => {
-    if (index < chars.length - 1) setIndex(index + 1);
-  }, [chars.length, index]);
+    const nextIndex = index + 1;
+    if (nextIndex < 0) return setIndex(0);
+    if (nextIndex >= value.length) return setIndex(value.length - 1);
+    setIndex(nextIndex);
+  }, [index, value.length]);
 
   //----------------------------------------------------------------------------
   // Clipboard
@@ -181,7 +195,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   return (
     <div
       autoFocus={autoFocus}
-      class="editor"
+      class={`editor ${caretClassName}`}
       onKeyDown={handleKeyDown}
       ref={containerRef}
       tabIndex={0}
@@ -190,13 +204,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         const className = classNames([
           ["editor-char", true],
           ["selected", i === index],
-          ["solid", i !== index && isSolid(i)],
-          ["empty", i !== index && isEmpty(i)],
-        ]);
-
-        const backgroundClassName = classNames([
-          ["editor-char-background", true],
-          ["selected", i === index],
+          ["solid", isSolid(i)],
+          ["empty", isEmpty(i)],
         ]);
 
         return (
@@ -208,11 +217,17 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
               focus();
             }}
           >
-            <div class={backgroundClassName} />
             {char}
           </div>
         );
       })}
+
+      {0 <= index && index < value.length && (
+        <div
+          class="editor-caret"
+          style={{ left: `calc(${index} * var(--caret-width))` }}
+        />
+      )}
     </div>
   );
 });

@@ -28,7 +28,7 @@ export default function useChars(
   );
 
   const moveRight = useCallback(
-    () => Math.min(_chars.length, _index + 1),
+    () => Math.min(_chars.length - 1, _index + 1),
     [_chars.length, _index]
   );
 

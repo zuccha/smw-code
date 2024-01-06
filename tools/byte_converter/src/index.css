@@ -10,7 +10,8 @@
   --color-neutral-2: rgba(255, 255, 255, 0.6);
   --color-neutral-3: rgba(255, 255, 255, 0.4);
 
-  --color-background: #242424;
+  --color-background-1: #242424;
+  --color-background-2: #141414;
 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -18,7 +19,7 @@
 
   color-scheme: light dark;
   color: var(--color-neutral-1);
-  background-color: var(--color-background);
+  background-color: var(--color-background-1);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -32,4 +33,10 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+code {
+  background-color: var(--color-background-2);
+  padding: 0.2em 0.4em;
+  border-radius: 0.2em;
 }

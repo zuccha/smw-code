@@ -6,19 +6,18 @@ type AppInstructions = {
 };
 
 const keybindings = [
-  { hotkey: "<arrows>", description: "Move across editors" },
+  { hotkeys: ["<arrows>"], description: "Move across editors" },
   {
-    hotkey: "ctrl/cmd+C",
+    hotkeys: ["ctrl+C", "cmd+C"],
     description: "Copy the value of the focused editor in the clipboard.",
   },
   {
-    hotkey: "ctrl/cmd+V",
+    hotkeys: ["ctrl+V", "cmd+V"],
     description:
       "Paste a value in the focused editor from the clipboard. It won't do anything if the clipboard doesn't contain a valid value.",
   },
-
   {
-    hotkey: "H",
+    hotkeys: ["H"],
     description: "Toggle settings visibility.",
   },
 ];
@@ -67,6 +66,12 @@ const settings = [
     description:
       "If enabled, after typing a digit, the cursor will move in the relevant direction, otherwise it will stay where it is. Removing a digit with backspace will always move.",
     hotkey: "M",
+  },
+  {
+    name: "Caret",
+    value: "Bar, Box, Underline",
+    description: "Caret appearance.",
+    hotkey: "<none>",
   },
   {
     name: "Hotkeys",
@@ -134,7 +139,12 @@ export default function AppInstructions({
             {keybindings.map((keybinding) => (
               <tr>
                 <td>
-                  <code>{keybinding.hotkey}</code>
+                  {keybinding.hotkeys.map((hotkey, index) => (
+                    <>
+                      <code>{hotkey}</code>
+                      {index < keybinding.hotkeys.length - 1 && " "}
+                    </>
+                  ))}
                 </td>
                 <td>{keybinding.description}</td>
               </tr>

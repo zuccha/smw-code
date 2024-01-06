@@ -5,6 +5,8 @@ import Editor, { EditorRef } from "../components/editor";
 import Radio, { Option } from "../components/radio";
 import useSetting from "../hooks/use-setting";
 import {
+  Caret,
+  CaretSchema,
   Encoding,
   TypingDirection,
   TypingDirectionSchema,
@@ -22,9 +24,15 @@ import "./app.css";
 // Radio Options
 //==============================================================================
 
-const unitOptions: Option<Unit>[] = [
-  { label: "Byte", value: Unit.Byte },
-  { label: "Word", value: Unit.Word },
+const binaryOptions: Option<boolean>[] = [
+  { label: "On", value: true },
+  { label: "Off", value: false },
+] as const;
+
+const caretOptions: Option<Caret>[] = [
+  { label: "Bar", value: Caret.Bar },
+  { label: "Box", value: Caret.Box },
+  { label: "Underline", value: Caret.Underline },
 ] as const;
 
 const typingDirectionOptions: Option<TypingDirection>[] = [
@@ -37,9 +45,9 @@ const typingModeOptions: Option<TypingMode>[] = [
   { label: "Overwrite", value: TypingMode.Overwrite },
 ] as const;
 
-const binaryOptions: Option<boolean>[] = [
-  { label: "On", value: true },
-  { label: "Off", value: false },
+const unitOptions: Option<Unit>[] = [
+  { label: "Byte", value: Unit.Byte },
+  { label: "Word", value: Unit.Word },
 ] as const;
 
 //==============================================================================
@@ -72,25 +80,7 @@ export function App() {
   // Settings
   //----------------------------------------------------------------------------
 
-  const [typingMode, setTypingMode] = useSetting(
-    "typing-mode",
-    TypingMode.Overwrite,
-    TypingModeSchema.parse
-  );
-
-  const [typingDirection, setTypingDirection] = useSetting(
-    "typing-direction",
-    TypingDirection.Right,
-    TypingDirectionSchema.parse
-  );
-
-  const [moveAfterTypingEnabled, setMoveAfterTypingEnabled] = useSetting(
-    "move-after-typing-enabled",
-    true,
-    z.boolean().parse
-  );
-
-  const [unit, setUnit] = useSetting("unit", Unit.Byte, UnitSchema.parse);
+  const [caret, setCaret] = useSetting("caret", Caret.Box, CaretSchema.parse);
 
   const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
     "hotkeys-enabled",
@@ -104,26 +94,47 @@ export function App() {
     z.boolean().parse
   );
 
+  const [moveAfterTypingEnabled, setMoveAfterTypingEnabled] = useSetting(
+    "move-after-typing-enabled",
+    true,
+    z.boolean().parse
+  );
+
+  const [typingDirection, setTypingDirection] = useSetting(
+    "typing-direction",
+    TypingDirection.Right,
+    TypingDirectionSchema.parse
+  );
+
+  const [typingMode, setTypingMode] = useSetting(
+    "typing-mode",
+    TypingMode.Overwrite,
+    TypingModeSchema.parse
+  );
+
+  const [unit, setUnit] = useSetting("unit", Unit.Byte, UnitSchema.parse);
+
   //----------------------------------------------------------------------------
   // Editors
   //----------------------------------------------------------------------------
 
   const props = {
+    caret,
     integer,
-    unit,
     moveAfterTypingEnabled,
     onChange,
     typingDirection,
     typingMode,
+    unit,
   };
 
-  const editor0Ref = useRef<EditorRef>(null);
-  const editor1Ref = useRef<EditorRef>(null);
-  const editor2Ref = useRef<EditorRef>(null);
+  const editorBinRef = useRef<EditorRef>(null);
+  const editorDecRef = useRef<EditorRef>(null);
+  const editorHexRef = useRef<EditorRef>(null);
 
-  const editor0 = useEditor(editor0Ref, undefined, editor1Ref);
-  const editor1 = useEditor(editor1Ref, editor0Ref, editor2Ref);
-  const editor2 = useEditor(editor2Ref, editor1Ref, undefined);
+  const editorBin = useEditor(editorBinRef, undefined, editorDecRef);
+  const editorDec = useEditor(editorDecRef, editorBinRef, editorHexRef);
+  const editorHex = useEditor(editorHexRef, editorDecRef, undefined);
 
   //----------------------------------------------------------------------------
   // Keyboard Event Listener
@@ -162,21 +173,21 @@ export function App() {
         <Caption unit={unit} />
         <div />
 
-        <AppEditor label="Binary" onCopy={editor0.copy}>
+        <AppEditor label="Binary" onCopy={editorBin.copy}>
           <Editor
             {...props}
-            {...editor0}
+            {...editorBin}
             encoding={Encoding.Binary}
             autoFocus
           />
         </AppEditor>
 
-        <AppEditor label="Decimal" onCopy={editor1.copy}>
-          <Editor {...props} {...editor1} encoding={Encoding.Decimal} />
+        <AppEditor label="Decimal" onCopy={editorDec.copy}>
+          <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
         </AppEditor>
 
-        <AppEditor label="Hexadecimal" onCopy={editor2.copy}>
-          <Editor {...props} {...editor2} encoding={Encoding.Hexadecimal} />
+        <AppEditor label="Hexadecimal" onCopy={editorHex.copy}>
+          <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
         </AppEditor>
       </div>
 
@@ -209,6 +220,10 @@ export function App() {
             options={binaryOptions}
             value={moveAfterTypingEnabled}
           />
+        </AppSetting>
+
+        <AppSetting label="Caret">
+          <Radio onChange={setCaret} options={caretOptions} value={caret} />
         </AppSetting>
 
         <AppSetting label="Hotkeys">
