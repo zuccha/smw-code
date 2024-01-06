@@ -1,0 +1,8 @@
+.collapsible.collapsed .collapsible-children {
+  display: none;
+}
+
+.collapsible-button {
+  display: flex;
+  justify-content: center;
+}
