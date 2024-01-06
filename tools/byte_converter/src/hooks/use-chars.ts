@@ -1,15 +1,11 @@
 import { useCallback, useMemo } from "preact/hooks";
+import { TypingDirection } from "../types";
 import { insert, remove, replace } from "../utils";
-
-export enum TypeDirection {
-  Right,
-  Left,
-}
 
 export default function useChars(
   chars: string[],
   index: number,
-  typeDirection: TypeDirection
+  typingDirection: TypingDirection
 ): {
   insertChar: (char: string) => [string[], number];
   replaceChar: (char: string) => [string[], number];
@@ -18,11 +14,11 @@ export default function useChars(
 } {
   const prepare = useCallback(
     (nextChars: string[], nextIndex: number): [string[], number] => {
-      return typeDirection === TypeDirection.Right
+      return typingDirection === TypingDirection.Right
         ? [nextChars, nextIndex]
         : [nextChars.slice().reverse(), nextChars.length - nextIndex - 1];
     },
-    [typeDirection]
+    [typingDirection]
   );
 
   const [_chars, _index] = useMemo(

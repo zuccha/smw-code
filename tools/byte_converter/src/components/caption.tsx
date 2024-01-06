@@ -1,5 +1,6 @@
 import { useMemo } from "preact/hooks";
-import { Encoding, Length, Unit } from "../hooks/use-value";
+import { Length } from "../hooks/use-value";
+import { Encoding, Unit } from "../types";
 import "./caption.css";
 
 export type CaptionProps = {

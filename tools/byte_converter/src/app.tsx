@@ -1,37 +1,50 @@
 import { Copy } from "lucide-preact";
 import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { z } from "zod";
 import Button from "./components/button";
 import Caption from "./components/caption";
-import Editor, {
-  EditorRef,
-  TypeDirection,
-  TypeMode,
-} from "./components/editor";
+import Editor, { EditorRef } from "./components/editor";
 import Radio, { Option } from "./components/radio";
 import useSetting from "./hooks/use-setting";
-import { Encoding, Unit } from "./hooks/use-value";
+import {
+  Encoding,
+  TypingDirection,
+  TypingDirectionSchema,
+  TypingMode,
+  TypingModeSchema,
+  Unit,
+  UnitSchema,
+} from "./types";
 import { classNames } from "./utils";
 import "./app.css";
+
+//==============================================================================
+// Radio Options
+//==============================================================================
 
 const unitOptions: Option<Unit>[] = [
   { label: "Byte", value: Unit.Byte },
   { label: "Word", value: Unit.Word },
 ] as const;
 
-const typeDirectionOptions: Option<TypeDirection>[] = [
-  { label: "Left", value: TypeDirection.Left },
-  { label: "Right", value: TypeDirection.Right },
+const typingDirectionOptions: Option<TypingDirection>[] = [
+  { label: "Left", value: TypingDirection.Left },
+  { label: "Right", value: TypingDirection.Right },
 ] as const;
 
-const typeModeOptions: Option<TypeMode>[] = [
-  { label: "Insert", value: TypeMode.Insert },
-  { label: "Overwrite", value: TypeMode.Overwrite },
+const typingModeOptions: Option<TypingMode>[] = [
+  { label: "Insert", value: TypingMode.Insert },
+  { label: "Overwrite", value: TypingMode.Overwrite },
 ] as const;
 
 const binaryOptions: Option<boolean>[] = [
   { label: "On", value: true },
   { label: "Off", value: false },
 ] as const;
+
+//==============================================================================
+// Use Editor
+//==============================================================================
 
 const useEditor = (
   ref: Ref<EditorRef>,
@@ -44,18 +57,52 @@ const useEditor = (
   return { copy, onMoveDown, onMoveUp, ref };
 };
 
+//==============================================================================
+// App
+//==============================================================================
+
 export function App() {
+  //----------------------------------------------------------------------------
+  // State
+  //----------------------------------------------------------------------------
+
   const [integer, onChange] = useState(0);
 
-  const [typeMode, setTypeMode] = useSetting("type-mode", TypeMode.Overwrite);
-  const [typeDirection, setTypeDirection] = useSetting(
-    "type-direction",
-    TypeDirection.Right
-  );
-  const [unit, setUnit] = useSetting("unit", Unit.Byte);
-  const [hotkeysEnabled, setHotkeysEnabled] = useSetting("hotkeys", false);
+  //----------------------------------------------------------------------------
+  // Settings
+  //----------------------------------------------------------------------------
 
-  const props = { integer, unit, onChange, typeDirection, typeMode };
+  const [typingMode, setTypingMode] = useSetting(
+    "typing-mode",
+    TypingMode.Overwrite,
+    TypingModeSchema.parse
+  );
+
+  const [typingDirection, setTypingDirection] = useSetting(
+    "typing-direction",
+    TypingDirection.Right,
+    TypingDirectionSchema.parse
+  );
+
+  const [unit, setUnit] = useSetting("unit", Unit.Byte, UnitSchema.parse);
+
+  const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
+    "hotkeys-enabled",
+    false,
+    z.boolean().parse
+  );
+
+  const [instructionsVisible, setInstructionsVisible] = useSetting(
+    "instructions-visible",
+    true,
+    z.boolean().parse
+  );
+
+  //----------------------------------------------------------------------------
+  // Editors
+  //----------------------------------------------------------------------------
+
+  const props = { integer, unit, onChange, typingDirection, typingMode };
 
   const editor0Ref = useRef<EditorRef>(null);
   const editor1Ref = useRef<EditorRef>(null);
@@ -65,20 +112,24 @@ export function App() {
   const editor1 = useEditor(editor1Ref, editor0Ref, editor2Ref);
   const editor2 = useEditor(editor2Ref, editor1Ref, undefined);
 
-  const [instructionsVisible, setInstructionsVisible] = useSetting(
-    "instructions-visible",
-    true
-  );
+  //----------------------------------------------------------------------------
+  // Instructions
+  //----------------------------------------------------------------------------
 
-  const toggleInstructions = useCallback(() => {
-    setInstructionsVisible((prevIntructionsVisible) => !prevIntructionsVisible);
-  }, []);
+  const toggleInstructions = useCallback(
+    () => setInstructionsVisible((prev) => !prev),
+    []
+  );
 
   const instructionsButtonLabel = instructionsVisible
     ? "Hide Instructions"
     : "Show Instructions";
 
   const instructionsClassName = classNames([["hidden", !instructionsVisible]]);
+
+  //----------------------------------------------------------------------------
+  // Keyboard Event Listener
+  //----------------------------------------------------------------------------
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -88,15 +139,15 @@ export function App() {
       if (e.key === "h") return toggleInstructions();
       if (e.key === "y") return setUnit(Unit.Byte);
       if (e.key === "w") return setUnit(Unit.Word);
-      if (e.key === "i") return setTypeMode(TypeMode.Insert);
-      if (e.key === "o") return setTypeMode(TypeMode.Overwrite);
-      if (e.key === "l") return setTypeDirection(TypeDirection.Left);
-      if (e.key === "r") return setTypeDirection(TypeDirection.Right);
+      if (e.key === "i") return setTypingMode(TypingMode.Insert);
+      if (e.key === "o") return setTypingMode(TypingMode.Overwrite);
+      if (e.key === "l") return setTypingDirection(TypingDirection.Left);
+      if (e.key === "r") return setTypingDirection(TypingDirection.Right);
     },
     [
       hotkeysEnabled,
       setHotkeysEnabled,
-      setTypeMode,
+      setTypingMode,
       setUnit,
       toggleInstructions,
     ]
@@ -108,6 +159,10 @@ export function App() {
   }, [handleKeyDown]);
 
   const copyButtonLabel = <Copy size={20} />;
+
+  //----------------------------------------------------------------------------
+  // Render
+  //----------------------------------------------------------------------------
 
   return (
     <div class="app">
@@ -151,18 +206,18 @@ export function App() {
         <span class="app-setting-label">Typing Mode:</span>
         <div class="app-setting-input">
           <Radio
-            onChange={setTypeMode}
-            options={typeModeOptions}
-            value={typeMode}
+            onChange={setTypingMode}
+            options={typingModeOptions}
+            value={typingMode}
           />
         </div>
 
         <span class="app-setting-label">Typing Direction:</span>
         <div class="app-setting-input">
           <Radio
-            onChange={setTypeDirection}
-            options={typeDirectionOptions}
-            value={typeDirection}
+            onChange={setTypingDirection}
+            options={typingDirectionOptions}
+            value={typingDirection}
           />
         </div>
 

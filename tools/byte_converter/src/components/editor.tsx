@@ -6,17 +6,11 @@ import {
   useRef,
   useState,
 } from "preact/hooks";
-import useChars, { TypeDirection } from "../hooks/use-chars";
-import { Encoding, Unit, useValue } from "../hooks/use-value";
+import useChars from "../hooks/use-chars";
+import { useValue } from "../hooks/use-value";
+import { Encoding, TypingDirection, TypingMode, Unit } from "../types";
 import { classNames, differsFrom0, firstIndexOf, lastIndexOf } from "../utils";
 import "./editor.css";
-
-export { TypeDirection } from "../hooks/use-chars";
-
-export enum TypeMode {
-  Insert,
-  Overwrite,
-}
 
 export type EditorProps = {
   autoFocus?: boolean;
@@ -25,8 +19,8 @@ export type EditorProps = {
   onChange: (integer: number) => void;
   onMoveDown: () => void;
   onMoveUp: () => void;
-  typeDirection: TypeDirection;
-  typeMode: TypeMode;
+  typingDirection: TypingDirection;
+  typingMode: TypingMode;
   unit: Unit;
 };
 
@@ -44,12 +38,16 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     onChange,
     onMoveDown,
     onMoveUp,
-    typeDirection,
-    typeMode,
+    typingDirection,
+    typingMode,
     unit,
   },
   ref
 ) {
+  //----------------------------------------------------------------------------
+  // State
+  //----------------------------------------------------------------------------
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [index, setIndex] = useState(0);
@@ -59,28 +57,36 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   const { insertChar, replaceChar, deleteChar, removeChar } = useChars(
     chars,
     index,
-    typeDirection
+    typingDirection
   );
+
+  //----------------------------------------------------------------------------
+  // Solid/Empty Chars
+  //----------------------------------------------------------------------------
 
   const last = useMemo(
     () =>
-      typeDirection === TypeDirection.Right
+      typingDirection === TypingDirection.Right
         ? Math.max(lastIndexOf(chars, differsFrom0), index)
         : Math.min(firstIndexOf(chars, differsFrom0), index),
-    [chars, index, typeDirection]
+    [chars, index, typingDirection]
   );
 
   const isSolid = useCallback(
     (i: number) =>
-      typeDirection === TypeDirection.Right ? i <= last : i >= last,
-    [last, typeDirection]
+      typingDirection === TypingDirection.Right ? i <= last : i >= last,
+    [last, typingDirection]
   );
 
   const isEmpty = useCallback(
     (i: number) =>
-      typeDirection === TypeDirection.Right ? i > last : i < last,
-    [last, typeDirection]
+      typingDirection === TypingDirection.Right ? i > last : i < last,
+    [last, typingDirection]
   );
+
+  //----------------------------------------------------------------------------
+  // Chars/Index Utilities
+  //----------------------------------------------------------------------------
 
   const update = useCallback(
     (nextChars: string[], nextIndex: number) => {
@@ -101,6 +107,10 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     if (index < chars.length - 1) setIndex(index + 1);
   }, [chars.length, index]);
 
+  //----------------------------------------------------------------------------
+  // Clipboard
+  //----------------------------------------------------------------------------
+
   const copy = useCallback(() => {
     navigator.clipboard.writeText(value);
   }, [value]);
@@ -111,6 +121,10 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       if (newInteger !== undefined) onChange(newInteger);
     });
   }, [onChange, parse]);
+
+  //----------------------------------------------------------------------------
+  // Keyboard Event Listener
+  //----------------------------------------------------------------------------
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -124,10 +138,10 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       if (e.key === "Delete") return update(...deleteChar());
 
       if (validChar(e.key)) {
-        switch (typeMode) {
-          case TypeMode.Insert:
+        switch (typingMode) {
+          case TypingMode.Insert:
             return update(...insertChar(e.key));
-          case TypeMode.Overwrite:
+          case TypingMode.Overwrite:
             return update(...replaceChar(e.key));
         }
       }
@@ -142,16 +156,24 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       onMoveUp,
       removeChar,
       replaceChar,
-      typeMode,
+      typingMode,
       update,
       validChar,
     ]
   );
 
+  //----------------------------------------------------------------------------
+  // Ref
+  //----------------------------------------------------------------------------
+
   const blur = useCallback(() => containerRef.current?.blur(), []);
   const focus = useCallback(() => containerRef.current?.focus(), []);
 
   useImperativeHandle(ref, () => ({ blur, copy, focus }), [blur, copy, focus]);
+
+  //----------------------------------------------------------------------------
+  // Render
+  //----------------------------------------------------------------------------
 
   return (
     <div

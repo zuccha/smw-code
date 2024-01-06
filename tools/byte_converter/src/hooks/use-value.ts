@@ -1,15 +1,5 @@
 import { useCallback, useMemo } from "preact/hooks";
-
-export enum Encoding {
-  Binary,
-  Decimal,
-  Hexadecimal,
-}
-
-export enum Unit {
-  Byte,
-  Word,
-}
+import { Encoding, Unit } from "../types";
 
 export const Boundaries = {
   [Unit.Byte]: { min: 0, max: 255 },
