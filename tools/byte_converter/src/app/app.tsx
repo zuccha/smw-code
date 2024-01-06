@@ -1,12 +1,9 @@
-import { Copy } from "lucide-preact";
 import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { z } from "zod";
-import Button from "./components/button";
-import Caption from "./components/caption";
-import Collapsible from "./components/collapsible";
-import Editor, { EditorRef } from "./components/editor";
-import Radio, { Option } from "./components/radio";
-import useSetting from "./hooks/use-setting";
+import Caption from "../components/caption";
+import Editor, { EditorRef } from "../components/editor";
+import Radio, { Option } from "../components/radio";
+import useSetting from "../hooks/use-setting";
 import {
   Encoding,
   TypingDirection,
@@ -15,7 +12,10 @@ import {
   TypingModeSchema,
   Unit,
   UnitSchema,
-} from "./types";
+} from "../types";
+import AppEditor from "./app-editor";
+import AppInstructions from "./app-instructions";
+import AppSetting from "./app-setting";
 import "./app.css";
 
 //==============================================================================
@@ -137,8 +137,6 @@ export function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const copyButtonLabel = <Copy size={20} />;
-
   //----------------------------------------------------------------------------
   // Render
   //----------------------------------------------------------------------------
@@ -150,132 +148,62 @@ export function App() {
         <Caption unit={unit} />
         <div />
 
-        <span class="app-editor-label">Binary</span>
-        <div class="app-editor-input">
+        <AppEditor label="Binary" onCopy={editor0.copy}>
           <Editor
             {...props}
             {...editor0}
             encoding={Encoding.Binary}
             autoFocus
           />
-        </div>
-        <Button isRound label={copyButtonLabel} onClick={editor0.copy} />
+        </AppEditor>
 
-        <span class="app-editor-label">Decimal</span>
-        <div class="app-editor-input">
+        <AppEditor label="Decimal" onCopy={editor1.copy}>
           <Editor {...props} {...editor1} encoding={Encoding.Decimal} />
-        </div>
-        <Button isRound label={copyButtonLabel} onClick={editor1.copy} />
+        </AppEditor>
 
-        <span class="app-editor-label">Hexadecimal</span>
-        <div class="app-editor-input">
+        <AppEditor label="Hexadecimal" onCopy={editor2.copy}>
           <Editor {...props} {...editor2} encoding={Encoding.Hexadecimal} />
-        </div>
-        <Button isRound label={copyButtonLabel} onClick={editor2.copy} />
+        </AppEditor>
       </div>
 
       <div class="app-divider" />
 
       <div class="app-settings">
-        <span class="app-setting-label">Unit:</span>
-        <div class="app-setting-input">
+        <AppSetting label="Unit">
           <Radio onChange={setUnit} options={unitOptions} value={unit} />
-        </div>
+        </AppSetting>
 
-        <span class="app-setting-label">Typing Mode:</span>
-        <div class="app-setting-input">
+        <AppSetting label="Typing Mode">
           <Radio
             onChange={setTypingMode}
             options={typingModeOptions}
             value={typingMode}
           />
-        </div>
+        </AppSetting>
 
-        <span class="app-setting-label">Typing Direction:</span>
-        <div class="app-setting-input">
+        <AppSetting label="Typing Direction">
           <Radio
             onChange={setTypingDirection}
             options={typingDirectionOptions}
             value={typingDirection}
           />
-        </div>
+        </AppSetting>
 
-        <span class="app-setting-label">Hotkeys:</span>
-        <div class="app-setting-input">
+        <AppSetting label="Hotkeys">
           <Radio
             onChange={setHotkeysEnabled}
             options={binaryOptions}
             value={hotkeysEnabled}
           />
-        </div>
+        </AppSetting>
       </div>
 
       <div class="app-divider" />
 
-      <div class="app-instructions">
-        <Collapsible
-          label="Instructions"
-          isVisible={instructionsVisible}
-          onChange={setInstructionsVisible}
-        >
-          <ul>
-            <li>
-              Click on a number to modify it, the others will change
-              accordingly.
-            </li>
-            <li>Move with arrow keys.</li>
-            <li>
-              <code>ctrl/cmd+C</code> while selecting a number to copy it to the
-              clipboard, <code>ctrl/cmd+V</code> to paste it (paste won't do
-              anything if what's stored in the clipboard is not a valid number
-              in the selected format).
-            </li>
-            <li>
-              <b>Unit:</b> <i>Byte</i> is 8-bit; <i>Word</i> is 16-bit.
-            </li>
-            <li>
-              <b>Typing Mode:</b> <i>Insert</i> inserts the typed digit where
-              the selected digit is; <i>Overwrite</i> replaces the selected
-              digit with the typed digit.
-            </li>
-            <li>
-              <b>Typing Direction:</b> <i>Right</i> moves the cursor to the
-              right after typing; <i>Left</i> moves the cursors to the left
-              after typing. Deletion direction is also inverted.
-            </li>
-            <li>
-              <b>Hotkeys:</b> When on, it is possible to control settings with
-              keys:
-              <ul>
-                <li>
-                  <code>Y</code> - Set unit to <i>Byte</i>
-                </li>
-                <li>
-                  <code>W</code> - Set unit to <i>Word</i>
-                </li>
-                <li>
-                  <code>I</code> - Set typing mode to <i>Insert</i>
-                </li>
-                <li>
-                  <code>O</code> - Set typing mode to <i>Overwrite</i>
-                </li>
-                <li>
-                  <code>L</code> - Set typing direction to <i>Left</i>
-                </li>
-                <li>
-                  <code>R</code> - Set typing direction to <i>Right</i>
-                </li>
-                <li>
-                  <code>H</code> - Toggle instructions visibility
-                </li>
-                <li>
-                  <code>K</code> - Toggle hotkeys (this is always enabled)
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </Collapsible>
-      </div>
+      <AppInstructions
+        isVisible={instructionsVisible}
+        onChangeVisibility={setInstructionsVisible}
+      />
     </div>
   );
 }

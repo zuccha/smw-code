@@ -68,8 +68,3 @@
   min-width: 100%;
   max-width: min-content;
 }
-
-.app-instructions-button {
-  display: flex;
-  justify-content: center;
-}
