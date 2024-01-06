@@ -45,3 +45,9 @@ code {
   padding: 0.2em 0.4em;
   border-radius: 0.2em;
 }
+
+@media (max-width: 35em) {
+  body {
+    font-size: 2.5vw;
+  }
+}

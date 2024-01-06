@@ -13,7 +13,7 @@ export default function AppEditor({ children, label, onCopy }: AppEditor) {
     <>
       <span class="app-editor-label">{label}</span>
       <div class="app-editor-input">{children}</div>
-      <Button isRound label={<Copy size={20} />} onClick={onCopy} />
+      <Button isRound label={<Copy size="1.5em" />} onClick={onCopy} />
     </>
   );
 }

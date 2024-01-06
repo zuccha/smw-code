@@ -53,7 +53,11 @@ export default function SectionCollapsible({
           tabIndex={0}
         >
           <span>{label}</span>
-          {isVisible ? <ChevronUp /> : <ChevronDown />}
+          {isVisible ? (
+            <ChevronUp size="1.5em" />
+          ) : (
+            <ChevronDown size="1.5em" />
+          )}
         </div>
       }
     >
