@@ -92,7 +92,7 @@ export function App() {
 
   const [instructionsVisible, setInstructionsVisible] = useSetting(
     "instructions-visible",
-    true,
+    false,
     z.boolean().parse
   );
 
@@ -104,7 +104,7 @@ export function App() {
 
   const [settingsVisible, setSettingsVisible] = useSetting(
     "settings-visible",
-    true,
+    false,
     z.boolean().parse
   );
 
@@ -251,6 +251,23 @@ export function App() {
         isVisible={instructionsVisible}
         onChangeVisibility={setInstructionsVisible}
       />
+
+      <div class="app-footer">
+        v1.1.0 | zuccha |&nbsp;
+        <a
+          href="https://github.com/zuccha/smw-code/blob/main/tools/byte_converter/CHANGELOG.md"
+          target="_blank"
+        >
+          Changelog
+        </a>
+        &nbsp;|&nbsp;
+        <a
+          href="https://github.com/zuccha/smw-code/blob/main/tools/byte_converter"
+          target="_blank"
+        >
+          GitHub
+        </a>
+      </div>
     </div>
   );
 }

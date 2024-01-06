@@ -86,3 +86,9 @@
   font-weight: bold;
   margin-bottom: 1em;
 }
+
+.app-footer {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.8em;
+}
