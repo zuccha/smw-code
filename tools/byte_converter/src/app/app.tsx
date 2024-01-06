@@ -3,6 +3,8 @@ import { z } from "zod";
 import Caption from "../components/caption";
 import Editor, { EditorRef } from "../components/editor";
 import Radio, { Option } from "../components/radio";
+import SectionCollapsible from "../components/section-collapsible";
+import SectionStatic from "../components/section-static";
 import useSetting from "../hooks/use-setting";
 import {
   Caret,
@@ -19,8 +21,6 @@ import AppEditor from "./app-editor";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
 import "./app.css";
-import Collapsible from "../components/collapsible";
-import Section from "../components/section";
 
 //==============================================================================
 // Radio Options
@@ -177,7 +177,7 @@ export function App() {
 
   return (
     <div class="app">
-      <Section label="Byte Converter">
+      <SectionStatic label="Byte Converter">
         <div class="app-editors">
           <div />
           <Caption unit={unit} />
@@ -197,9 +197,9 @@ export function App() {
             <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
           </AppEditor>
         </div>
-      </Section>
+      </SectionStatic>
 
-      <Collapsible
+      <SectionCollapsible
         isVisible={settingsVisible}
         label="Settings"
         onChange={setSettingsVisible}
@@ -245,7 +245,7 @@ export function App() {
             />
           </AppSetting>
         </div>
-      </Collapsible>
+      </SectionCollapsible>
 
       <AppInstructions
         isVisible={instructionsVisible}

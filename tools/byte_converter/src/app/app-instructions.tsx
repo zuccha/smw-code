@@ -1,4 +1,4 @@
-import Collapsible from "../components/collapsible";
+import SectionCollapsible from "../components/section-collapsible";
 
 type AppInstructions = {
   isVisible: boolean;
@@ -87,7 +87,7 @@ export default function AppInstructions({
 }: AppInstructions) {
   return (
     <div class="app-instructions">
-      <Collapsible
+      <SectionCollapsible
         isVisible={isVisible}
         label="Instructions"
         onChange={onChangeVisibility}
@@ -155,7 +155,7 @@ export default function AppInstructions({
             </table>
           </div>
         </div>
-      </Collapsible>
+      </SectionCollapsible>
     </div>
   );
 }

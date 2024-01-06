@@ -1,15 +1,26 @@
 import { ReactNode } from "preact/compat";
+import { classNames } from "../utils";
 import "./section.css";
 
 export type SectionProps = {
   children: ReactNode;
-  label: string;
+  className?: string;
+  header: ReactNode;
 };
 
-export default function Section({ children, label }: SectionProps) {
+export default function Section({
+  children,
+  className = "",
+  header,
+}: SectionProps) {
+  const _className = classNames([
+    ["section", true],
+    [className, Boolean(className)],
+  ]);
+
   return (
-    <div class="section card">
-      <div class="section-header">{label}</div>
+    <div class={_className}>
+      {header}
       <div class="section-children">{children}</div>
     </div>
   );

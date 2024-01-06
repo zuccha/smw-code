@@ -1,26 +1,26 @@
 import { ChevronDown, ChevronUp } from "lucide-preact";
 import { ReactNode, useCallback } from "preact/compat";
 import { classNames } from "../utils";
-import "./collapsible.css";
+import Section from "./section";
 
-export type CollapsibleProps = {
+export type SectionCollapsibleProps = {
   children: ReactNode;
   label: string;
   isVisible: boolean;
   onChange: (isVisible: boolean) => void;
 };
 
-export default function Collapsible({
+export default function SectionCollapsible({
   children,
   label,
   isVisible,
   onChange,
-}: CollapsibleProps) {
+}: SectionCollapsibleProps) {
   const toggle = useCallback(() => onChange(!isVisible), [isVisible]);
 
   const className = classNames([
+    ["section", true],
     ["collapsible", true],
-    ["card", true],
     ["collapsed", !isVisible],
   ]);
 
@@ -43,18 +43,21 @@ export default function Collapsible({
   );
 
   return (
-    <div class={className}>
-      <div
-        class="collapsible-header"
-        onKeyDown={handleKeyDown}
-        onMouseDown={handleMouseDown}
-        tabIndex={0}
-      >
-        <span>{label}</span>
-        {isVisible ? <ChevronUp /> : <ChevronDown />}
-      </div>
-
-      <div class="collapsible-children">{children}</div>
-    </div>
+    <Section
+      className={className}
+      header={
+        <div
+          class="section-header"
+          onKeyDown={handleKeyDown}
+          onMouseDown={handleMouseDown}
+          tabIndex={0}
+        >
+          <span>{label}</span>
+          {isVisible ? <ChevronUp /> : <ChevronDown />}
+        </div>
+      }
+    >
+      {children}
+    </Section>
   );
 }
