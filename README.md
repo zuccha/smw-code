@@ -29,7 +29,7 @@ A collection of SMW resources.
 
 | Name                                                       | Download                                                                                                                    | Online                                                   |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [Byte Converter](./tools/byte_converter)                   | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_converter%2F1.0.0/byte_converter-1.0.0.zip)       | [Online](https://zuccha.io/pages/byte_converter.html)    |
+| [Byte Converter](./tools/byte_converter)                   | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_converter%2F1.1.0/byte_converter-1.1.0.zip)       | [Online](https://zuccha.io/pages/byte_converter.html)    |
 | [Byte Table Editor](./tools/byte_table_editor)             | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_table_editor%2F1.1.0/byte_table_editor-1.1.0.zip) | [Online](https://zuccha.io/pages/byte_table_editor.html) |
 | ~[Overworld Music Editor](./tools/overworld_music_editor)~ | Deprecated, use _Byte Table Editor_                                                                                         | -                                                        |
 
