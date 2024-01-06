@@ -8,11 +8,16 @@ type AppInstructions = {
 const keybindings = [
   { hotkeys: ["<arrows>"], description: "Move across editors." },
   {
-    hotkeys: ["ctrl+C", "cmd+C"],
+    hotkeys: ["TAB", "SHIFT+TAB"],
+    description:
+      "Move to the next/previous focusable element. If nothing is focused, it should focus the binary editor.",
+  },
+  {
+    hotkeys: ["CTRL+C", "CMD+C"],
     description: "Copy the value of the focused editor in the clipboard.",
   },
   {
-    hotkeys: ["ctrl+V", "cmd+V"],
+    hotkeys: ["CTRL+V", "CMD+V"],
     description:
       "Paste a value in the focused editor from the clipboard. It won't do anything if the clipboard doesn't contain a valid value.",
   },
