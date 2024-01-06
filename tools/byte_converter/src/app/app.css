@@ -12,24 +12,20 @@
   gap: 1em;
 }
 
-.app-title {
-  font-variant: small-caps;
-  padding: 1em;
-}
-
 .app-editors {
   display: grid;
   grid-template-columns: max-content max-content max-content;
   column-gap: 1em;
   align-items: center;
   justify-content: center;
+  font-family: monospace;
 }
 
 .app-editor-label {
   display: flex;
   justify-content: flex-end;
   font-size: xx-large;
-  margin-right: 2em;
+  margin-right: 1em;
 }
 
 .app-editor-input {

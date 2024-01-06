@@ -182,7 +182,7 @@ export function App() {
           <div />
           <Caption unit={unit} />
           <div />
-          <AppEditor label="Binary" onCopy={editorBin.copy}>
+          <AppEditor label="BIN" onCopy={editorBin.copy}>
             <Editor
               {...props}
               {...editorBin}
@@ -190,10 +190,10 @@ export function App() {
               autoFocus
             />
           </AppEditor>
-          <AppEditor label="Decimal" onCopy={editorDec.copy}>
+          <AppEditor label="DEC" onCopy={editorDec.copy}>
             <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
           </AppEditor>
-          <AppEditor label="Hexadecimal" onCopy={editorHex.copy}>
+          <AppEditor label="HEX" onCopy={editorHex.copy}>
             <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
           </AppEditor>
         </div>

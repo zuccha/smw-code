@@ -6,7 +6,7 @@ type AppInstructions = {
 };
 
 const keybindings = [
-  { hotkeys: ["<arrows>"], description: "Move across editors" },
+  { hotkeys: ["<arrows>"], description: "Move across editors." },
   {
     hotkeys: ["ctrl+C", "cmd+C"],
     description: "Copy the value of the focused editor in the clipboard.",
@@ -17,15 +17,19 @@ const keybindings = [
       "Paste a value in the focused editor from the clipboard. It won't do anything if the clipboard doesn't contain a valid value.",
   },
   {
-    hotkeys: ["H"],
+    hotkeys: ["S"],
     description: "Toggle settings visibility.",
+  },
+  {
+    hotkeys: ["H"],
+    description: "Toggle instructions visibility.",
   },
 ];
 
 const settings = [
   {
-    rowSpan: 2,
     name: "Unit",
+    nameRowSpan: 2,
     value: "Byte",
     description: "8-bit editing mode.",
     hotkey: "Y",
@@ -36,8 +40,8 @@ const settings = [
     hotkey: "W",
   },
   {
-    rowSpan: 2,
     name: "Typing Mode",
+    nameRowSpan: 2,
     value: "Insert",
     description: "Insert the typed digit where the selected digit is.",
     hotkey: "I",
@@ -48,8 +52,8 @@ const settings = [
     hotkey: "O",
   },
   {
-    rowSpan: 2,
     name: "Typing Direction",
+    nameRowSpan: 2,
     value: "Left",
     description:
       "Move the cursors to the left after typing. Backspace moves to the right.",
@@ -63,9 +67,15 @@ const settings = [
   },
   {
     name: "Move Cursor",
-    description:
-      "If enabled, after typing a digit, the cursor will move in the relevant direction, otherwise it will stay where it is. Removing a digit with backspace will always move.",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Move cursor after typing.",
     hotkey: "M",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Don't move cursor after typing.",
   },
   {
     name: "Caret",
@@ -75,9 +85,15 @@ const settings = [
   },
   {
     name: "Hotkeys",
-    description:
-      "Whether or not hotkeys are enabled. This hotkey is always enabled.",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Hotkeys are enabled.",
     hotkey: "K",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Hotkeys are disabled, except for this one.",
   },
 ];
 
@@ -108,18 +124,15 @@ export default function AppInstructions({
                 {settings.map((setting) => (
                   <tr>
                     {setting.name && (
-                      <td
-                        colSpan={setting.value ? 1 : 2}
-                        rowSpan={setting.rowSpan ?? 1}
-                      >
-                        {setting.name}
-                      </td>
+                      <td rowSpan={setting.nameRowSpan}>{setting.name}</td>
                     )}
                     {setting.value && <td>{setting.value}</td>}
                     <td>{setting.description}</td>
-                    <td>
-                      <code>{setting.hotkey}</code>
-                    </td>
+                    {setting.hotkey && (
+                      <td rowSpan={setting.hotkeyRowSpan}>
+                        <code>{setting.hotkey}</code>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
