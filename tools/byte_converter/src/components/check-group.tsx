@@ -21,7 +21,7 @@ export default function CheckGroup({
 
         const onClick = () => {
           const nextValues = replace(values, i, !value);
-          if (nextValues.some((nextValue) => nextValue)) onChange(nextValues);
+          onChange(nextValues);
         };
         return <Button isSelected={value} label={label} onClick={onClick} />;
       })}

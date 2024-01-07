@@ -17,7 +17,7 @@ import { Boundaries } from "../hooks/use-value";
 import {
   Caret,
   CaretSchema,
-  Encoding,
+  Direction,
   Operation,
   TypingDirection,
   TypingDirectionSchema,
@@ -62,7 +62,7 @@ const unitOptions: Option<Unit>[] = [
   { label: "Word", value: Unit.Word },
 ] as const;
 
-const groupVisibilityLabels = ["Bin", "Dec", "Hex"];
+const groupVisibilityLabels = ["B", "D", "H"];
 
 const OperationLabel = {
   [Operation.And]: "&",
@@ -77,58 +77,6 @@ const OperationLabel = {
 //==============================================================================
 
 export function App() {
-  //----------------------------------------------------------------------------
-  // State
-  //----------------------------------------------------------------------------
-
-  const operand1Ref = useRef<AppEditorsRef>(null);
-  const operand2Ref = useRef<AppEditorsRef>(null);
-  const resultRef = useRef<AppEditorsRef>(null);
-
-  const [operand1, setOperand1] = useState(0);
-  const [operand2, setOperand2] = useState(0);
-  const [operation, setOperation] = useState(Operation.Add);
-
-  const result = useMemo(() => {
-    switch (operation) {
-      case Operation.Add:
-        return (operand1 + operand2) % (Boundaries[Encoding.Decimal].max + 1);
-      case Operation.And:
-        return operand1 & operand2;
-      case Operation.Or:
-        return operand1 | operand2;
-      case Operation.Subtract:
-        return mod(operand1 - operand2, Boundaries[Encoding.Decimal].max + 1);
-      case Operation.Xor:
-        return operand1 ^ operand2;
-    }
-  }, [operand1, operation, operand2]);
-
-  const clearInteger = useCallback(() => setOperand1(0), []);
-  const clearPartial = useCallback(() => setOperand2(0), []);
-
-  const apply = useCallback(
-    (nextOperation: Operation) => {
-      setOperation(nextOperation);
-    },
-    [operand1]
-  );
-
-  const add = useCallback(() => apply(Operation.Add), [apply]);
-  const subtract = useCallback(() => apply(Operation.Subtract), [apply]);
-  const and = useCallback(() => apply(Operation.And), [apply]);
-  const or = useCallback(() => apply(Operation.Or), [apply]);
-  const xor = useCallback(() => apply(Operation.Xor), [apply]);
-  const finalize = useCallback(() => setOperand2(result), [result]);
-  const clear = useCallback(() => {
-    setOperand1(0);
-    setOperand2(0);
-  }, []);
-  const swap = useCallback(() => {
-    setOperand1(operand2);
-    setOperand2(operand1);
-  }, [operand1, operand2]);
-
   //----------------------------------------------------------------------------
   // Settings
   //----------------------------------------------------------------------------
@@ -204,6 +152,58 @@ export function App() {
   const [unit, setUnit] = useSetting("unit", Unit.Byte, UnitSchema.parse);
 
   //----------------------------------------------------------------------------
+  // State
+  //----------------------------------------------------------------------------
+
+  const operand1Ref = useRef<AppEditorsRef>(null);
+  const operand2Ref = useRef<AppEditorsRef>(null);
+  const resultRef = useRef<AppEditorsRef>(null);
+
+  const [operand1, setOperand1] = useState(0);
+  const [operand2, setOperand2] = useState(0);
+  const [operation, setOperation] = useState(Operation.Add);
+
+  const result = useMemo(() => {
+    switch (operation) {
+      case Operation.Add:
+        return (operand1 + operand2) % (Boundaries[unit].max + 1);
+      case Operation.And:
+        return operand1 & operand2;
+      case Operation.Or:
+        return operand1 | operand2;
+      case Operation.Subtract:
+        return mod(operand1 - operand2, Boundaries[unit].max + 1);
+      case Operation.Xor:
+        return operand1 ^ operand2;
+    }
+  }, [operand1, operation, operand2, unit]);
+
+  const clearInteger = useCallback(() => setOperand1(0), []);
+  const clearPartial = useCallback(() => setOperand2(0), []);
+
+  const apply = useCallback(
+    (nextOperation: Operation) => {
+      setOperation(nextOperation);
+    },
+    [operand1]
+  );
+
+  const add = useCallback(() => apply(Operation.Add), [apply]);
+  const subtract = useCallback(() => apply(Operation.Subtract), [apply]);
+  const and = useCallback(() => apply(Operation.And), [apply]);
+  const or = useCallback(() => apply(Operation.Or), [apply]);
+  const xor = useCallback(() => apply(Operation.Xor), [apply]);
+  const finalize = useCallback(() => setOperand2(result), [result]);
+  const clear = useCallback(() => {
+    setOperand1(0);
+    setOperand2(0);
+  }, []);
+  const swap = useCallback(() => {
+    setOperand1(operand2);
+    setOperand2(operand1);
+  }, [operand1, operand2]);
+
+  //----------------------------------------------------------------------------
   // Editors
   //----------------------------------------------------------------------------
 
@@ -222,38 +222,42 @@ export function App() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      const ok = (_: unknown) => true; // prevent default
-      const ko = (_: unknown) => false; // don't prevent default
+      const t = (_: unknown) => true; // prevent default
+      const f = (_: unknown) => false; // don't prevent default
 
       const processKeys = (): boolean => {
-        if (e.key === "k") return ko(setHotkeysEnabled((prev) => !prev));
+        if (e.key === "Tab")
+          return (document.activeElement ?? document.body) === document.body
+            ? t(operand1Ref.current?.focus(Direction.Down))
+            : false;
+
+        if (e.key === "k") return f(setHotkeysEnabled((prev) => !prev));
 
         if (calculatorEnabled) {
-          if (e.key === "+") return ok(add());
-          if (e.key === "-") return ok(subtract());
-          if (e.key === "&") return ok(and());
-          if (e.key === "|") return ok(or());
-          if (e.key === "^") return ok(xor());
-          if (e.key === "=") return ok(finalize());
+          if (e.key === "+") return t(add());
+          if (e.key === "-") return t(subtract());
+          if (e.key === "&") return t(and());
+          if (e.key === "|") return t(or());
+          if (e.key === "^") return t(xor());
+          if (e.key === "=") return t(finalize());
         }
 
         if (!hotkeysEnabled) return false;
-        if (e.key === "q") return ko(toggle);
-        if (e.key === "s") return ko(toggle);
-        if (e.key === "h") return ko(toggle);
-        if (e.key === "t") return ko(toggle);
-        if (e.key === "y") return ko(setUnit(Unit.Byte));
-        if (e.key === "w") return ko(setUnit(Unit.Word));
-        if (e.key === "i") return ko(setTypingMode(TypingMode.Insert));
-        if (e.key === "o") return ko(setTypingMode(TypingMode.Overwrite));
-        if (e.key === "l") return ko(setTypingDirection(TypingDirection.Left));
-        if (e.key === "r") return ko(setTypingDirection(TypingDirection.Right));
-        if (e.key === "m") return ko(toggle);
+        if (e.key === "q") return f(toggle);
+        if (e.key === "s") return f(toggle);
+        if (e.key === "h") return f(toggle);
+        if (e.key === "t") return f(toggle);
+        if (e.key === "y") return f(setUnit(Unit.Byte));
+        if (e.key === "w") return f(setUnit(Unit.Word));
+        if (e.key === "i") return f(setTypingMode(TypingMode.Insert));
+        if (e.key === "o") return f(setTypingMode(TypingMode.Overwrite));
+        if (e.key === "l") return f(setTypingDirection(TypingDirection.Left));
+        if (e.key === "r") return f(setTypingDirection(TypingDirection.Right));
+        if (e.key === "m") return f(toggle);
 
         return false;
       };
 
-      processKeys();
       if (processKeys()) e.preventDefault();
     },
     [
@@ -287,8 +291,13 @@ export function App() {
           <div class="app-editors">
             <div />
             <Caption unit={unit} />
-            <div />
-            <div />
+            <div class="app-divider-editors-visibility">
+              <CheckGroup
+                labels={groupVisibilityLabels}
+                onChange={setOperand1Visibility}
+                values={operand1Visibility}
+              />
+            </div>
 
             <AppEditors
               {...props}
@@ -308,7 +317,14 @@ export function App() {
 
             {calculatorEnabled ? (
               <>
-                <div class="divider" />
+                <div class="app-divider-line" />
+                <div class="app-divider-editors-visibility">
+                  <CheckGroup
+                    labels={groupVisibilityLabels}
+                    onChange={setOperand2Visibility}
+                    values={operand2Visibility}
+                  />
+                </div>
 
                 <AppEditors
                   {...props}
@@ -338,7 +354,14 @@ export function App() {
                   refPrev={operand1Ref}
                 />
 
-                <div class="divider" />
+                <div class="app-divider-line" />
+                <div class="app-divider-editors-visibility">
+                  <CheckGroup
+                    labels={groupVisibilityLabels}
+                    onChange={setResultVisibility}
+                    values={resultVisibility}
+                  />
+                </div>
 
                 <AppEditors
                   {...props}
@@ -431,30 +454,6 @@ export function App() {
               onChange={setFlipBitEnabled}
               options={binaryOptions}
               value={flipBitEnabled}
-            />
-          </AppSetting>
-
-          <AppSetting label="Operand 1 Visibility">
-            <CheckGroup
-              labels={groupVisibilityLabels}
-              onChange={setOperand1Visibility}
-              values={operand1Visibility}
-            />
-          </AppSetting>
-
-          <AppSetting label="Operand 2 Visibility">
-            <CheckGroup
-              labels={groupVisibilityLabels}
-              onChange={setOperand2Visibility}
-              values={operand2Visibility}
-            />
-          </AppSetting>
-
-          <AppSetting label="Result Visibility">
-            <CheckGroup
-              labels={groupVisibilityLabels}
-              onChange={setResultVisibility}
-              values={resultVisibility}
             />
           </AppSetting>
 

@@ -21,15 +21,27 @@
   font-family: monospace;
 }
 
-.app-editors .divider {
-  height: 1px;
-  background-color: var(--color-neutral-3);
-  margin: 0.5em 0;
+.app-editors .empty {
   grid-column: span 4;
 }
 
-.app-editors .empty {
-  grid-column: span 4;
+.app-divider-line {
+  grid-column: span 2;
+  height: 1px;
+  background-color: var(--color-neutral-3);
+}
+
+.app-divider-editors-visibility {
+  grid-column: span 2;
+  display: flex;
+  justify-content: center;
+  font-size: 0.7em;
+  margin: 0.2em 0;
+}
+
+.app-divider-editors-visibility .button {
+  aspect-ratio: 1;
+  line-height: 0;
 }
 
 .app-editor-label {
