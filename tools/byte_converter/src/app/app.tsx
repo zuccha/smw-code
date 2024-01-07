@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/hooks";
 import { z } from "zod";
 import Caption from "../components/caption";
 import Radio, { Option } from "../components/radio";
@@ -18,7 +24,7 @@ import {
   Unit,
   UnitSchema,
 } from "../types";
-import AppEditors from "./app-editors";
+import AppEditors, { AppEditorsRef } from "./app-editors";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
 import "./app.css";
@@ -71,6 +77,10 @@ export function App() {
   //----------------------------------------------------------------------------
   // State
   //----------------------------------------------------------------------------
+
+  const operand1Ref = useRef<AppEditorsRef>(null);
+  const operand2Ref = useRef<AppEditorsRef>(null);
+  const resultRef = useRef<AppEditorsRef>(null);
 
   const [operand1, setOperand1] = useState(0);
   const [operand2, setOperand2] = useState(0);
@@ -243,6 +253,8 @@ export function App() {
               prefixBin="BIN"
               prefixDec="DEC"
               prefixHex="HEX"
+              ref={operand1Ref}
+              refNext={operand2Ref}
             />
 
             <div class="divider" />
@@ -256,6 +268,9 @@ export function App() {
               onChange={setOperand2}
               onClear={clearPartial}
               prefixBin={OperationLabel[operation]}
+              ref={operand2Ref}
+              refNext={resultRef}
+              refPrev={operand1Ref}
             />
 
             <div class="divider" />
@@ -269,6 +284,8 @@ export function App() {
               isVisibleHex
               onChange={doNothing}
               prefixBin="="
+              ref={resultRef}
+              refPrev={operand2Ref}
             />
           </div>
 

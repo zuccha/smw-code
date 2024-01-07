@@ -1,9 +1,10 @@
-import { Ref, useCallback, useRef } from "preact/hooks";
+import { Ref, useCallback, useImperativeHandle, useRef } from "preact/hooks";
 import Editor, { EditorRef } from "../components/editor";
 import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
 import AppEditor from "./app-editor";
+import { forwardRef } from "preact/compat";
 
-type AppEditorsProps = {
+export type AppEditorsProps = {
   autoFocus?: boolean;
   caret: Caret;
   flipBitEnabled?: boolean;
@@ -18,41 +19,65 @@ type AppEditorsProps = {
   prefixBin?: string;
   prefixDec?: string;
   prefixHex?: string;
+  refNext?: Ref<AppEditorsRef>;
+  refPrev?: Ref<AppEditorsRef>;
   typingDirection: TypingDirection;
   typingMode: TypingMode;
   unit: Unit;
 };
 
+export type AppEditorsRef = {
+  focusFirst: () => void;
+  focusLast: () => void;
+};
+
 const useEditor = (
   ref: Ref<EditorRef>,
-  prevRef: Ref<EditorRef> | undefined,
-  nextRef: Ref<EditorRef> | undefined
+  prevs: (Ref<EditorRef> | Ref<AppEditorsRef> | undefined)[],
+  nexts: (Ref<EditorRef> | Ref<AppEditorsRef> | undefined)[]
 ) => {
-  const onMoveUp = useCallback(() => prevRef?.current?.focus(), [prevRef]);
-  const onMoveDown = useCallback(() => nextRef?.current?.focus(), [nextRef]);
+  const onMoveUp = useCallback(() => {
+    const editor = prevs.find((prev) => prev?.current);
+    if (!editor) return;
+    if ("focus" in editor.current!) editor.current?.focus();
+    else editor.current?.focusLast();
+  }, prevs);
+
+  const onMoveDown = useCallback(() => {
+    const editor = nexts.find((next) => next?.current);
+    if (!editor) return;
+    if ("focus" in editor.current!) editor.current?.focus();
+    else editor.current?.focusFirst();
+  }, nexts);
+
   const copy = useCallback(() => ref.current?.copy(), [ref]);
   return { copy, onMoveDown, onMoveUp, ref };
 };
 
-export default function AppEditors({
-  autoFocus,
-  caret,
-  flipBitEnabled,
-  integer,
-  isDisabled = false,
-  isVisibleBin = false,
-  isVisibleDec = false,
-  isVisibleHex = false,
-  moveAfterTypingEnabled,
-  onChange,
-  onClear,
-  prefixBin = "",
-  prefixDec = "",
-  prefixHex = "",
-  typingDirection,
-  typingMode,
-  unit,
-}: AppEditorsProps) {
+export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
+  {
+    autoFocus,
+    caret,
+    flipBitEnabled,
+    integer,
+    isDisabled = false,
+    isVisibleBin = false,
+    isVisibleDec = false,
+    isVisibleHex = false,
+    moveAfterTypingEnabled,
+    onChange,
+    onClear,
+    prefixBin = "",
+    prefixDec = "",
+    prefixHex = "",
+    refNext,
+    refPrev,
+    typingDirection,
+    typingMode,
+    unit,
+  },
+  ref
+) {
   const props = {
     caret,
     flipBitEnabled,
@@ -65,21 +90,36 @@ export default function AppEditors({
     unit,
   };
 
-  const editorBinRef = useRef<EditorRef>(null);
-  const editorDecRef = useRef<EditorRef>(null);
-  const editorHexRef = useRef<EditorRef>(null);
+  const binRef = useRef<EditorRef>(null);
+  const decRef = useRef<EditorRef>(null);
+  const hexRef = useRef<EditorRef>(null);
 
-  const editorBin = useEditor(editorBinRef, undefined, editorDecRef);
-  const editorDec = useEditor(editorDecRef, editorBinRef, editorHexRef);
-  const editorHex = useEditor(editorHexRef, editorDecRef, undefined);
+  const bin = isVisibleBin ? binRef : undefined;
+  const dec = isVisibleDec ? decRef : undefined;
+  const hex = isVisibleHex ? hexRef : undefined;
+
+  const binProps = useEditor(binRef, [refPrev], [dec, hex, refNext]);
+  const decProps = useEditor(decRef, [bin, refPrev], [hex, refNext]);
+  const hexProps = useEditor(hexRef, [dec, bin, refPrev], [refNext]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusFirst: () =>
+        [bin, dec, hex].find((editor) => editor?.current)?.current?.focus(),
+      focusLast: () =>
+        [hex, dec, bin].find((editor) => editor?.current)?.current?.focus(),
+    }),
+    [bin, dec, hex]
+  );
 
   return (
     <>
       {isVisibleBin && (
-        <AppEditor label={prefixBin} onCopy={editorBin.copy} onClear={onClear}>
+        <AppEditor label={prefixBin} onCopy={binProps.copy} onClear={onClear}>
           <Editor
             {...props}
-            {...editorBin}
+            {...binProps}
             encoding={Encoding.Binary}
             autoFocus={autoFocus}
           />
@@ -87,16 +127,16 @@ export default function AppEditors({
       )}
 
       {isVisibleDec && (
-        <AppEditor label={prefixDec} onCopy={editorDec.copy} onClear={onClear}>
-          <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
+        <AppEditor label={prefixDec} onCopy={decProps.copy} onClear={onClear}>
+          <Editor {...props} {...decProps} encoding={Encoding.Decimal} />
         </AppEditor>
       )}
 
       {isVisibleHex && (
-        <AppEditor label={prefixHex} onCopy={editorHex.copy} onClear={onClear}>
-          <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
+        <AppEditor label={prefixHex} onCopy={hexProps.copy} onClear={onClear}>
+          <Editor {...props} {...hexProps} encoding={Encoding.Hexadecimal} />
         </AppEditor>
       )}
     </>
   );
-}
+});
