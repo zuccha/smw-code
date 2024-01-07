@@ -289,7 +289,7 @@ export function App() {
       <SectionStatic label="Byte Converter">
         <div>
           <div class="app-editors">
-            <div />
+            <div class="app-spacer">&nbsp;&nbsp;&nbsp;</div>
             <Caption unit={unit} />
             <div class="app-divider-editors-visibility">
               <CheckGroup
@@ -385,25 +385,27 @@ export function App() {
                   ref={resultRef}
                   refPrev={operand2Ref}
                 />
-
-                <div class="app-calculator">
-                  <Calculator
-                    operation={operation}
-                    onAdd={add}
-                    onAnd={and}
-                    onClear={clear}
-                    onFinalize={finalize}
-                    onOr={or}
-                    onSubtract={subtract}
-                    onSwap={swap}
-                    onXor={xor}
-                  />
-                </div>
               </>
             ) : (
               <div class="empty" />
             )}
           </div>
+
+          {calculatorEnabled && (
+            <div class="app-calculator">
+              <Calculator
+                operation={operation}
+                onAdd={add}
+                onAnd={and}
+                onClear={clear}
+                onFinalize={finalize}
+                onOr={or}
+                onSubtract={subtract}
+                onSwap={swap}
+                onXor={xor}
+              />
+            </div>
+          )}
         </div>
       </SectionStatic>
 

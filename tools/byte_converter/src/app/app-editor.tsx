@@ -19,12 +19,12 @@ export default function AppEditor({
     <>
       <span class="app-editor-label">{label}</span>
       <div class="app-editor-input">{children}</div>
-      <Button isRound label={<Copy size="1.5em" />} onClick={onCopy} />
-      {onClear ? (
-        <Button isRound label={<X size="1.5em" />} onClick={onClear} />
-      ) : (
-        <div />
-      )}
+      <div class="app-editor-actions">
+        <Button isRound label={<Copy size="1.5em" />} onClick={onCopy} />
+        {onClear && (
+          <Button isRound label={<X size="1.5em" />} onClick={onClear} />
+        )}
+      </div>
     </>
   );
 }
