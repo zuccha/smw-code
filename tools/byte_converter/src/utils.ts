@@ -44,3 +44,7 @@ export function remove<T>(items: T[], index: number, fill: T): T[] {
 export function differsFrom0(char: string): boolean {
   return char !== "0";
 }
+
+export function mod(n: number, m: number): number {
+  return ((n % m) + m) % m;
+}

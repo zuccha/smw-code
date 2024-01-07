@@ -26,7 +26,7 @@ import {
   Unit,
   UnitSchema,
 } from "../types";
-import { doNothing } from "../utils";
+import { doNothing, mod } from "../utils";
 import AppEditors, { AppEditorsRef } from "./app-editors";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
@@ -98,7 +98,7 @@ export function App() {
       case Operation.Or:
         return operand1 | operand2;
       case Operation.Subtract:
-        return operand1 - operand2; // ! FIXME: Apply modulo.
+        return mod(operand1 - operand2, Boundaries[Encoding.Decimal].max + 1);
       case Operation.Xor:
         return operand1 ^ operand2;
     }
