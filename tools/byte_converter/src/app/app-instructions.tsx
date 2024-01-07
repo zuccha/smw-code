@@ -33,6 +33,18 @@ const keybindings = [
 
 const settings = [
   {
+    name: "Calculator",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Calculator mode.",
+    hotkey: "Q",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Converter-only mode.",
+  },
+  {
     name: "Unit",
     nameRowSpan: 2,
     value: "Byte",
@@ -95,10 +107,31 @@ const settings = [
     description: "Don't flip any bit when clicking on the editors.",
   },
   {
+    name: "Operand 1 Visibility",
+    value: "Bin, Dec, Hex",
+    description:
+      "Multi selection. Editors to show for the first group. At least one must be selected.",
+    hotkey: "",
+  },
+  {
+    name: "Operand 2 Visibility",
+    value: "Bin, Dec, Hex",
+    description:
+      "Multi selection. Editors to show for the second group (only visible in calculator mode). At least one must be selected.",
+    hotkey: "",
+  },
+  {
+    name: "Result Visibility",
+    value: "Bin, Dec, Hex",
+    description:
+      "Multi selection. Fields to show for the third group (only visible in calculator mode). At least one must be selected.",
+    hotkey: "",
+  },
+  {
     name: "Caret",
     value: "Bar, Box, Underline",
     description: "Caret appearance.",
-    hotkey: "<none>",
+    hotkey: "",
   },
   {
     name: "Hotkeys",
@@ -111,6 +144,49 @@ const settings = [
   {
     value: "Off",
     description: "Hotkeys are disabled, except for this one.",
+  },
+];
+
+const operations = [
+  {
+    name: "+",
+    description: "Add the two operands together.",
+    hotkey: "+",
+  },
+  {
+    name: "-",
+    description: "Subtract operand 2 from operand 1.",
+    hotkey: "-",
+  },
+  {
+    name: "&",
+    description: "Logical AND between the two operands.",
+    hotkey: "&",
+  },
+  {
+    name: "|",
+    description: "Logical OR between the two operands.",
+    hotkey: "|",
+  },
+  {
+    name: "^",
+    description: "Logical XOR between the two operands.",
+    hotkey: "^",
+  },
+  {
+    name: "=",
+    description: "Transfer the result in operand 2.",
+    hotkey: "=",
+  },
+  {
+    name: "C",
+    description: "Clear all values (set them to 0).",
+    hotkey: "",
+  },
+  {
+    name: "↓↑",
+    description: "Swap operand 1 with operand 2.",
+    hotkey: "",
   },
 ];
 
@@ -145,9 +221,9 @@ export default function AppInstructions({
                     )}
                     {setting.value && <td>{setting.value}</td>}
                     <td>{setting.description}</td>
-                    {setting.hotkey && (
+                    {setting.hotkey !== undefined && (
                       <td rowSpan={setting.hotkeyRowSpan}>
-                        <code>{setting.hotkey}</code>
+                        {setting.hotkey ? <code>{setting.hotkey}</code> : "-"}
                       </td>
                     )}
                   </tr>
@@ -179,6 +255,37 @@ export default function AppInstructions({
                       ))}
                     </td>
                     <td>{keybinding.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="app-instructions-section-label">Calculator Mode:</div>
+            <div>
+              Calculator mode allows to perform operations between two values.
+              The widget is divided in three groups (separated by lines): the
+              first two are the operands, the last one holds the result of the
+              operation (it cannot be modified manually).
+            </div>
+            <br />
+            <table>
+              <thead>
+                <tr>
+                  <th>Operation</th>
+                  <th>Description</th>
+                  <th>Hotkey</th>
+                </tr>
+              </thead>
+              <tbody>
+                {operations.map((operation) => (
+                  <tr>
+                    <td>{operation.name}</td>
+                    <td>{operation.description}</td>
+                    <td>
+                      {operation.hotkey ? <code>{operation.hotkey}</code> : "-"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

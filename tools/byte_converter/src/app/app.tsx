@@ -468,7 +468,7 @@ export function App() {
       />
 
       <div class="app-footer">
-        v1.1.0 | zuccha |&nbsp;
+        v1.2.0 | zuccha |&nbsp;
         <a
           href="https://github.com/zuccha/smw-code/blob/main/tools/byte_converter/CHANGELOG.md"
           target="_blank"
