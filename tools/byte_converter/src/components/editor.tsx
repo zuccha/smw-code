@@ -1,5 +1,6 @@
 import { forwardRef } from "preact/compat";
 import {
+  Ref,
   useCallback,
   useImperativeHandle,
   useMemo,
@@ -8,7 +9,15 @@ import {
 } from "preact/hooks";
 import useChars from "../hooks/use-chars";
 import { useValue } from "../hooks/use-value";
-import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
+import {
+  Caret,
+  Direction,
+  Encoding,
+  Focusable,
+  TypingDirection,
+  TypingMode,
+  Unit,
+} from "../types";
 import {
   classNames,
   differsFrom0,
@@ -27,17 +36,15 @@ export type EditorProps = {
   isDisabled?: boolean;
   moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
-  onMoveDown: () => void;
-  onMoveUp: () => void;
+  refNext?: Ref<Focusable>;
+  refPrev?: Ref<Focusable>;
   typingDirection: TypingDirection;
   typingMode: TypingMode;
   unit: Unit;
 };
 
-export type EditorRef = {
-  blur: () => void;
+export type EditorRef = Focusable & {
   copy: () => void;
-  focus: () => void;
 };
 
 export default forwardRef<EditorRef, EditorProps>(function Editor(
@@ -50,8 +57,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     isDisabled = false,
     moveAfterTypingEnabled,
     onChange,
-    onMoveDown,
-    onMoveUp,
+    refNext,
+    refPrev,
     typingDirection,
     typingMode,
     unit,
@@ -163,26 +170,37 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "c") return copy();
-      if ((e.ctrlKey || e.metaKey) && e.key === "v") return paste();
-      if (e.key === "ArrowDown") return onMoveDown();
-      if (e.key === "ArrowUp") return onMoveUp();
+      const ok = (_: unknown) => true;
 
-      if (isDisabled) return;
+      const processKeys = (): boolean => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "c") return ok(copy());
+        if ((e.ctrlKey || e.metaKey) && e.key === "v") return ok(paste());
 
-      if (e.key === "ArrowLeft") return moveLeft();
-      if (e.key === "ArrowRight") return moveRight();
-      if (e.key === "Backspace") return update(...removeChar());
-      if (e.key === "Delete") return update(...deleteChar());
+        if (e.key === "ArrowDown")
+          return Boolean(refNext?.current?.focus(Direction.Down));
+        if (e.key === "ArrowUp")
+          return Boolean(refPrev?.current?.focus(Direction.Up));
 
-      if (validChar(e.key)) {
-        switch (typingMode) {
-          case TypingMode.Insert:
-            return update(...insertChar(e.key));
-          case TypingMode.Overwrite:
-            return update(...replaceChar(e.key));
+        if (isDisabled) return false;
+
+        if (e.key === "ArrowLeft") return ok(moveLeft());
+        if (e.key === "ArrowRight") return ok(moveRight());
+        if (e.key === "Backspace") return ok(update(...removeChar()));
+        if (e.key === "Delete") return ok(update(...deleteChar()));
+
+        if (validChar(e.key)) {
+          switch (typingMode) {
+            case TypingMode.Insert:
+              return ok(update(...insertChar(e.key)));
+            case TypingMode.Overwrite:
+              return ok(update(...replaceChar(e.key)));
+          }
         }
-      }
+
+        return false;
+      };
+
+      if (processKeys()) e.preventDefault();
     },
     [
       copy,
@@ -191,8 +209,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       isDisabled,
       moveLeft,
       moveRight,
-      onMoveDown,
-      onMoveUp,
+      refNext,
+      refPrev,
       removeChar,
       replaceChar,
       typingMode,
@@ -205,10 +223,13 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   // Ref
   //----------------------------------------------------------------------------
 
-  const blur = useCallback(() => containerRef.current?.blur(), []);
-  const focus = useCallback(() => containerRef.current?.focus(), []);
+  const focus = useCallback(() => {
+    if (!containerRef.current) return false;
+    containerRef.current.focus();
+    return true;
+  }, []);
 
-  useImperativeHandle(ref, () => ({ blur, copy, focus }), [blur, copy, focus]);
+  useImperativeHandle(ref, () => ({ copy, focus }), [copy, focus]);
 
   //----------------------------------------------------------------------------
   // Render

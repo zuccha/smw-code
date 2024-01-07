@@ -70,3 +70,24 @@ export enum Operation {
 }
 
 export const OperationSchema = z.nativeEnum(Operation);
+
+//==============================================================================
+// Direction
+//==============================================================================
+
+export enum Direction {
+  Down,
+  Left,
+  Right,
+  Up,
+}
+
+export const DirectionSchema = z.nativeEnum(Direction);
+
+//==============================================================================
+// Focusable
+//==============================================================================
+
+export type Focusable = {
+  focus: (direction?: Direction) => boolean;
+};

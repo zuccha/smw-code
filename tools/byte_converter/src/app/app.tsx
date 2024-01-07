@@ -26,7 +26,7 @@ import {
   Unit,
   UnitSchema,
 } from "../types";
-import { doNothing, mod } from "../utils";
+import { doNothing, mod, toggle } from "../utils";
 import AppEditors, { AppEditorsRef } from "./app-editors";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
@@ -222,29 +222,39 @@ export function App() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "k") return setHotkeysEnabled((prev) => !prev);
+      const ok = (_: unknown) => true; // prevent default
+      const ko = (_: unknown) => false; // don't prevent default
 
-      if (calculatorEnabled) {
-        if (e.key === "+") return add();
-        if (e.key === "-") return subtract();
-        if (e.key === "&") return and();
-        if (e.key === "|") return or();
-        if (e.key === "^") return xor();
-        if (e.key === "=") return finalize();
-      }
+      const processKeys = (): boolean => {
+        if (e.key === "k") return ko(setHotkeysEnabled((prev) => !prev));
 
-      if (!hotkeysEnabled) return;
-      if (e.key === "q") return setCalculatorEnabled((prev) => !prev);
-      if (e.key === "s") return setSettingsVisible((prev) => !prev);
-      if (e.key === "h") return setInstructionsVisible((prev) => !prev);
-      if (e.key === "t") return setFlipBitEnabled((prev) => !prev);
-      if (e.key === "y") return setUnit(Unit.Byte);
-      if (e.key === "w") return setUnit(Unit.Word);
-      if (e.key === "i") return setTypingMode(TypingMode.Insert);
-      if (e.key === "o") return setTypingMode(TypingMode.Overwrite);
-      if (e.key === "l") return setTypingDirection(TypingDirection.Left);
-      if (e.key === "r") return setTypingDirection(TypingDirection.Right);
-      if (e.key === "m") return setMoveAfterTypingEnabled((prev) => !prev);
+        if (calculatorEnabled) {
+          if (e.key === "+") return ok(add());
+          if (e.key === "-") return ok(subtract());
+          if (e.key === "&") return ok(and());
+          if (e.key === "|") return ok(or());
+          if (e.key === "^") return ok(xor());
+          if (e.key === "=") return ok(finalize());
+        }
+
+        if (!hotkeysEnabled) return false;
+        if (e.key === "q") return ko(toggle);
+        if (e.key === "s") return ko(toggle);
+        if (e.key === "h") return ko(toggle);
+        if (e.key === "t") return ko(toggle);
+        if (e.key === "y") return ko(setUnit(Unit.Byte));
+        if (e.key === "w") return ko(setUnit(Unit.Word));
+        if (e.key === "i") return ko(setTypingMode(TypingMode.Insert));
+        if (e.key === "o") return ko(setTypingMode(TypingMode.Overwrite));
+        if (e.key === "l") return ko(setTypingDirection(TypingDirection.Left));
+        if (e.key === "r") return ko(setTypingDirection(TypingDirection.Right));
+        if (e.key === "m") return ko(toggle);
+
+        return false;
+      };
+
+      processKeys();
+      if (processKeys()) e.preventDefault();
     },
     [
       add,
@@ -368,7 +378,7 @@ export function App() {
                 </div>
               </>
             ) : (
-              <div class="fixer" />
+              <div class="empty" />
             )}
           </div>
         </div>

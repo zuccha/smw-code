@@ -1,6 +1,20 @@
-import { Ref, useCallback, useImperativeHandle, useRef } from "preact/hooks";
+import {
+  Ref,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "preact/hooks";
 import Editor, { EditorRef } from "../components/editor";
-import { Caret, Encoding, TypingDirection, TypingMode, Unit } from "../types";
+import {
+  Caret,
+  Direction,
+  Encoding,
+  Focusable,
+  TypingDirection,
+  TypingMode,
+  Unit,
+} from "../types";
 import AppEditor from "./app-editor";
 import { forwardRef } from "preact/compat";
 
@@ -26,32 +40,17 @@ export type AppEditorsProps = {
   unit: Unit;
 };
 
-export type AppEditorsRef = {
-  focusFirst: () => void;
-  focusLast: () => void;
-};
+export type AppEditorsRef = Focusable;
 
 const useEditor = (
   ref: Ref<EditorRef>,
-  prevs: (Ref<EditorRef> | Ref<AppEditorsRef> | undefined)[],
-  nexts: (Ref<EditorRef> | Ref<AppEditorsRef> | undefined)[]
+  prevs: (Ref<Focusable> | undefined)[],
+  nexts: (Ref<Focusable> | undefined)[]
 ) => {
-  const onMoveUp = useCallback(() => {
-    const editor = prevs.find((prev) => prev?.current);
-    if (!editor) return;
-    if ("focus" in editor.current!) editor.current?.focus();
-    else editor.current?.focusLast();
-  }, prevs);
-
-  const onMoveDown = useCallback(() => {
-    const editor = nexts.find((next) => next?.current);
-    if (!editor) return;
-    if ("focus" in editor.current!) editor.current?.focus();
-    else editor.current?.focusFirst();
-  }, nexts);
-
+  const refNext = useMemo(() => nexts.find(Boolean), nexts);
+  const refPrev = useMemo(() => prevs.find(Boolean), prevs);
   const copy = useCallback(() => ref.current?.copy(), [ref]);
-  return { copy, onMoveDown, onMoveUp, ref };
+  return { copy, ref, refNext, refPrev };
 };
 
 export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
@@ -105,12 +104,19 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
   useImperativeHandle(
     ref,
     () => ({
-      focusFirst: () =>
-        [bin, dec, hex].find((editor) => editor?.current)?.current?.focus(),
-      focusLast: () =>
-        [hex, dec, bin].find((editor) => editor?.current)?.current?.focus(),
+      focus: (direction?: Direction): boolean => {
+        switch (direction) {
+          case Direction.Down:
+            const nexts = [bin, dec, hex, refNext];
+            return Boolean(nexts.find(Boolean)?.current?.focus(Direction.Down));
+          case Direction.Up:
+            const prevs = [hex, dec, bin, refPrev];
+            return Boolean(prevs.find(Boolean)?.current?.focus(Direction.Up));
+        }
+        return false;
+      },
     }),
-    [bin, dec, hex]
+    [bin, dec, hex, refNext, refPrev]
   );
 
   return (

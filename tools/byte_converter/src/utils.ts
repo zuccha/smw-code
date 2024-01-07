@@ -48,3 +48,7 @@ export function differsFrom0(char: string): boolean {
 export function mod(n: number, m: number): number {
   return ((n % m) + m) % m;
 }
+
+export function toggle(value: boolean): boolean {
+  return !value;
+}
