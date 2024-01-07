@@ -110,7 +110,6 @@ export function App() {
   const apply = useCallback(
     (nextOperation: Operation) => {
       setOperation(nextOperation);
-      setOperand2(operand1);
     },
     [operand1]
   );
@@ -121,6 +120,14 @@ export function App() {
   const or = useCallback(() => apply(Operation.Or), [apply]);
   const xor = useCallback(() => apply(Operation.Xor), [apply]);
   const finalize = useCallback(() => setOperand2(result), [result]);
+  const clear = useCallback(() => {
+    setOperand1(0);
+    setOperand2(0);
+  }, []);
+  const swap = useCallback(() => {
+    setOperand1(operand2);
+    setOperand2(operand1);
+  }, [operand1, operand2]);
 
   //----------------------------------------------------------------------------
   // Settings
@@ -331,11 +338,14 @@ export function App() {
           </div>
 
           <Calculator
+            operation={operation}
             onAdd={add}
             onAnd={and}
+            onClear={clear}
             onFinalize={finalize}
             onOr={or}
             onSubtract={subtract}
+            onSwap={swap}
             onXor={xor}
           />
         </div>
