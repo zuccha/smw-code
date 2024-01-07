@@ -21,6 +21,13 @@
   font-family: monospace;
 }
 
+.app-editors .divider {
+  height: 1px;
+  background-color: var(--color-neutral-3);
+  margin: 0.5em 0;
+  grid-column: span 4;
+}
+
 .app-editor-label {
   display: flex;
   justify-content: flex-end;

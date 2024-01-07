@@ -56,3 +56,17 @@ export enum Unit {
 }
 
 export const UnitSchema = z.nativeEnum(Unit);
+
+//==============================================================================
+// Operation
+//==============================================================================
+
+export enum Operation {
+  Add,
+  And,
+  Or,
+  Subtract,
+  Xor,
+}
+
+export const OperationSchema = z.nativeEnum(Operation);

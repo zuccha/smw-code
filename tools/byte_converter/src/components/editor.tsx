@@ -24,6 +24,7 @@ export type EditorProps = {
   encoding: Encoding;
   flipBitEnabled?: boolean;
   integer: number;
+  isDisabled?: boolean;
   moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
   onMoveDown: () => void;
@@ -46,6 +47,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     encoding,
     flipBitEnabled = false,
     integer,
+    isDisabled = false,
     moveAfterTypingEnabled,
     onChange,
     onMoveDown,
@@ -97,11 +99,18 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     [last, typingDirection]
   );
 
-  const caretClassName = {
-    [Caret.Bar]: "caret-bar",
-    [Caret.Box]: "caret-box",
-    [Caret.Underline]: "caret-underline",
-  }[caret];
+  const className = classNames([
+    ["editor", true],
+    [
+      {
+        [Caret.Bar]: "caret-bar",
+        [Caret.Box]: "caret-box",
+        [Caret.Underline]: "caret-underline",
+      }[caret],
+      true,
+    ],
+    ["disabled", isDisabled],
+  ]);
 
   //----------------------------------------------------------------------------
   // Chars/Index Utilities
@@ -141,11 +150,12 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   }, [value]);
 
   const paste = useCallback(() => {
+    if (isDisabled) return;
     navigator.clipboard.readText().then((maybeValue) => {
       const newInteger = parse(maybeValue);
       if (newInteger !== undefined) onChange(newInteger);
     });
-  }, [onChange, parse]);
+  }, [isDisabled, onChange, parse]);
 
   //----------------------------------------------------------------------------
   // Keyboard Event Listener
@@ -157,6 +167,9 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       if ((e.ctrlKey || e.metaKey) && e.key === "v") return paste();
       if (e.key === "ArrowDown") return onMoveDown();
       if (e.key === "ArrowUp") return onMoveUp();
+
+      if (isDisabled) return;
+
       if (e.key === "ArrowLeft") return moveLeft();
       if (e.key === "ArrowRight") return moveRight();
       if (e.key === "Backspace") return update(...removeChar());
@@ -175,6 +188,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       copy,
       deleteChar,
       insertChar,
+      isDisabled,
       moveLeft,
       moveRight,
       onMoveDown,
@@ -203,7 +217,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   return (
     <div
       autoFocus={autoFocus}
-      class={`editor ${caretClassName}`}
+      class={className}
       onKeyDown={handleKeyDown}
       ref={containerRef}
       tabIndex={0}
@@ -222,6 +236,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
             onMouseDown={(e: MouseEvent) => {
               e.preventDefault();
               focus();
+              if (isDisabled) return;
               if (flipBitEnabled && encoding === Encoding.Binary)
                 update(replace(chars, i, chars[i] === "0" ? "1" : "0"), i);
               else setIndex(i);
@@ -232,7 +247,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         );
       })}
 
-      {0 <= index && index < value.length && (
+      {!isDisabled && 0 <= index && index < value.length && (
         <div
           class="editor-caret"
           style={{ left: `calc(${index} * var(--caret-width))` }}

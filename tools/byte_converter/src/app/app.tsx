@@ -1,15 +1,16 @@
-import { Ref, useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { z } from "zod";
 import Caption from "../components/caption";
-import Editor, { EditorRef } from "../components/editor";
 import Radio, { Option } from "../components/radio";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
 import useSetting from "../hooks/use-setting";
+import { Boundaries } from "../hooks/use-value";
 import {
   Caret,
   CaretSchema,
   Encoding,
+  Operation,
   TypingDirection,
   TypingDirectionSchema,
   TypingMode,
@@ -17,10 +18,12 @@ import {
   Unit,
   UnitSchema,
 } from "../types";
-import AppEditor from "./app-editor";
+import AppEditors from "./app-editors";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
 import "./app.css";
+import { doNothing } from "../utils";
+import Calculator from "../components/calculator";
 
 //==============================================================================
 // Radio Options
@@ -52,19 +55,12 @@ const unitOptions: Option<Unit>[] = [
   { label: "Word", value: Unit.Word },
 ] as const;
 
-//==============================================================================
-// Use Editor
-//==============================================================================
-
-const useEditor = (
-  ref: Ref<EditorRef>,
-  prevRef: Ref<EditorRef> | undefined,
-  nextRef: Ref<EditorRef> | undefined
-) => {
-  const onMoveUp = useCallback(() => prevRef?.current?.focus(), [prevRef]);
-  const onMoveDown = useCallback(() => nextRef?.current?.focus(), [nextRef]);
-  const copy = useCallback(() => ref.current?.copy(), [ref]);
-  return { copy, onMoveDown, onMoveUp, ref };
+const OperationLabel = {
+  [Operation.And]: "&",
+  [Operation.Add]: "+",
+  [Operation.Or]: "|",
+  [Operation.Subtract]: "-",
+  [Operation.Xor]: "^",
 };
 
 //==============================================================================
@@ -76,7 +72,42 @@ export function App() {
   // State
   //----------------------------------------------------------------------------
 
-  const [integer, onChange] = useState(0);
+  const [operand1, setOperand1] = useState(0);
+  const [operand2, setOperand2] = useState(0);
+  const [operation, setOperation] = useState(Operation.And);
+
+  const result = useMemo(() => {
+    switch (operation) {
+      case Operation.Add:
+        return (operand1 + operand2) % (Boundaries[Encoding.Decimal].max + 1);
+      case Operation.And:
+        return operand1 & operand2;
+      case Operation.Or:
+        return operand1 | operand2;
+      case Operation.Subtract:
+        return operand1 - operand2;
+      case Operation.Xor:
+        return operand1 ^ operand2;
+    }
+  }, [operand1, operation, operand2]);
+
+  const clearInteger = useCallback(() => setOperand1(0), []);
+  const clearPartial = useCallback(() => setOperand2(0), []);
+
+  const apply = useCallback(
+    (nextOperation: Operation) => {
+      setOperation(nextOperation);
+      setOperand2(operand1);
+    },
+    [operand1]
+  );
+
+  const add = useCallback(() => apply(Operation.Add), [apply]);
+  const subtract = useCallback(() => apply(Operation.Subtract), [apply]);
+  const and = useCallback(() => apply(Operation.And), [apply]);
+  const or = useCallback(() => apply(Operation.Or), [apply]);
+  const xor = useCallback(() => apply(Operation.Xor), [apply]);
+  const finalize = useCallback(() => setOperand2(result), [result]);
 
   //----------------------------------------------------------------------------
   // Settings
@@ -135,21 +166,11 @@ export function App() {
   const props = {
     caret,
     flipBitEnabled,
-    integer,
     moveAfterTypingEnabled,
-    onChange,
     typingDirection,
     typingMode,
     unit,
   };
-
-  const editorBinRef = useRef<EditorRef>(null);
-  const editorDecRef = useRef<EditorRef>(null);
-  const editorHexRef = useRef<EditorRef>(null);
-
-  const editorBin = useEditor(editorBinRef, undefined, editorDecRef);
-  const editorDec = useEditor(editorDecRef, editorBinRef, editorHexRef);
-  const editorHex = useEditor(editorHexRef, editorDecRef, undefined);
 
   //----------------------------------------------------------------------------
   // Keyboard Event Listener
@@ -158,6 +179,12 @@ export function App() {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "k") return setHotkeysEnabled((prev) => !prev);
+      if (e.key === "+") return add();
+      if (e.key === "-") return subtract();
+      if (e.key === "&") return and();
+      if (e.key === "|") return or();
+      if (e.key === "^") return xor();
+      if (e.key === "=") return finalize();
 
       if (!hotkeysEnabled) return;
       if (e.key === "s") return setSettingsVisible((prev) => !prev);
@@ -171,7 +198,18 @@ export function App() {
       if (e.key === "r") return setTypingDirection(TypingDirection.Right);
       if (e.key === "m") return setMoveAfterTypingEnabled((prev) => !prev);
     },
-    [hotkeysEnabled, setHotkeysEnabled, setTypingMode, setUnit]
+    [
+      add,
+      and,
+      finalize,
+      hotkeysEnabled,
+      or,
+      setHotkeysEnabled,
+      setTypingMode,
+      setUnit,
+      subtract,
+      xor,
+    ]
   );
 
   useEffect(() => {
@@ -186,24 +224,62 @@ export function App() {
   return (
     <div class="app">
       <SectionStatic label="Byte Converter">
-        <div class="app-editors">
-          <div />
-          <Caption unit={unit} />
-          <div />
-          <AppEditor label="BIN" onCopy={editorBin.copy}>
-            <Editor
+        <div>
+          <div class="app-editors">
+            <div />
+            <Caption unit={unit} />
+            <div />
+            <div />
+
+            <AppEditors
               {...props}
-              {...editorBin}
-              encoding={Encoding.Binary}
               autoFocus
+              integer={operand1}
+              isVisibleBin
+              isVisibleDec
+              isVisibleHex
+              onChange={setOperand1}
+              onClear={clearInteger}
+              prefixBin="BIN"
+              prefixDec="DEC"
+              prefixHex="HEX"
             />
-          </AppEditor>
-          <AppEditor label="DEC" onCopy={editorDec.copy}>
-            <Editor {...props} {...editorDec} encoding={Encoding.Decimal} />
-          </AppEditor>
-          <AppEditor label="HEX" onCopy={editorHex.copy}>
-            <Editor {...props} {...editorHex} encoding={Encoding.Hexadecimal} />
-          </AppEditor>
+
+            <div class="divider" />
+
+            <AppEditors
+              {...props}
+              integer={operand2}
+              isVisibleBin
+              isVisibleDec
+              isVisibleHex
+              onChange={setOperand2}
+              onClear={clearPartial}
+              prefixBin={OperationLabel[operation]}
+            />
+
+            <div class="divider" />
+
+            <AppEditors
+              {...props}
+              integer={result}
+              isDisabled
+              isVisibleBin
+              isVisibleDec
+              isVisibleHex
+              onChange={doNothing}
+              prefixBin="="
+            />
+          </div>
+
+          <Calculator
+            onAdd={add}
+            onAnd={and}
+            onFinalize={finalize}
+            onOr={or}
+            onSubtract={subtract}
+            onXor={xor}
+          />
         </div>
       </SectionStatic>
 
