@@ -133,6 +133,12 @@ export function App() {
   // Settings
   //----------------------------------------------------------------------------
 
+  const [calculatorEnabled, setCalculatorEnabled] = useSetting(
+    "calculator-enabled",
+    false,
+    z.boolean().parse
+  );
+
   const [caret, setCaret] = useSetting("caret", Caret.Box, CaretSchema.parse);
 
   const [flipBitEnabled, setFlipBitEnabled] = useSetting(
@@ -217,14 +223,18 @@ export function App() {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "k") return setHotkeysEnabled((prev) => !prev);
-      if (e.key === "+") return add();
-      if (e.key === "-") return subtract();
-      if (e.key === "&") return and();
-      if (e.key === "|") return or();
-      if (e.key === "^") return xor();
-      if (e.key === "=") return finalize();
+
+      if (calculatorEnabled) {
+        if (e.key === "+") return add();
+        if (e.key === "-") return subtract();
+        if (e.key === "&") return and();
+        if (e.key === "|") return or();
+        if (e.key === "^") return xor();
+        if (e.key === "=") return finalize();
+      }
 
       if (!hotkeysEnabled) return;
+      if (e.key === "q") return setCalculatorEnabled((prev) => !prev);
       if (e.key === "s") return setSettingsVisible((prev) => !prev);
       if (e.key === "h") return setInstructionsVisible((prev) => !prev);
       if (e.key === "t") return setFlipBitEnabled((prev) => !prev);
@@ -239,6 +249,7 @@ export function App() {
     [
       add,
       and,
+      calculatorEnabled,
       finalize,
       hotkeysEnabled,
       or,
@@ -285,69 +296,81 @@ export function App() {
               refNext={operand2Ref}
             />
 
-            <div class="divider" />
+            {calculatorEnabled ? (
+              <>
+                <div class="divider" />
 
-            <AppEditors
-              {...props}
-              integer={operand2}
-              isVisibleBin={operand2Visibility[0]}
-              isVisibleDec={operand2Visibility[1]}
-              isVisibleHex={operand2Visibility[2]}
-              onChange={setOperand2}
-              onClear={clearPartial}
-              prefixBin={operand2Visibility[0] ? OperationLabel[operation] : ""}
-              prefixDec={
-                !operand2Visibility[0] && operand2Visibility[1]
-                  ? OperationLabel[operation]
-                  : ""
-              }
-              prefixHex={
-                !operand2Visibility[0] &&
-                !operand2Visibility[1] &&
-                operand2Visibility[2]
-                  ? OperationLabel[operation]
-                  : ""
-              }
-              ref={operand2Ref}
-              refNext={resultRef}
-              refPrev={operand1Ref}
-            />
+                <AppEditors
+                  {...props}
+                  integer={operand2}
+                  isVisibleBin={operand2Visibility[0]}
+                  isVisibleDec={operand2Visibility[1]}
+                  isVisibleHex={operand2Visibility[2]}
+                  onChange={setOperand2}
+                  onClear={clearPartial}
+                  prefixBin={
+                    operand2Visibility[0] ? OperationLabel[operation] : ""
+                  }
+                  prefixDec={
+                    !operand2Visibility[0] && operand2Visibility[1]
+                      ? OperationLabel[operation]
+                      : ""
+                  }
+                  prefixHex={
+                    !operand2Visibility[0] &&
+                    !operand2Visibility[1] &&
+                    operand2Visibility[2]
+                      ? OperationLabel[operation]
+                      : ""
+                  }
+                  ref={operand2Ref}
+                  refNext={resultRef}
+                  refPrev={operand1Ref}
+                />
 
-            <div class="divider" />
+                <div class="divider" />
 
-            <AppEditors
-              {...props}
-              integer={result}
-              isDisabled
-              isVisibleBin={resultVisibility[0]}
-              isVisibleDec={resultVisibility[1]}
-              isVisibleHex={resultVisibility[2]}
-              onChange={doNothing}
-              prefixBin={resultVisibility[0] ? "=" : ""}
-              prefixDec={!resultVisibility[0] && resultVisibility[1] ? "=" : ""}
-              prefixHex={
-                !resultVisibility[0] &&
-                !resultVisibility[1] &&
-                resultVisibility[2]
-                  ? "="
-                  : ""
-              }
-              ref={resultRef}
-              refPrev={operand2Ref}
-            />
+                <AppEditors
+                  {...props}
+                  integer={result}
+                  isDisabled
+                  isVisibleBin={resultVisibility[0]}
+                  isVisibleDec={resultVisibility[1]}
+                  isVisibleHex={resultVisibility[2]}
+                  onChange={doNothing}
+                  prefixBin={resultVisibility[0] ? "=" : ""}
+                  prefixDec={
+                    !resultVisibility[0] && resultVisibility[1] ? "=" : ""
+                  }
+                  prefixHex={
+                    !resultVisibility[0] &&
+                    !resultVisibility[1] &&
+                    resultVisibility[2]
+                      ? "="
+                      : ""
+                  }
+                  ref={resultRef}
+                  refPrev={operand2Ref}
+                />
+
+                <div class="app-calculator">
+                  <Calculator
+                    operation={operation}
+                    onAdd={add}
+                    onAnd={and}
+                    onClear={clear}
+                    onFinalize={finalize}
+                    onOr={or}
+                    onSubtract={subtract}
+                    onSwap={swap}
+                    onXor={xor}
+                  />
+                </div>
+              </>
+            ) : (
+              <div class="fixer" />
+            )}
           </div>
-
-          <Calculator
-            operation={operation}
-            onAdd={add}
-            onAnd={and}
-            onClear={clear}
-            onFinalize={finalize}
-            onOr={or}
-            onSubtract={subtract}
-            onSwap={swap}
-            onXor={xor}
-          />
         </div>
       </SectionStatic>
 
@@ -357,6 +380,14 @@ export function App() {
         onChange={setSettingsVisible}
       >
         <div class="app-settings">
+          <AppSetting label="Calculator">
+            <Radio
+              onChange={setCalculatorEnabled}
+              options={binaryOptions}
+              value={calculatorEnabled}
+            />
+          </AppSetting>
+
           <AppSetting label="Unit">
             <Radio onChange={setUnit} options={unitOptions} value={unit} />
           </AppSetting>
