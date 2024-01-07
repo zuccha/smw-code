@@ -7,28 +7,28 @@ export const Boundaries = {
 } as const;
 
 export const Chars = {
-  [Encoding.Binary]: /^[0-1]$/,
-  [Encoding.Decimal]: /^[0-9]$/,
-  [Encoding.Hexadecimal]: /^[0-9a-fA-F]$/,
+  [Encoding.Bin]: /^[0-1]$/,
+  [Encoding.Dec]: /^[0-9]$/,
+  [Encoding.Hex]: /^[0-9a-fA-F]$/,
 } as const;
 
 export const Length = {
   [Unit.Byte]: {
-    [Encoding.Binary]: 8,
-    [Encoding.Decimal]: 3,
-    [Encoding.Hexadecimal]: 2,
+    [Encoding.Bin]: 8,
+    [Encoding.Dec]: 3,
+    [Encoding.Hex]: 2,
   },
   [Unit.Word]: {
-    [Encoding.Binary]: 16,
-    [Encoding.Decimal]: 5,
-    [Encoding.Hexadecimal]: 4,
+    [Encoding.Bin]: 16,
+    [Encoding.Dec]: 5,
+    [Encoding.Hex]: 4,
   },
 } as const;
 
 export const Radix = {
-  [Encoding.Binary]: 2,
-  [Encoding.Decimal]: 10,
-  [Encoding.Hexadecimal]: 16,
+  [Encoding.Bin]: 2,
+  [Encoding.Dec]: 10,
+  [Encoding.Hex]: 16,
 } as const;
 
 export function useValue(

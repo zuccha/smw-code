@@ -22,6 +22,11 @@ const keybindings = [
       "Paste a value in the focused editor from the clipboard. It won't do anything if the clipboard doesn't contain a valid value.",
   },
   {
+    hotkeys: ["SPACE", "SHIFT+SPACE"],
+    description:
+      "Increase/decrease the selected digit by one. In binary, this is the equivalent of a bit flip.",
+  },
+  {
     hotkeys: ["S"],
     description: "Toggle settings visibility.",
   },

@@ -8,7 +8,7 @@ import {
   useState,
 } from "preact/hooks";
 import useChars from "../hooks/use-chars";
-import { useValue } from "../hooks/use-value";
+import { Radix, useValue } from "../hooks/use-value";
 import {
   Caret,
   Direction,
@@ -21,8 +21,11 @@ import {
 import {
   classNames,
   differsFrom0,
+  digitToHex,
   firstIndexOf,
+  hexToDigit,
   lastIndexOf,
+  mod,
   replace,
 } from "../utils";
 import "./editor.css";
@@ -148,6 +151,15 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     setIndex(nextIndex);
   }, [index, value.length]);
 
+  const shiftDigit = useCallback(
+    (nextIndex: number, shift: number) => {
+      const digit = hexToDigit(chars[nextIndex]!);
+      const nextChar = digitToHex(mod(digit + shift, Radix[encoding]));
+      update(replace(chars, nextIndex, nextChar), nextIndex);
+    },
+    [chars, encoding]
+  );
+
   //----------------------------------------------------------------------------
   // Clipboard
   //----------------------------------------------------------------------------
@@ -183,6 +195,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
         if (isDisabled) return false;
 
+        if (e.key === " ") return ok(shiftDigit(index, e.shiftKey ? -1 : 1));
         if (e.key === "ArrowLeft") return ok(moveLeft());
         if (e.key === "ArrowRight") return ok(moveRight());
         if (e.key === "Backspace") return ok(update(...removeChar()));
@@ -205,6 +218,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     [
       copy,
       deleteChar,
+      index,
       insertChar,
       isDisabled,
       moveLeft,
@@ -258,8 +272,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
               e.preventDefault();
               focus();
               if (isDisabled) return;
-              if (flipBitEnabled && encoding === Encoding.Binary)
-                update(replace(chars, i, chars[i] === "0" ? "1" : "0"), i);
+              if (flipBitEnabled && encoding === Encoding.Bin) shiftDigit(i, 1);
               else setIndex(i);
             }}
           >

@@ -1,3 +1,5 @@
+import { HexDigit, HexDigits } from "./types";
+
 export function doNothing() {}
 
 export function clamp(n: number, min: number, max: number): number {
@@ -51,4 +53,16 @@ export function mod(n: number, m: number): number {
 
 export function toggle(value: boolean): boolean {
   return !value;
+}
+
+export function range(length: number): number[] {
+  return Array.from(Array(length).keys());
+}
+
+export function digitToHex(digit: number): HexDigit {
+  return HexDigits[digit] ?? "0";
+}
+
+export function hexToDigit(hex: string): number {
+  return Number.parseInt(hex ?? "0", 16) ?? 0;
 }

@@ -126,7 +126,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
           <Editor
             {...props}
             {...binProps}
-            encoding={Encoding.Binary}
+            encoding={Encoding.Bin}
             autoFocus={autoFocus}
           />
         </AppEditor>
@@ -134,13 +134,13 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
 
       {isVisibleDec && (
         <AppEditor label={prefixDec} onCopy={decProps.copy} onClear={onClear}>
-          <Editor {...props} {...decProps} encoding={Encoding.Decimal} />
+          <Editor {...props} {...decProps} encoding={Encoding.Dec} />
         </AppEditor>
       )}
 
       {isVisibleHex && (
         <AppEditor label={prefixHex} onCopy={hexProps.copy} onClear={onClear}>
-          <Editor {...props} {...hexProps} encoding={Encoding.Hexadecimal} />
+          <Editor {...props} {...hexProps} encoding={Encoding.Hex} />
         </AppEditor>
       )}
     </>

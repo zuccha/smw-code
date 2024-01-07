@@ -39,9 +39,9 @@ export const TypingModeSchema = z.nativeEnum(TypingMode);
 //==============================================================================
 
 export enum Encoding {
-  Binary,
-  Decimal,
-  Hexadecimal,
+  Bin,
+  Dec,
+  Hex,
 }
 
 export const EncodingSchema = z.nativeEnum(Encoding);
@@ -91,3 +91,30 @@ export const DirectionSchema = z.nativeEnum(Direction);
 export type Focusable = {
   focus: (direction?: Direction) => boolean;
 };
+
+//==============================================================================
+// Hex Digits
+//==============================================================================
+
+export const HexDigits = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+] as const;
+
+export const HexDigitSchema = z.enum(HexDigits);
+
+export type HexDigit = z.infer<typeof HexDigitSchema>;
