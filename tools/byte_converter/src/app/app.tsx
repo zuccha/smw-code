@@ -6,7 +6,9 @@ import {
   useState,
 } from "preact/hooks";
 import { z } from "zod";
+import Calculator from "../components/calculator";
 import Caption from "../components/caption";
+import CheckGroup from "../components/check-group";
 import Radio, { Option } from "../components/radio";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
@@ -24,15 +26,14 @@ import {
   Unit,
   UnitSchema,
 } from "../types";
+import { doNothing } from "../utils";
 import AppEditors, { AppEditorsRef } from "./app-editors";
 import AppInstructions from "./app-instructions";
 import AppSetting from "./app-setting";
 import "./app.css";
-import { doNothing } from "../utils";
-import Calculator from "../components/calculator";
 
 //==============================================================================
-// Radio Options
+// Settings Options
 //==============================================================================
 
 const binaryOptions: Option<boolean>[] = [
@@ -61,6 +62,8 @@ const unitOptions: Option<Unit>[] = [
   { label: "Word", value: Unit.Word },
 ] as const;
 
+const groupVisibilityLabels = ["Bin", "Dec", "Hex"];
+
 const OperationLabel = {
   [Operation.And]: "&",
   [Operation.Add]: "+",
@@ -84,7 +87,7 @@ export function App() {
 
   const [operand1, setOperand1] = useState(0);
   const [operand2, setOperand2] = useState(0);
-  const [operation, setOperation] = useState(Operation.And);
+  const [operation, setOperation] = useState(Operation.Add);
 
   const result = useMemo(() => {
     switch (operation) {
@@ -95,7 +98,7 @@ export function App() {
       case Operation.Or:
         return operand1 | operand2;
       case Operation.Subtract:
-        return operand1 - operand2;
+        return operand1 - operand2; // ! FIXME: Apply modulo.
       case Operation.Xor:
         return operand1 ^ operand2;
     }
@@ -147,6 +150,24 @@ export function App() {
     "move-after-typing-enabled",
     true,
     z.boolean().parse
+  );
+
+  const [operand1Visibility, setOperand1Visibility] = useSetting(
+    "operand-1-visibility",
+    [true, true, true],
+    z.array(z.boolean()).length(3).parse
+  );
+
+  const [operand2Visibility, setOperand2Visibility] = useSetting(
+    "operand-2-visibility",
+    [true, false, false],
+    z.array(z.boolean()).length(3).parse
+  );
+
+  const [resultVisibility, setResultVisibility] = useSetting(
+    "result-visibility",
+    [true, false, false],
+    z.array(z.boolean()).length(3).parse
   );
 
   const [settingsVisible, setSettingsVisible] = useSetting(
@@ -245,9 +266,9 @@ export function App() {
               {...props}
               autoFocus
               integer={operand1}
-              isVisibleBin
-              isVisibleDec
-              isVisibleHex
+              isVisibleBin={operand1Visibility[0]}
+              isVisibleDec={operand1Visibility[1]}
+              isVisibleHex={operand1Visibility[2]}
               onChange={setOperand1}
               onClear={clearInteger}
               prefixBin="BIN"
@@ -262,12 +283,24 @@ export function App() {
             <AppEditors
               {...props}
               integer={operand2}
-              isVisibleBin
-              isVisibleDec
-              isVisibleHex
+              isVisibleBin={operand2Visibility[0]}
+              isVisibleDec={operand2Visibility[1]}
+              isVisibleHex={operand2Visibility[2]}
               onChange={setOperand2}
               onClear={clearPartial}
-              prefixBin={OperationLabel[operation]}
+              prefixBin={operand2Visibility[0] ? OperationLabel[operation] : ""}
+              prefixDec={
+                !operand2Visibility[0] && operand2Visibility[1]
+                  ? OperationLabel[operation]
+                  : ""
+              }
+              prefixHex={
+                !operand2Visibility[0] &&
+                !operand2Visibility[1] &&
+                operand2Visibility[2]
+                  ? OperationLabel[operation]
+                  : ""
+              }
               ref={operand2Ref}
               refNext={resultRef}
               refPrev={operand1Ref}
@@ -279,11 +312,19 @@ export function App() {
               {...props}
               integer={result}
               isDisabled
-              isVisibleBin
-              isVisibleDec
-              isVisibleHex
+              isVisibleBin={resultVisibility[0]}
+              isVisibleDec={resultVisibility[1]}
+              isVisibleHex={resultVisibility[2]}
               onChange={doNothing}
-              prefixBin="="
+              prefixBin={resultVisibility[0] ? "=" : ""}
+              prefixDec={!resultVisibility[0] && resultVisibility[1] ? "=" : ""}
+              prefixHex={
+                !resultVisibility[0] &&
+                !resultVisibility[1] &&
+                resultVisibility[2]
+                  ? "="
+                  : ""
+              }
               ref={resultRef}
               refPrev={operand2Ref}
             />
@@ -339,6 +380,30 @@ export function App() {
               onChange={setFlipBitEnabled}
               options={binaryOptions}
               value={flipBitEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting label="Operand 1 Visibility">
+            <CheckGroup
+              labels={groupVisibilityLabels}
+              onChange={setOperand1Visibility}
+              values={operand1Visibility}
+            />
+          </AppSetting>
+
+          <AppSetting label="Operand 2 Visibility">
+            <CheckGroup
+              labels={groupVisibilityLabels}
+              onChange={setOperand2Visibility}
+              values={operand2Visibility}
+            />
+          </AppSetting>
+
+          <AppSetting label="Result Visibility">
+            <CheckGroup
+              labels={groupVisibilityLabels}
+              onChange={setResultVisibility}
+              values={resultVisibility}
             />
           </AppSetting>
 
