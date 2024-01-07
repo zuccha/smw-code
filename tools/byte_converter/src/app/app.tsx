@@ -12,6 +12,7 @@ import CheckGroup from "../components/check-group";
 import RadioGroup, { Option } from "../components/radio-group";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
+import useMaskedValue from "../hooks/use-masked-value";
 import useSetting from "../hooks/use-setting";
 import { Boundaries } from "../hooks/use-value";
 import {
@@ -159,8 +160,8 @@ export function App() {
   const operand2Ref = useRef<AppEditorsRef>(null);
   const resultRef = useRef<AppEditorsRef>(null);
 
-  const [operand1, setOperand1] = useState(0);
-  const [operand2, setOperand2] = useState(0);
+  const [operand1, setOperand1] = useMaskedValue(0, unit);
+  const [operand2, setOperand2] = useMaskedValue(0, unit);
   const [operation, setOperation] = useState(Operation.Add);
 
   const result = useMemo(() => {
