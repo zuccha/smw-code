@@ -243,17 +243,17 @@ export function App() {
         }
 
         if (!hotkeysEnabled) return false;
-        if (e.key === "q") return f(toggle);
-        if (e.key === "s") return f(toggle);
-        if (e.key === "h") return f(toggle);
-        if (e.key === "t") return f(toggle);
+        if (e.key === "q") return f(setCalculatorEnabled(toggle));
+        if (e.key === "s") return f(setSettingsVisible(toggle));
+        if (e.key === "h") return f(setInstructionsVisible(toggle));
+        if (e.key === "t") return f(setFlipBitEnabled(toggle));
         if (e.key === "y") return f(setUnit(Unit.Byte));
         if (e.key === "w") return f(setUnit(Unit.Word));
         if (e.key === "i") return f(setTypingMode(TypingMode.Insert));
         if (e.key === "o") return f(setTypingMode(TypingMode.Overwrite));
         if (e.key === "l") return f(setTypingDirection(TypingDirection.Left));
         if (e.key === "r") return f(setTypingDirection(TypingDirection.Right));
-        if (e.key === "m") return f(toggle);
+        if (e.key === "m") return f(setMoveAfterTypingEnabled(toggle));
 
         return false;
       };
