@@ -4,40 +4,35 @@
   flex-direction: row;
   cursor: pointer;
   user-select: none;
-
-  --caret-height: 1.2em;
-  --caret-width: 0.75em;
 }
 
 .editor-char {
+  position: relative;
   display: flex;
   justify-content: center;
   width: var(--caret-width);
 }
 
+.editor-char:nth-last-child(4n + 4) {
+  margin-left: var(--digits-space);
+}
+
 .editor-caret {
   position: absolute;
+  width: var(--caret-width);
+  height: var(--caret-height);
+  bottom: 0.2em;
   z-index: -1;
 }
 
 .editor.caret-bar .editor-caret {
-  width: 2px;
-  height: var(--caret-height);
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.editor.caret-box .editor-caret {
-  width: var(--caret-width);
-  height: var(--caret-height);
-  top: 50%;
-  transform: translateY(-50%);
+  width: 0.075em;
+  left: 0;
+  transform: translateX(-50%);
 }
 
 .editor.caret-underline .editor-caret {
-  width: var(--caret-width);
-  height: 2px;
-  bottom: 0;
+  height: 0.075em;
 }
 
 .editor:focus .editor-caret {

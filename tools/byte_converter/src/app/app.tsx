@@ -235,12 +235,12 @@ export function App() {
         if (e.key === "k") return f(setHotkeysEnabled((prev) => !prev));
 
         if (calculatorEnabled) {
-          if (e.key === "+") return t(add());
-          if (e.key === "-") return t(subtract());
-          if (e.key === "&") return t(and());
-          if (e.key === "|") return t(or());
-          if (e.key === "^") return t(xor());
-          if (e.key === "=") return t(finalize());
+          if (e.key === "+") return f(add());
+          if (e.key === "-") return f(subtract());
+          if (e.key === "&") return f(and());
+          if (e.key === "|") return f(or());
+          if (e.key === "^") return f(xor());
+          if (e.key === "=") return f(finalize());
         }
 
         if (!hotkeysEnabled) return false;

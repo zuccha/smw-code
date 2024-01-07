@@ -188,6 +188,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         if ((e.ctrlKey || e.metaKey) && e.key === "c") return ok(copy());
         if ((e.ctrlKey || e.metaKey) && e.key === "v") return ok(paste());
 
+        if (e.ctrlKey || e.metaKey) return false;
+
         if (e.key === "ArrowDown")
           return Boolean(refNext?.current?.focus(Direction.Down));
         if (e.key === "ArrowUp")
@@ -277,16 +279,10 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
             }}
           >
             {char}
+            {!isDisabled && i === index && <div class="editor-caret" />}
           </div>
         );
       })}
-
-      {!isDisabled && 0 <= index && index < value.length && (
-        <div
-          class="editor-caret"
-          style={{ left: `calc(${index} * var(--caret-width))` }}
-        />
-      )}
     </div>
   );
 });
