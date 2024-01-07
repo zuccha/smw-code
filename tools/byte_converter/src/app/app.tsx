@@ -9,7 +9,7 @@ import { z } from "zod";
 import Calculator from "../components/calculator";
 import Caption from "../components/caption";
 import CheckGroup from "../components/check-group";
-import Radio, { Option } from "../components/radio";
+import RadioGroup, { Option } from "../components/radio-group";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
 import useSetting from "../hooks/use-setting";
@@ -414,7 +414,7 @@ export function App() {
       >
         <div class="app-settings">
           <AppSetting label="Calculator">
-            <Radio
+            <RadioGroup
               onChange={setCalculatorEnabled}
               options={binaryOptions}
               value={calculatorEnabled}
@@ -422,11 +422,11 @@ export function App() {
           </AppSetting>
 
           <AppSetting label="Unit">
-            <Radio onChange={setUnit} options={unitOptions} value={unit} />
+            <RadioGroup onChange={setUnit} options={unitOptions} value={unit} />
           </AppSetting>
 
           <AppSetting label="Typing Mode">
-            <Radio
+            <RadioGroup
               onChange={setTypingMode}
               options={typingModeOptions}
               value={typingMode}
@@ -434,7 +434,7 @@ export function App() {
           </AppSetting>
 
           <AppSetting label="Typing Direction">
-            <Radio
+            <RadioGroup
               onChange={setTypingDirection}
               options={typingDirectionOptions}
               value={typingDirection}
@@ -442,7 +442,7 @@ export function App() {
           </AppSetting>
 
           <AppSetting label="Move Cursor">
-            <Radio
+            <RadioGroup
               onChange={setMoveAfterTypingEnabled}
               options={binaryOptions}
               value={moveAfterTypingEnabled}
@@ -450,7 +450,7 @@ export function App() {
           </AppSetting>
 
           <AppSetting label="Flip Bit">
-            <Radio
+            <RadioGroup
               onChange={setFlipBitEnabled}
               options={binaryOptions}
               value={flipBitEnabled}
@@ -458,11 +458,15 @@ export function App() {
           </AppSetting>
 
           <AppSetting label="Caret">
-            <Radio onChange={setCaret} options={caretOptions} value={caret} />
+            <RadioGroup
+              onChange={setCaret}
+              options={caretOptions}
+              value={caret}
+            />
           </AppSetting>
 
           <AppSetting label="Hotkeys">
-            <Radio
+            <RadioGroup
               onChange={setHotkeysEnabled}
               options={binaryOptions}
               value={hotkeysEnabled}
