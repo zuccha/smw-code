@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* gap: 0.6em; */
 }
 
 .radio-group .button:not(:last-child) {

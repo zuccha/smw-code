@@ -413,7 +413,7 @@ export function App() {
         onChange={setSettingsVisible}
       >
         <div class="app-settings">
-          <AppSetting label="Calculator">
+          <AppSetting hotkey="Q" label="Calculator">
             <RadioGroup
               onChange={setCalculatorEnabled}
               options={binaryOptions}
@@ -421,11 +421,11 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Unit">
+          <AppSetting hotkey="Y/W" label="Unit">
             <RadioGroup onChange={setUnit} options={unitOptions} value={unit} />
           </AppSetting>
 
-          <AppSetting label="Typing Mode">
+          <AppSetting hotkey="I/O" label="Typing Mode">
             <RadioGroup
               onChange={setTypingMode}
               options={typingModeOptions}
@@ -433,7 +433,7 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Typing Direction">
+          <AppSetting hotkey="L/R" label="Typing Direction">
             <RadioGroup
               onChange={setTypingDirection}
               options={typingDirectionOptions}
@@ -441,7 +441,7 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Move Cursor">
+          <AppSetting hotkey="M" label="Move Cursor">
             <RadioGroup
               onChange={setMoveAfterTypingEnabled}
               options={binaryOptions}
@@ -449,7 +449,7 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Flip Bit">
+          <AppSetting hotkey="T" label="Flip Bit">
             <RadioGroup
               onChange={setFlipBitEnabled}
               options={binaryOptions}
@@ -465,7 +465,7 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Hotkeys">
+          <AppSetting hotkey="K" label="Hotkeys">
             <RadioGroup
               onChange={setHotkeysEnabled}
               options={binaryOptions}

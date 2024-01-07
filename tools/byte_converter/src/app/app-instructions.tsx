@@ -107,27 +107,6 @@ const settings = [
     description: "Don't flip any bit when clicking on the editors.",
   },
   {
-    name: "Operand 1 Visibility",
-    value: "Bin, Dec, Hex",
-    description:
-      "Multi selection. Editors to show for the first group. At least one must be selected.",
-    hotkey: "",
-  },
-  {
-    name: "Operand 2 Visibility",
-    value: "Bin, Dec, Hex",
-    description:
-      "Multi selection. Editors to show for the second group (only visible in calculator mode). At least one must be selected.",
-    hotkey: "",
-  },
-  {
-    name: "Result Visibility",
-    value: "Bin, Dec, Hex",
-    description:
-      "Multi selection. Fields to show for the third group (only visible in calculator mode). At least one must be selected.",
-    hotkey: "",
-  },
-  {
     name: "Caret",
     value: "Bar, Box, Underline",
     description: "Caret appearance.",
@@ -203,6 +182,50 @@ export default function AppInstructions({
       >
         <div class="app-instructions-sections">
           <div>
+            <div class="app-instructions-section-label">
+              Calculator General:
+            </div>
+            <div>
+              Click on a number to edit it. In a group (bin/dec/hex), the
+              numbers are connected, editing one will cause the others to
+              update. To hide numbers, click on the three toggle buttons on the
+              top-right of the group.
+            </div>
+            <div>
+              Copy a specific value (in its format) by pressing on the
+              "copy-to-clipboard" button. The "X" button sets the value to 0 for
+              the entire group.
+            </div>
+          </div>
+
+          <div>
+            <div class="app-instructions-section-label">Keybindings:</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Keybinding</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {keybindings.map((keybinding) => (
+                  <tr>
+                    <td>
+                      {keybinding.hotkeys.map((hotkey, index) => (
+                        <>
+                          <code>{hotkey}</code>
+                          {index < keybinding.hotkeys.length - 1 && " "}
+                        </>
+                      ))}
+                    </td>
+                    <td>{keybinding.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
             <div class="app-instructions-section-label">Settings:</div>
             <table>
               <thead>
@@ -233,35 +256,6 @@ export default function AppInstructions({
           </div>
 
           <div>
-            <div class="app-instructions-section-label">
-              Generic Keybindings:
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Keybinding</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {keybindings.map((keybinding) => (
-                  <tr>
-                    <td>
-                      {keybinding.hotkeys.map((hotkey, index) => (
-                        <>
-                          <code>{hotkey}</code>
-                          {index < keybinding.hotkeys.length - 1 && " "}
-                        </>
-                      ))}
-                    </td>
-                    <td>{keybinding.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div>
             <div class="app-instructions-section-label">Calculator Mode:</div>
             <div>
               Calculator mode allows to perform operations between two values.
@@ -269,7 +263,6 @@ export default function AppInstructions({
               first two are the operands, the last one holds the result of the
               operation (it cannot be modified manually).
             </div>
-            <br />
             <table>
               <thead>
                 <tr>
