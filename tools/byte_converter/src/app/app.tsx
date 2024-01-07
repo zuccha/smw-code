@@ -173,13 +173,13 @@ export function App() {
 
   const [operand2Visibility, setOperand2Visibility] = useSetting(
     "operand-2-visibility",
-    [true, false, false],
+    [true, true, true],
     z.array(z.boolean()).length(3).parse
   );
 
   const [resultVisibility, setResultVisibility] = useSetting(
     "result-visibility",
-    [true, false, false],
+    [true, true, true],
     z.array(z.boolean()).length(3).parse
   );
 
