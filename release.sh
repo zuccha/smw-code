@@ -40,7 +40,7 @@
 #     -e, -E      Merge branch
 #     -g, -G      Create tag
 #     -a, -A      Generate archive
-#     -r, -R      Publish release
+#     -r, -R      Release on GitHub
 #     -d, -D      Notify Discord
 #     -s, -S      Update summary
 #     -p, -P      Publish
@@ -63,8 +63,9 @@
 # Make script exit if any command fails
 set -e
 
-# Load env
+# Load env and utilities
 source .env
+source _utils/log.sh
 
 
 #-------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ source .env
 #-------------------------------------------------------------------------------
 
 # Parse flags
-while getopts "eEgGaArRdDsShHtTmMiIc:of" flag; do
+while getopts "eEgGaArRdDsSpPhHtTmMiIc:of" flag; do
   case $flag in
     e) FLAG_PHASE_MERGE_TEMP=1    ;;
     E) FLAG_PHASE_MERGE_TEMP=0    ;;
@@ -190,6 +191,10 @@ if [[ -n $FLAG_DOC_IMAGES_TEMP ]];   then FLAG_DOC_IMAGES=$FLAG_DOC_IMAGES_TEMP;
 # Defines
 #-------------------------------------------------------------------------------
 
+# Variables used in child scripts
+export ROOT=$(pwd)
+export TAG="$TYPE/$NAME/$VERSION"
+
 # Tools
 MD2HTML="./_utils/md2/md2html.ts"
 MD2TEXT="./_utils/md2/md2text.ts"
@@ -198,7 +203,7 @@ GH_GET_NOTES="./_utils/gh/gh_get_notes.ts"
 SUMMARY_UPDATE="./_utils/summary/update_summary.ts"
 
 # Git
-GIT_TAG="$TYPE/$NAME/$VERSION"
+GIT_TAG=$TAG
 GIT_BRANCH="feat/$GIT_TAG"
 
 # Summary
@@ -222,24 +227,6 @@ OUT_NAME="$NAME-$VERSION"
 OUT_PATH="$OUT_DIR/$OUT_NAME"
 ZIP_NAME="$OUT_NAME.zip"
 ZIP_PATH="$OUT_DIR/$ZIP_NAME"
-
-
-#-------------------------------------------------------------------------------
-# Log
-#-------------------------------------------------------------------------------
-
-# Colors for logging
-LOG_COLOR_GOOD='\033[0;32m'
-LOG_COLOR_INFO='\033[0;34m'
-LOG_COLOR_WARN='\033[0;33m'
-LOG_COLOR_FAIL='\033[0;31m'
-LOG_COLOR_NONE='\033[0m'
-
-# Logging functions
-log_good() { printf "${LOG_COLOR_GOOD}$1${LOG_COLOR_NONE}\n"; }
-log_info() { printf "${LOG_COLOR_INFO}$1${LOG_COLOR_NONE}\n"; }
-log_warn() { printf "${LOG_COLOR_WARN}$1${LOG_COLOR_NONE}\n"; }
-log_fail() { printf "${LOG_COLOR_FAIL}$1${LOG_COLOR_NONE}\n"; }
 
 
 #-------------------------------------------------------------------------------
@@ -459,7 +446,7 @@ fi
 
 if [[ $FLAG_PHASE_PUBLISH != 1 ]]; then
   log_warn "Skip publish: disabled"
-if [[ ! -f $SRC_PUBLISH_PATH ]]; then
+elif [[ ! -f $SRC_PUBLISH_PATH ]]; then
   log_warn "Skip publish: no custom publish script"
 else
   pushd $SRC_PATH > /dev/null
