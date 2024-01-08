@@ -1,3 +1,4 @@
+import { ArrowDownUp } from "lucide-preact";
 import {
   useCallback,
   useEffect,
@@ -5,10 +6,11 @@ import {
   useRef,
   useState,
 } from "preact/hooks";
+import { isMobile } from "react-device-detect";
 import { z } from "zod";
-import Calculator from "../components/calculator";
 import Caption from "../components/caption";
 import CheckGroup from "../components/check-group";
+import Keyboard from "../components/keyboard";
 import RadioGroup, { Option } from "../components/radio-group";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
@@ -19,6 +21,8 @@ import {
   Caret,
   CaretSchema,
   Direction,
+  Encoding,
+  HexDigits,
   Operation,
   SpaceFrequency,
   SpaceFrequencySchema,
@@ -146,8 +150,20 @@ export function App() {
     z.boolean().parse
   );
 
-  const [signedDecimalEnabled, setSignedDecimalEnabled] = useSetting(
-    "signed-decimal",
+  const [signedBinEnabled, setSignedBinEnabled] = useSetting(
+    "signed-bin",
+    false,
+    z.boolean().parse
+  );
+
+  const [signedDecEnabled, setSignedDecEnabled] = useSetting(
+    "signed-dec",
+    false,
+    z.boolean().parse
+  );
+
+  const [signedHexEnabled, setSignedHexEnabled] = useSetting(
+    "signed-hex",
     false,
     z.boolean().parse
   );
@@ -275,7 +291,7 @@ export function App() {
         if (e.key === "l") return f(setTypingDirection(TypingDirection.Left));
         if (e.key === "r") return f(setTypingDirection(TypingDirection.Right));
         if (e.key === "m") return f(setMoveAfterTypingEnabled(toggle));
-        if (e.key === "n") return f(setSignedDecimalEnabled(toggle));
+        if (e.key === "n") return f(setSignedDecEnabled(toggle));
 
         return false;
       };
@@ -303,16 +319,76 @@ export function App() {
   }, [handleKeyDown]);
 
   //----------------------------------------------------------------------------
+  // Keyboards
+  //----------------------------------------------------------------------------
+
+  const calculatorActions = useMemo(() => {
+    const is = (other: Operation) => other === operation;
+    return [
+      { label: "+", isActive: is(Operation.Add), onClick: add },
+      { label: "-", isActive: is(Operation.Subtract), onClick: subtract },
+      { label: "&", isActive: is(Operation.And), onClick: and },
+      { label: "|", isActive: is(Operation.Or), onClick: or },
+      { label: "^", isActive: is(Operation.Xor), onClick: xor },
+      { label: "=", onClick: finalize },
+      { label: "C", onClick: clear },
+      { label: <ArrowDownUp />, onClick: swap },
+    ];
+  }, [add, and, clear, finalize, operation, or, subtract, swap, xor]);
+
+  const mobileActions = useMemo(() => {
+    const type = (key: string, shiftKey?: boolean) => () => {
+      if (document.activeElement)
+        document.activeElement.dispatchEvent(
+          new KeyboardEvent("keydown", { key, shiftKey })
+        );
+    };
+
+    return [
+      ...HexDigits.map((digit) => ({ label: digit, onClick: type(digit) })),
+      { label: "⌫", onClick: type("Backspace") },
+      { label: "␡", onClick: type("Delete") },
+      { label: "±", onClick: type("±") },
+      { label: "↑", onClick: type(" ") },
+      { label: "↓", onClick: type(" ", true) },
+    ];
+  }, []);
+
+  //----------------------------------------------------------------------------
+  // Caption
+  //----------------------------------------------------------------------------
+
+  const isAnyBinVisible =
+    operand1Visibility[0] || operand2Visibility[0] || resultVisibility[0];
+  const isAnyDecVisible =
+    operand1Visibility[1] || operand2Visibility[1] || resultVisibility[1];
+  const isAnyHexVisible =
+    operand1Visibility[2] || operand2Visibility[2] || resultVisibility[2];
+
+  const [isCaptionSigned, captionEncoding] = isAnyBinVisible
+    ? [signedBinEnabled, Encoding.Bin]
+    : isAnyDecVisible
+    ? [signedDecEnabled, Encoding.Dec]
+    : isAnyHexVisible
+    ? [signedHexEnabled, Encoding.Hex]
+    : [false, undefined];
+
+  //----------------------------------------------------------------------------
   // Render
   //----------------------------------------------------------------------------
 
   return (
     <div class="app">
       <SectionStatic label="Byte Converter">
-        <div>
+        <div class="app-main">
           <div class="app-editors">
             <div class="app-spacer">&nbsp;&nbsp;&nbsp;</div>
-            <Caption spaceFrequency={spaceFrequency} unit={unit} />
+            <Caption
+              encoding={captionEncoding}
+              isSigned={isCaptionSigned}
+              spaceFrequency={spaceFrequency}
+              unit={unit}
+            />
             <div class="app-divider-editors-visibility">
               <CheckGroup
                 labels={groupVisibilityLabels}
@@ -325,7 +401,9 @@ export function App() {
               {...props}
               autoFocus
               integer={operand1}
-              isSignedDec={signedDecimalEnabled}
+              isSignedBin={signedBinEnabled}
+              isSignedDec={signedDecEnabled}
+              isSignedHex={signedHexEnabled}
               isVisibleBin={operand1Visibility[0]}
               isVisibleDec={operand1Visibility[1]}
               isVisibleHex={operand1Visibility[2]}
@@ -353,7 +431,9 @@ export function App() {
                 <AppEditors
                   {...props}
                   integer={operand2}
-                  isSignedDec={signedDecimalEnabled}
+                  isSignedBin={signedBinEnabled}
+                  isSignedDec={signedDecEnabled}
+                  isSignedHex={signedHexEnabled}
                   isVisibleBin={operand2Visibility[0]}
                   isVisibleDec={operand2Visibility[1]}
                   isVisibleHex={operand2Visibility[2]}
@@ -393,7 +473,9 @@ export function App() {
                   {...props}
                   integer={result}
                   isDisabled
-                  isSignedDec={signedDecimalEnabled}
+                  isSignedBin={signedBinEnabled}
+                  isSignedDec={signedDecEnabled}
+                  isSignedHex={signedHexEnabled}
                   isVisibleBin={resultVisibility[0]}
                   isVisibleDec={resultVisibility[1]}
                   isVisibleHex={resultVisibility[2]}
@@ -419,19 +501,10 @@ export function App() {
             )}
           </div>
 
-          {calculatorEnabled && (
-            <div class="app-calculator">
-              <Calculator
-                operation={operation}
-                onAdd={add}
-                onAnd={and}
-                onClear={clear}
-                onFinalize={finalize}
-                onOr={or}
-                onSubtract={subtract}
-                onSwap={swap}
-                onXor={xor}
-              />
+          {(isMobile || calculatorEnabled) && (
+            <div class="app-keyboards">
+              {isMobile && <Keyboard actions={mobileActions} />}
+              {calculatorEnabled && <Keyboard actions={calculatorActions} />}
             </div>
           )}
         </div>
@@ -487,11 +560,11 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting hotkey="N" label="Signed Decimal">
+          <AppSetting label="Space Frequency">
             <RadioGroup
-              onChange={setSignedDecimalEnabled}
-              options={binaryOptions}
-              value={signedDecimalEnabled}
+              onChange={setSpaceFrequency}
+              options={spaceFrequencyOptions}
+              value={spaceFrequency}
             />
           </AppSetting>
 
@@ -503,19 +576,35 @@ export function App() {
             />
           </AppSetting>
 
+          <AppSetting label="Signed Binary">
+            <RadioGroup
+              onChange={setSignedBinEnabled}
+              options={binaryOptions}
+              value={signedBinEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting hotkey="N" label="Signed Decimal">
+            <RadioGroup
+              onChange={setSignedDecEnabled}
+              options={binaryOptions}
+              value={signedDecEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting label="Signed Hexadecimal">
+            <RadioGroup
+              onChange={setSignedHexEnabled}
+              options={binaryOptions}
+              value={signedHexEnabled}
+            />
+          </AppSetting>
+
           <AppSetting label="Caret">
             <RadioGroup
               onChange={setCaret}
               options={caretOptions}
               value={caret}
-            />
-          </AppSetting>
-
-          <AppSetting label="Space Frequency">
-            <RadioGroup
-              onChange={setSpaceFrequency}
-              options={spaceFrequencyOptions}
-              value={spaceFrequency}
             />
           </AppSetting>
         </div>

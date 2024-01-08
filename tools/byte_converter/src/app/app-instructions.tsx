@@ -112,16 +112,40 @@ const settings = [
     description: "Don't flip any bit when clicking on the editors.",
   },
   {
+    name: "Signed Binary",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Binary numbers are signed (they can be negative).",
+    hotkey: "",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Binary numbers are always positive.",
+  },
+  {
     name: "Signed Decimal",
     nameRowSpan: 2,
     value: "On",
-    description: "The decimal number is signed (it can be negative).",
+    description: "Decimal numbers are signed (they can be negative).",
     hotkey: "N",
     hotkeyRowSpan: 2,
   },
   {
     value: "Off",
-    description: "All numbers are displayed as unsigned.",
+    description: "Decimal numbers are always positive.",
+  },
+  {
+    name: "Signed Hexadecimal",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Hexadecimal numbers are signed (they can be negative).",
+    hotkey: "",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Hexadecimal numbers are always positive.",
   },
   {
     name: "Hotkeys",

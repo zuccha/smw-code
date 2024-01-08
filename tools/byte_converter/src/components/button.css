@@ -12,14 +12,22 @@
   outline-color: var(--color-primary-2);
 }
 
-.button:active:not(.button.selected) {
+.button:hover {
+  background-color: var(--color-background-0);
+}
+
+.button:active {
   background-color: var(--color-primary-6);
 }
 
 .button.selected,
 .button.selected:hover {
-  border: 1px solid var(--color-primary-3);
   color: var(--color-primary-3);
+}
+
+.button.selected:not(.round),
+.button.selected:not(.round):hover {
+  border: 1px solid var(--color-primary-3);
 }
 
 .button:focus,

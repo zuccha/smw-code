@@ -248,6 +248,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
         if (isSigned && index === 0) {
           if (e.key === "-") return ok(update(...replaceChar("-")));
+          if (e.key === "±") return ok(shiftDigit(index, 1));
           if (e.key === "Backspace") return ok(update(...replaceChar(" ")));
           if (e.key === "Delete") return ok(update(...replaceChar(" ")));
         }

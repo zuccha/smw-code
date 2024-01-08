@@ -5,15 +5,22 @@ import { classNames, digitToHex, range } from "../utils";
 import "./caption.css";
 
 export type CaptionProps = {
+  encoding: Encoding | undefined;
+  isSigned: boolean;
   spaceFrequency: SpaceFrequency;
   unit: Unit;
 };
 
-export default function Caption({ spaceFrequency, unit }: CaptionProps) {
+export default function Caption({
+  encoding,
+  isSigned,
+  spaceFrequency,
+  unit,
+}: CaptionProps) {
   const digits = useMemo(() => {
-    const length = Length[unit][Encoding.Bin];
+    const length = encoding !== undefined ? Length[unit][encoding] : 0;
     return range(length).reverse();
-  }, [unit]);
+  }, [encoding, unit]);
 
   const className = classNames([
     ["caption", true],
@@ -23,6 +30,11 @@ export default function Caption({ spaceFrequency, unit }: CaptionProps) {
 
   return (
     <div class={className}>
+      {isSigned && (
+        <div class="caption-char">
+          <span>±</span>
+        </div>
+      )}
       {digits.map((digit) => (
         <div class="caption-char">{<span>{digitToHex(digit)}</span>}</div>
       ))}

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "lucide-preact": "^0.306.0",
+    "react-device-detect": "^2.2.3",
     "zod": "^3.22.4"
   }
 }

@@ -1,12 +1,12 @@
-.calculator {
-  display: flex;
-  justify-content: center;
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
   font-family: monospace;
   font-size: 2em;
   gap: 0.3em;
 }
 
-.calculator .button {
+.keyboard .button {
   height: 1.5em;
   width: 1.5em;
 }

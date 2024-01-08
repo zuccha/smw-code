@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- Show a custom keyboard on mobile.
+- Allow to mark binary and hexadecimal numbers as signed (they can be negative).
+
 ### Fixed
 
 - Preserve high byte when clearing a value in "Byte" mode.
