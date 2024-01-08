@@ -11,6 +11,7 @@ import {
   Direction,
   Encoding,
   Focusable,
+  SpaceFrequency,
   TypingDirection,
   TypingMode,
   Unit,
@@ -35,6 +36,7 @@ export type AppEditorsProps = {
   prefixHex?: string;
   refNext?: Ref<AppEditorsRef>;
   refPrev?: Ref<AppEditorsRef>;
+  spaceFrequency: SpaceFrequency;
   typingDirection: TypingDirection;
   typingMode: TypingMode;
   unit: Unit;
@@ -71,6 +73,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
     prefixHex = "",
     refNext,
     refPrev,
+    spaceFrequency,
     typingDirection,
     typingMode,
     unit,
@@ -84,6 +87,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
     isDisabled,
     moveAfterTypingEnabled,
     onChange,
+    spaceFrequency,
     typingDirection,
     typingMode,
     unit,

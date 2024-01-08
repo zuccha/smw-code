@@ -13,10 +13,14 @@
   width: var(--caret-width);
 }
 
-.caption-char:nth-last-child(4n + 4) {
+.caption-char > span {
+  font-size: small;
+}
+
+.caption.space-4 .caption-char:nth-last-child(4n + 4):not(:first-child) {
   margin-left: var(--digits-space);
 }
 
-.caption-char > span {
-  font-size: small;
+.caption.space-8 .caption-char:nth-last-child(8n + 8):not(:first-child) {
+  margin-left: var(--digits-space);
 }

@@ -13,7 +13,11 @@
   width: var(--caret-width);
 }
 
-.editor-char:nth-last-child(4n + 4) {
+.editor.space-4 .editor-char:nth-last-child(4n + 4):not(:first-child) {
+  margin-left: var(--digits-space);
+}
+
+.editor.space-8 .editor-char:nth-last-child(8n + 8):not(:first-child) {
   margin-left: var(--digits-space);
 }
 

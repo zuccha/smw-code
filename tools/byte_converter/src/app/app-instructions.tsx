@@ -129,6 +129,12 @@ const settings = [
     value: "Off",
     description: "Hotkeys are disabled, except for this one.",
   },
+  {
+    name: "Space Frequency",
+    value: "None, 8 Digits, 4 Digits",
+    description: "Add some space between digits to improve readability.",
+    hotkey: "",
+  },
 ];
 
 const operations = [

@@ -14,6 +14,7 @@ import {
   Direction,
   Encoding,
   Focusable,
+  SpaceFrequency,
   TypingDirection,
   TypingMode,
   Unit,
@@ -41,6 +42,7 @@ export type EditorProps = {
   onChange: (integer: number) => void;
   refNext?: Ref<Focusable>;
   refPrev?: Ref<Focusable>;
+  spaceFrequency: SpaceFrequency;
   typingDirection: TypingDirection;
   typingMode: TypingMode;
   unit: Unit;
@@ -62,6 +64,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     onChange,
     refNext,
     refPrev,
+    spaceFrequency,
     typingDirection,
     typingMode,
     unit,
@@ -120,6 +123,8 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       true,
     ],
     ["disabled", isDisabled],
+    ["space-4", spaceFrequency === SpaceFrequency.Digits4],
+    ["space-8", spaceFrequency === SpaceFrequency.Digits8],
   ]);
 
   //----------------------------------------------------------------------------

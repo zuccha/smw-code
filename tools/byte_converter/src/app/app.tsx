@@ -20,6 +20,8 @@ import {
   CaretSchema,
   Direction,
   Operation,
+  SpaceFrequency,
+  SpaceFrequencySchema,
   TypingDirection,
   TypingDirectionSchema,
   TypingMode,
@@ -46,6 +48,12 @@ const caretOptions: Option<Caret>[] = [
   { label: "Bar", value: Caret.Bar },
   { label: "Box", value: Caret.Box },
   { label: "Underline", value: Caret.Underline },
+] as const;
+
+const spaceFrequencyOptions: Option<SpaceFrequency>[] = [
+  { label: "None", value: SpaceFrequency.None },
+  { label: "8 Digits", value: SpaceFrequency.Digits8 },
+  { label: "4 Digits", value: SpaceFrequency.Digits4 },
 ] as const;
 
 const typingDirectionOptions: Option<TypingDirection>[] = [
@@ -138,6 +146,12 @@ export function App() {
     z.boolean().parse
   );
 
+  const [spaceFrequency, setSpaceFrequency] = useSetting(
+    "space-frequency",
+    SpaceFrequency.Digits8,
+    SpaceFrequencySchema.parse
+  );
+
   const [typingDirection, setTypingDirection] = useSetting(
     "typing-direction",
     TypingDirection.Right,
@@ -179,8 +193,8 @@ export function App() {
     }
   }, [operand1, operation, operand2, unit]);
 
-  const clearInteger = useCallback(() => setOperand1(0), []);
-  const clearPartial = useCallback(() => setOperand2(0), []);
+  const clearOperand1 = useCallback(() => setOperand1(0), []);
+  const clearOperand2 = useCallback(() => setOperand2(0), []);
 
   const apply = useCallback(
     (nextOperation: Operation) => {
@@ -291,7 +305,7 @@ export function App() {
         <div>
           <div class="app-editors">
             <div class="app-spacer">&nbsp;&nbsp;&nbsp;</div>
-            <Caption unit={unit} />
+            <Caption spaceFrequency={spaceFrequency} unit={unit} />
             <div class="app-divider-editors-visibility">
               <CheckGroup
                 labels={groupVisibilityLabels}
@@ -308,12 +322,13 @@ export function App() {
               isVisibleDec={operand1Visibility[1]}
               isVisibleHex={operand1Visibility[2]}
               onChange={setOperand1}
-              onClear={clearInteger}
+              onClear={clearOperand1}
               prefixBin="BIN"
               prefixDec="DEC"
               prefixHex="HEX"
               ref={operand1Ref}
               refNext={operand2Ref}
+              spaceFrequency={spaceFrequency}
             />
 
             {calculatorEnabled ? (
@@ -334,7 +349,7 @@ export function App() {
                   isVisibleDec={operand2Visibility[1]}
                   isVisibleHex={operand2Visibility[2]}
                   onChange={setOperand2}
-                  onClear={clearPartial}
+                  onClear={clearOperand2}
                   prefixBin={
                     operand2Visibility[0] ? OperationLabel[operation] : ""
                   }
@@ -353,6 +368,7 @@ export function App() {
                   ref={operand2Ref}
                   refNext={resultRef}
                   refPrev={operand1Ref}
+                  spaceFrequency={spaceFrequency}
                 />
 
                 <div class="app-divider-line" />
@@ -385,6 +401,7 @@ export function App() {
                   }
                   ref={resultRef}
                   refPrev={operand2Ref}
+                  spaceFrequency={spaceFrequency}
                 />
               </>
             ) : (
@@ -473,6 +490,14 @@ export function App() {
               onChange={setHotkeysEnabled}
               options={binaryOptions}
               value={hotkeysEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting label="Space Frequency">
+            <RadioGroup
+              onChange={setSpaceFrequency}
+              options={spaceFrequencyOptions}
+              value={spaceFrequency}
             />
           </AppSetting>
         </div>

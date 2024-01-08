@@ -35,6 +35,18 @@ export enum TypingMode {
 export const TypingModeSchema = z.nativeEnum(TypingMode);
 
 //==============================================================================
+// Space Frequency
+//==============================================================================
+
+export enum SpaceFrequency {
+  Digits4,
+  Digits8,
+  None,
+}
+
+export const SpaceFrequencySchema = z.nativeEnum(SpaceFrequency);
+
+//==============================================================================
 // Encoding
 //==============================================================================
 

@@ -61,8 +61,8 @@ code {
   border-radius: 0.2em;
 }
 
-@media (max-width: 35em) {
+@media (max-width: 40em) {
   body {
-    font-size: 2.3vw;
+    font-size: 2.2vw;
   }
 }
