@@ -1,8 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Preserve high byte when clearing a value in "Byte" mode.
+
 ## [1.2.0] - 2024-01-08
 
-## Added
+### Added
 
 - Implement calculator, supporting addition, subtraction, logical AND, logical OR, and logical XOR between two operands.
 - Add support for signed decimals (decimals can be negative).
@@ -10,11 +16,11 @@
 - Allow to add some space every 4 or 8 digits for readability.
 - Increment/decrement the selected digit by 1 by pressing space/shift-space. This is the equivalent of a bit flip in binary.
 
-## Changed
+### Changed
 
 - Reorganize settings section.
 
-## Fixed
+### Fixed
 
 - Prevent default keyboard event when typing characters and moving with arrows.
 - Preserve high byte when editing in "Byte" mode.

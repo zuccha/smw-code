@@ -199,8 +199,8 @@ export function App() {
     }
   }, [operand1, operation, operand2, unit]);
 
-  const clearOperand1 = useCallback(() => setOperand1(0), []);
-  const clearOperand2 = useCallback(() => setOperand2(0), []);
+  const clearOperand1 = useCallback(() => setOperand1(0), [setOperand1]);
+  const clearOperand2 = useCallback(() => setOperand2(0), [setOperand2]);
 
   const apply = useCallback(
     (nextOperation: Operation) => {
@@ -216,13 +216,13 @@ export function App() {
   const xor = useCallback(() => apply(Operation.Xor), [apply]);
   const finalize = useCallback(() => setOperand2(result), [result]);
   const clear = useCallback(() => {
-    setOperand1(0);
-    setOperand2(0);
-  }, []);
+    clearOperand1();
+    clearOperand2();
+  }, [clearOperand1, clearOperand2]);
   const swap = useCallback(() => {
     setOperand1(operand2);
     setOperand2(operand1);
-  }, [operand1, operand2]);
+  }, [operand1, operand2, setOperand1, setOperand2]);
 
   //----------------------------------------------------------------------------
   // Editors

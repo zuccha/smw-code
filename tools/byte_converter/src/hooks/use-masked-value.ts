@@ -10,24 +10,17 @@ export default function useMaskedValue(
 ): [number, (nextValue: number) => void] {
   const [value, setValue] = useState(initialValue);
 
-  const maskedValue = useMemo(() => {
-    switch (unit) {
-      case Unit.Byte:
-        return value & LowByteMask;
-      case Unit.Word:
-        return value;
-    }
-  }, [unit, value]);
+  const maskedValue = useMemo(
+    () => (unit === Unit.Byte ? value & LowByteMask : value),
+    [unit, value]
+  );
 
   const setMaskedValue = useCallback(
     (nextValue: number) => {
       setValue((prevValue) => {
-        switch (unit) {
-          case Unit.Byte:
-            return (prevValue & HighByteMask) | (nextValue & LowByteMask);
-          case Unit.Word:
-            return nextValue;
-        }
+        return unit === Unit.Byte
+          ? (prevValue & HighByteMask) | (nextValue & LowByteMask)
+          : nextValue;
       });
     },
     [unit]
