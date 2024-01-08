@@ -14,6 +14,7 @@
 #     - Publish: Publish a new release on GitHub.
 #     - Notify: Post a message on Discord.
 #     - Summary: Update the main README of the repository.
+#     - Publish: Publish the resource with a custom script.
 #
 #   Lowercase flags are positives, uppercase flags are negatives ("don't"s).
 #
@@ -42,6 +43,7 @@
 #     -r, -R      Publish release
 #     -d, -D      Notify Discord
 #     -s, -S      Update summary
+#     -p, -P      Publish
 #
 #   Documentation:
 #     -h, -H      Generate HTML documentation
@@ -84,6 +86,8 @@ while getopts "eEgGaArRdDsShHtTmMiIc:of" flag; do
     D) FLAG_PHASE_DISCORD_TEMP=0  ;;
     s) FLAG_PHASE_SUMMARY_TEMP=1  ;;
     S) FLAG_PHASE_SUMMARY_TEMP=0  ;;
+    p) FLAG_PHASE_PUBLISH_TEMP=1  ;;
+    P) FLAG_PHASE_PUBLISH_TEMP=0  ;;
     m) FLAG_DOC_MARKDOWN_TEMP=1   ;;
     h) FLAG_DOC_HTML_TEMP=1       ;;
     H) FLAG_DOC_HTML_TEMP=0       ;;
@@ -150,7 +154,8 @@ if [[ $FLAG_PHASE_MERGE_TEMP == 1 ]]   || \
    [[ $FLAG_PHASE_ARCHIVE_TEMP == 1 ]] || \
    [[ $FLAG_PHASE_RELEASE_TEMP == 1 ]] || \
    [[ $FLAG_PHASE_DISCORD_TEMP == 1 ]] || \
-   [[ $FLAG_PHASE_SUMMARY_TEMP == 1 ]]; then
+   [[ $FLAG_PHASE_SUMMARY_TEMP == 1 ]] || \
+   [[ $FLAG_PHASE_PUBLISH_TEMP == 1 ]]; then
   FLAG_PHASE_DEFAULT=0
 else
   FLAG_PHASE_DEFAULT=1
@@ -163,6 +168,7 @@ FLAG_PHASE_ARCHIVE=$FLAG_PHASE_DEFAULT
 FLAG_PHASE_RELEASE=$FLAG_PHASE_DEFAULT
 FLAG_PHASE_DISCORD=$FLAG_PHASE_DEFAULT
 FLAG_PHASE_SUMMARY=$FLAG_PHASE_DEFAULT
+FLAG_PHASE_PUBLISH=$FLAG_PHASE_DEFAULT
 
 # Override phase flags
 if [[ -n $FLAG_PHASE_MERGE_TEMP ]];   then FLAG_PHASE_MERGE=$FLAG_PHASE_MERGE_TEMP;     fi
@@ -171,6 +177,7 @@ if [[ -n $FLAG_PHASE_ARCHIVE_TEMP ]]; then FLAG_PHASE_ARCHIVE=$FLAG_PHASE_ARCHIV
 if [[ -n $FLAG_PHASE_RELEASE_TEMP ]]; then FLAG_PHASE_RELEASE=$FLAG_PHASE_RELEASE_TEMP; fi
 if [[ -n $FLAG_PHASE_DISCORD_TEMP ]]; then FLAG_PHASE_DISCORD=$FLAG_PHASE_DISCORD_TEMP; fi
 if [[ -n $FLAG_PHASE_SUMMARY_TEMP ]]; then FLAG_PHASE_SUMMARY=$FLAG_PHASE_SUMMARY_TEMP; fi
+if [[ -n $FLAG_PHASE_PUBLISH_TEMP ]]; then FLAG_PHASE_PUBLISH=$FLAG_PHASE_PUBLISH_TEMP; fi
 
 # Override documentation flags
 if [[ -n $FLAG_DOC_MARKDOWN_TEMP ]]; then FLAG_DOC_MARKDOWN=$FLAG_DOC_MARKDOWN_TEMP; fi
@@ -202,6 +209,8 @@ SUMMARY_JSON="./releases.json"
 SRC_PATH="./$TYPE_DIR/$NAME"
 SRC_BUILD_NAME="build.sh"
 SRC_BUILD_PATH="$SRC_PATH/$SRC_BUILD_NAME"
+SRC_PUBLISH_NAME="publish.sh"
+SRC_PUBLISH_PATH="$SRC_PATH/$SRC_PUBLISH_NAME"
 README_NAME="README.md"
 README_PATH="$SRC_PATH/$README_NAME"
 CHANGELOG_NAME="CHANGELOG.md"
@@ -316,7 +325,7 @@ else
 
   if [[ -f $SRC_BUILD_PATH ]]; then
     pushd $SRC_PATH > /dev/null
-    source $SRC_BUILD_NAME
+    BUILD_OUT_PATH=$(./$SRC_BUILD_NAME)
     popd > /dev/null
 
     mkdir -p $OUT_DIR
@@ -443,6 +452,20 @@ else
   git push > /dev/null
 fi
 
+
+#-------------------------------------------------------------------------------
+# Custom Publish
+#-------------------------------------------------------------------------------
+
+if [[ $FLAG_PHASE_PUBLISH != 1 ]]; then
+  log_warn "Skip publish: disabled"
+if [[ ! -f $SRC_PUBLISH_PATH ]]; then
+  log_warn "Skip publish: no custom publish script"
+else
+  pushd $SRC_PATH > /dev/null
+  ./$SRC_PUBLISH_NAME
+  popd > /dev/null
+fi
 
 #-------------------------------------------------------------------------------
 # End
