@@ -14,6 +14,10 @@
   --color-background-1: #242424;
   --color-background-2: #141414;
 
+  --caret-height: 1.2em;
+  --caret-width: 0.75em;
+  --digits-space: 0.4em;
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -57,8 +61,8 @@ code {
   border-radius: 0.2em;
 }
 
-@media (max-width: 35em) {
+@media (max-width: 40em) {
   body {
-    font-size: 2.5vw;
+    font-size: 2.2vw;
   }
 }

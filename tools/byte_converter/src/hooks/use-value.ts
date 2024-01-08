@@ -1,40 +1,47 @@
 import { useCallback, useMemo } from "preact/hooks";
 import { Encoding, Unit } from "../types";
+import { clamp, padL } from "../utils";
 
 export const Boundaries = {
   [Unit.Byte]: { min: 0, max: 255 },
   [Unit.Word]: { min: 0, max: 65535 },
 } as const;
 
+export const SignedBoundaries = {
+  [Unit.Byte]: { min: -129, max: 127 },
+  [Unit.Word]: { min: -32768, max: 32767 },
+} as const;
+
 export const Chars = {
-  [Encoding.Binary]: /^[0-1]$/,
-  [Encoding.Decimal]: /^[0-9]$/,
-  [Encoding.Hexadecimal]: /^[0-9a-fA-F]$/,
+  [Encoding.Bin]: /^[0-1]$/,
+  [Encoding.Dec]: /^[0-9]$/,
+  [Encoding.Hex]: /^[0-9a-fA-F]$/,
 } as const;
 
 export const Length = {
   [Unit.Byte]: {
-    [Encoding.Binary]: 8,
-    [Encoding.Decimal]: 3,
-    [Encoding.Hexadecimal]: 2,
+    [Encoding.Bin]: 8,
+    [Encoding.Dec]: 3,
+    [Encoding.Hex]: 2,
   },
   [Unit.Word]: {
-    [Encoding.Binary]: 16,
-    [Encoding.Decimal]: 5,
-    [Encoding.Hexadecimal]: 4,
+    [Encoding.Bin]: 16,
+    [Encoding.Dec]: 5,
+    [Encoding.Hex]: 4,
   },
 } as const;
 
 export const Radix = {
-  [Encoding.Binary]: 2,
-  [Encoding.Decimal]: 10,
-  [Encoding.Hexadecimal]: 16,
+  [Encoding.Bin]: 2,
+  [Encoding.Dec]: 10,
+  [Encoding.Hex]: 16,
 } as const;
 
 export function useValue(
   integer: number,
   encoding: Encoding,
-  unit: Unit
+  unit: Unit,
+  signedEnabled: boolean
 ): [
   string,
   {
@@ -45,28 +52,50 @@ export function useValue(
     validChar: (char: string) => boolean;
   }
 ] {
+  const toSigned = useCallback(
+    (n: number): number => {
+      if (!signedEnabled) return n;
+      if (n <= SignedBoundaries[unit].max) return n;
+      return -(2 * (SignedBoundaries[unit].max + 1) - n);
+    },
+    [signedEnabled, unit]
+  );
+
+  const fromSigned = useCallback(
+    (n: number): number => {
+      if (!signedEnabled) return n;
+      if (n >= 0) return n;
+      return 2 * (SignedBoundaries[unit].max + 1) + n;
+    },
+    [signedEnabled, unit]
+  );
+
   const value = useMemo(() => {
     const { min, max } = Boundaries[unit];
     const length = Length[unit][encoding];
-    const n = Math.max(Math.min(integer, max), min)
-      .toString(Radix[encoding])
-      .toUpperCase();
-    return `${"0".repeat(length - n.length)}${n}`;
-  }, [encoding, integer, unit]);
+    const signed = toSigned(clamp(integer, min, max));
+    const signedStr = signed.toString(Radix[encoding]).toUpperCase();
+    return signed < 0
+      ? `-${padL(signedStr.substring(1), length, "0")}`
+      : signedEnabled
+      ? ` ${padL(signedStr, length, "0")}`
+      : padL(signedStr, length, "0");
+  }, [encoding, integer, toSigned, unit]);
 
   const parse = useCallback(
     (
       maybeValue: string,
       bounds?: { min?: number; max?: number }
     ): number | undefined => {
-      const i = Number.parseInt(maybeValue, Radix[encoding]);
-      const { min, max } = Boundaries[unit];
+      const signed = Number.parseInt(maybeValue, Radix[encoding]);
+      if (Number.isNaN(signed)) return undefined;
+      const { min, max } = signedEnabled
+        ? SignedBoundaries[unit]
+        : Boundaries[unit];
       bounds = { ...Boundaries[unit], ...bounds };
-      if (i < min) return bounds.min;
-      if (i > max) return bounds.max;
-      return Number.isNaN(i) ? undefined : i;
+      return fromSigned(clamp(signed, min, max));
     },
-    [encoding, unit]
+    [encoding, fromSigned, signedEnabled, unit]
   );
 
   const validChar = useCallback(

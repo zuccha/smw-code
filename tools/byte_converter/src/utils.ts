@@ -1,3 +1,7 @@
+import { HexDigit, HexDigits } from "./types";
+
+export function doNothing() {}
+
 export function clamp(n: number, min: number, max: number): number {
   return Math.min(Math.max(n, min), max);
 }
@@ -39,6 +43,34 @@ export function remove<T>(items: T[], index: number, fill: T): T[] {
   return [...items.slice(0, index), ...items.slice(index + 1), fill];
 }
 
-export function differsFrom0(char: string): boolean {
-  return char !== "0";
+export function isPositiveDigit(char: string): boolean {
+  return char !== "0" && char !== " " && char != "-";
+}
+
+export function mod(n: number, m: number): number {
+  return ((n % m) + m) % m;
+}
+
+export function toggle(value: boolean): boolean {
+  return !value;
+}
+
+export function range(length: number): number[] {
+  return Array.from(Array(length).keys());
+}
+
+export function digitToHex(digit: number): HexDigit {
+  return HexDigits[digit] ?? "0";
+}
+
+export function hexToDigit(hex: string): number {
+  return Number.parseInt(hex ?? "0", 16) ?? 0;
+}
+
+export function padL(text: string, length: number, fill: string): string {
+  return `${fill.repeat(length - text.length)}${text}`;
+}
+
+export function padR(text: string, length: number, fill: string): string {
+  return `${text}${fill.repeat(length - text.length)}`;
 }
