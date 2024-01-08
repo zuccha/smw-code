@@ -65,7 +65,7 @@ const settings = [
     name: "Typing Mode",
     nameRowSpan: 2,
     value: "Insert",
-    description: "Insert the typed digit where the selected digit is.",
+    description: "Insert the typed digit where the cursor is.",
     hotkey: "I",
   },
   {
@@ -112,7 +112,7 @@ const settings = [
     description: "Don't flip any bit when clicking on the editors.",
   },
   {
-    name: "Negative Decimal",
+    name: "Signed Decimal",
     nameRowSpan: 2,
     value: "On",
     description: "The decimal number is signed (it can be negative).",
