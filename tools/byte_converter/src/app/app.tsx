@@ -146,6 +146,12 @@ export function App() {
     z.boolean().parse
   );
 
+  const [signedDecimalEnabled, setSignedDecimalEnabled] = useSetting(
+    "signed-decimal",
+    false,
+    z.boolean().parse
+  );
+
   const [spaceFrequency, setSpaceFrequency] = useSetting(
     "space-frequency",
     SpaceFrequency.Digits8,
@@ -269,6 +275,7 @@ export function App() {
         if (e.key === "l") return f(setTypingDirection(TypingDirection.Left));
         if (e.key === "r") return f(setTypingDirection(TypingDirection.Right));
         if (e.key === "m") return f(setMoveAfterTypingEnabled(toggle));
+        if (e.key === "n") return f(setSignedDecimalEnabled(toggle));
 
         return false;
       };
@@ -318,6 +325,7 @@ export function App() {
               {...props}
               autoFocus
               integer={operand1}
+              isSignedDec={signedDecimalEnabled}
               isVisibleBin={operand1Visibility[0]}
               isVisibleDec={operand1Visibility[1]}
               isVisibleHex={operand1Visibility[2]}
@@ -345,6 +353,7 @@ export function App() {
                 <AppEditors
                   {...props}
                   integer={operand2}
+                  isSignedDec={signedDecimalEnabled}
                   isVisibleBin={operand2Visibility[0]}
                   isVisibleDec={operand2Visibility[1]}
                   isVisibleHex={operand2Visibility[2]}
@@ -384,6 +393,7 @@ export function App() {
                   {...props}
                   integer={result}
                   isDisabled
+                  isSignedDec={signedDecimalEnabled}
                   isVisibleBin={resultVisibility[0]}
                   isVisibleDec={resultVisibility[1]}
                   isVisibleHex={resultVisibility[2]}
@@ -477,11 +487,11 @@ export function App() {
             />
           </AppSetting>
 
-          <AppSetting label="Caret">
+          <AppSetting hotkey="N" label="Signed Decimal">
             <RadioGroup
-              onChange={setCaret}
-              options={caretOptions}
-              value={caret}
+              onChange={setSignedDecimalEnabled}
+              options={binaryOptions}
+              value={signedDecimalEnabled}
             />
           </AppSetting>
 
@@ -490,6 +500,14 @@ export function App() {
               onChange={setHotkeysEnabled}
               options={binaryOptions}
               value={hotkeysEnabled}
+            />
+          </AppSetting>
+
+          <AppSetting label="Caret">
+            <RadioGroup
+              onChange={setCaret}
+              options={caretOptions}
+              value={caret}
             />
           </AppSetting>
 

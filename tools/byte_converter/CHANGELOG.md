@@ -5,6 +5,7 @@
 ## Added
 
 - Implement calculator, supporting addition, subtraction, logical AND, logical OR, and logical XOR between two operands.
+- Add support for signed decimals (decimals can be negative).
 - Allow to hide any of the editors.
 - Allow to add some space every 4 or 8 digits for readability.
 - Increment/decrement the selected digit by 1 by pressing space/shift-space. This is the equivalent of a bit flip in binary.

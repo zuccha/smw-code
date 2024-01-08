@@ -25,6 +25,9 @@ export type AppEditorsProps = {
   flipBitEnabled?: boolean;
   integer: number;
   isDisabled?: boolean;
+  isSignedBin?: boolean;
+  isSignedDec?: boolean;
+  isSignedHex?: boolean;
   isVisibleBin?: boolean;
   isVisibleDec?: boolean;
   isVisibleHex?: boolean;
@@ -62,6 +65,9 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
     flipBitEnabled,
     integer,
     isDisabled = false,
+    isSignedBin = false,
+    isSignedDec = false,
+    isSignedHex = false,
     isVisibleBin = false,
     isVisibleDec = false,
     isVisibleHex = false,
@@ -130,21 +136,32 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
           <Editor
             {...props}
             {...binProps}
-            encoding={Encoding.Bin}
             autoFocus={autoFocus}
+            encoding={Encoding.Bin}
+            isSigned={isSignedBin}
           />
         </AppEditor>
       )}
 
       {isVisibleDec && (
         <AppEditor label={prefixDec} onCopy={decProps.copy} onClear={onClear}>
-          <Editor {...props} {...decProps} encoding={Encoding.Dec} />
+          <Editor
+            {...props}
+            {...decProps}
+            encoding={Encoding.Dec}
+            isSigned={isSignedDec}
+          />
         </AppEditor>
       )}
 
       {isVisibleHex && (
         <AppEditor label={prefixHex} onCopy={hexProps.copy} onClear={onClear}>
-          <Editor {...props} {...hexProps} encoding={Encoding.Hex} />
+          <Editor
+            {...props}
+            {...hexProps}
+            encoding={Encoding.Hex}
+            isSigned={isSignedHex}
+          />
         </AppEditor>
       )}
     </>

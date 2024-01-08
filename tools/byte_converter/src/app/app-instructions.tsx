@@ -112,10 +112,16 @@ const settings = [
     description: "Don't flip any bit when clicking on the editors.",
   },
   {
-    name: "Caret",
-    value: "Bar, Box, Underline",
-    description: "Caret appearance.",
-    hotkey: "",
+    name: "Negative Decimal",
+    nameRowSpan: 2,
+    value: "On",
+    description: "The decimal number is signed (it can be negative).",
+    hotkey: "N",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "All numbers are displayed as unsigned.",
   },
   {
     name: "Hotkeys",
@@ -128,6 +134,12 @@ const settings = [
   {
     value: "Off",
     description: "Hotkeys are disabled, except for this one.",
+  },
+  {
+    name: "Caret",
+    value: "Bar, Box, Underline",
+    description: "Caret appearance.",
+    hotkey: "",
   },
   {
     name: "Space Frequency",
@@ -193,24 +205,29 @@ export default function AppInstructions({
       >
         <div class="app-instructions-sections">
           <div>
-            <div class="app-instructions-section-label">
-              Calculator General:
-            </div>
-            <div>
-              Click on a number to edit it. In a group (bin/dec/hex), the
-              numbers are connected, editing one will cause the others to
-              update. To hide numbers, click on the three toggle buttons on the
-              top-right of the group.
-            </div>
-            <div>
-              Copy a specific value (in its format) by pressing on the
-              "copy-to-clipboard" button. The "X" button sets the value to 0 for
-              the entire group.
-            </div>
-            <div>
-              When in "Byte" mode, the high byte will be preserved and restored
-              when switching back to "Word".
-            </div>
+            <div class="app-instructions-section-label">General:</div>
+            <ul>
+              <li>
+                Click on a number to edit it. In a group (bin/dec/hex), the
+                numbers are connected, editing one will cause the others to
+                update. To hide numbers, click on the three toggle buttons on
+                the top-right of the group.
+              </li>
+              <li>
+                Copy a specific value (in its format) by pressing on the
+                "copy-to-clipboard" button. The "X" button sets the value to 0
+                for the entire group.
+              </li>
+              <li>
+                When in "Byte" mode, the high byte will be preserved and
+                restored when switching back to "Word".
+              </li>
+              <li>
+                When "Negative Decimal" is enabled, it's possible to manually
+                change its sign by selecting it and either delete it if it's a
+                minus sign, or type "-" to make the number negative.
+              </li>
+            </ul>
           </div>
 
           <div>

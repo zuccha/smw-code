@@ -12,6 +12,7 @@ export default function useChars(
   replaceChar: (char: string) => [string[], number];
   deleteChar: () => [string[], number];
   removeChar: () => [string[], number];
+  shiftAndReplaceChar: (char: string, shift: number) => [string[], number];
 } {
   const prepare = useCallback(
     (nextChars: string[], nextIndex: number): [string[], number] => {
@@ -54,6 +55,17 @@ export default function useChars(
     [_chars, _index, moveAfterTypingEnabled, moveRight, prepare]
   );
 
+  const shiftAndReplaceChar = useCallback(
+    (char: string, shift: number): [string[], number] => {
+      const nextIndex = _index + shift;
+      if (nextIndex < 0) return prepare(_chars, 0);
+      if (nextIndex >= _chars.length) return prepare(_chars, _chars.length - 1);
+      const nextChars = replace(_chars, nextIndex, char);
+      return prepare(nextChars, nextIndex);
+    },
+    [_chars, _index, prepare]
+  );
+
   const deleteChar = useCallback((): [string[], number] => {
     if (_index < 0) return prepare(_chars, 0);
     if (_index >= _chars.length) return prepare(_chars, _chars.length - 1);
@@ -71,5 +83,11 @@ export default function useChars(
     return prepare(nextChars, nextIndex);
   }, [_chars, _index, deleteChar, prepare]);
 
-  return { deleteChar, insertChar, removeChar, replaceChar };
+  return {
+    deleteChar,
+    insertChar,
+    removeChar,
+    replaceChar,
+    shiftAndReplaceChar,
+  };
 }
