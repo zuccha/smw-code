@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0] - 2024-01-08
+
+## Added
+
+- Implement calculator, supporting addition, subtraction, logical AND, logical OR, and logical XOR between two operands.
+- Allow to hide any of the editors.
+- Allow to add some space every 4 or 8 digits for readability.
+- Increment/decrement the selected digit by 1 by pressing space/shift-space. This is the equivalent of a bit flip in binary.
+
+## Changed
+
+- Reorganize settings section.
+
+## Fixed
+
+- Prevent default keyboard event when typing characters and moving with arrows.
+- Preserve high byte when editing in "Byte" mode.
+
 ## [1.1.0] - 2024-01-07
 
 ### Added

@@ -207,6 +207,10 @@ export default function AppInstructions({
               "copy-to-clipboard" button. The "X" button sets the value to 0 for
               the entire group.
             </div>
+            <div>
+              When in "Byte" mode, the high byte will be preserved and restored
+              when switching back to "Word".
+            </div>
           </div>
 
           <div>
