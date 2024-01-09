@@ -54,7 +54,8 @@ const useEditor = (
   const refNext = useMemo(() => nexts.find(Boolean), nexts);
   const refPrev = useMemo(() => prevs.find(Boolean), prevs);
   const copy = useCallback(() => ref.current?.copy(), [ref]);
-  return { copy, ref, refNext, refPrev };
+  const paste = useCallback(() => ref.current?.paste(), [ref]);
+  return { copy, paste, ref, refNext, refPrev };
 };
 
 export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
@@ -130,7 +131,11 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
   return (
     <>
       {isVisibleBin && (
-        <AppEditor label={prefixBin} onCopy={binProps.copy}>
+        <AppEditor
+          label={prefixBin}
+          onCopy={binProps.copy}
+          onPaste={binProps.paste}
+        >
           <Editor
             {...props}
             {...binProps}
@@ -142,7 +147,11 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
       )}
 
       {isVisibleDec && (
-        <AppEditor label={prefixDec} onCopy={decProps.copy}>
+        <AppEditor
+          label={prefixDec}
+          onCopy={decProps.copy}
+          onPaste={decProps.paste}
+        >
           <Editor
             {...props}
             {...decProps}
@@ -153,7 +162,11 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
       )}
 
       {isVisibleHex && (
-        <AppEditor label={prefixHex} onCopy={hexProps.copy}>
+        <AppEditor
+          label={prefixHex}
+          onCopy={hexProps.copy}
+          onPaste={hexProps.paste}
+        >
           <Editor
             {...props}
             {...hexProps}

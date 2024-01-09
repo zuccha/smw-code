@@ -1,5 +1,12 @@
 # Changelog
 
+## [X.Y.Z] - unreleased
+
+### Added
+
+- Add "Paste" icon button next to "Copy button.
+- Show tooltip when hovering icon buttons.
+
 ## [1.4.0] - 2024-01-09
 
 ### Added

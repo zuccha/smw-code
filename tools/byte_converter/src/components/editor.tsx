@@ -51,6 +51,7 @@ export type EditorProps = {
 
 export type EditorRef = Focusable & {
   copy: () => void;
+  paste: () => void;
 };
 
 export default forwardRef<EditorRef, EditorProps>(function Editor(
@@ -308,7 +309,11 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     return true;
   }, []);
 
-  useImperativeHandle(ref, () => ({ copy, focus }), [copy, focus]);
+  useImperativeHandle(ref, () => ({ copy, focus, paste }), [
+    copy,
+    focus,
+    paste,
+  ]);
 
   //----------------------------------------------------------------------------
   // Render

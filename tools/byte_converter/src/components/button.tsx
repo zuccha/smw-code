@@ -4,14 +4,14 @@ import { classNames } from "../utils";
 import "./button.css";
 
 type ButtonProps = {
-  isRound?: boolean;
+  isBorderless?: boolean;
   isSelected?: boolean;
   label: ReactNode;
   onClick: () => void;
 };
 
 export default function Button({
-  isRound = false,
+  isBorderless = false,
   isSelected = false,
   label,
   onClick,
@@ -20,10 +20,10 @@ export default function Button({
     () =>
       classNames([
         ["button", true],
+        ["borderless", isBorderless],
         ["selected", isSelected],
-        ["round", isRound],
       ]),
-    [isRound, isSelected]
+    [isSelected]
   );
 
   const handleMouseDown = useCallback(

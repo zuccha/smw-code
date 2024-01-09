@@ -91,7 +91,7 @@ const actions = [
     name: "Paste",
     hotkeys: ["CTRL+V", "CMD+V"],
     description:
-      "Paste a value from the clipboard in the focused editor. It won't do anything if the clipboard doesn't contain a valid value.",
+      "Paste a value from the clipboard in the focused editor. You can also use the button on the right of the editor. It won't do anything if the clipboard doesn't contain a valid value.",
   },
 ];
 
