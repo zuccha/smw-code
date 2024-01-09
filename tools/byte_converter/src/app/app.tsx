@@ -109,12 +109,6 @@ export function App() {
 
   const [caret, setCaret] = useSetting("caret", Caret.Box, CaretSchema.parse);
 
-  const [flipBitEnabled, setFlipBitEnabled] = useSetting(
-    "flip-bit-enabled",
-    false,
-    z.boolean().parse
-  );
-
   const [hotkeysEnabled, setHotkeysEnabled] = useSetting(
     "hotkeys-enabled",
     false,
@@ -124,12 +118,6 @@ export function App() {
   const [instructionsVisible, setInstructionsVisible] = useSetting(
     "instructions-visible",
     false,
-    z.boolean().parse
-  );
-
-  const [moveAfterTypingEnabled, setMoveAfterTypingEnabled] = useSetting(
-    "move-after-typing-enabled",
-    true,
     z.boolean().parse
   );
 
@@ -161,6 +149,18 @@ export function App() {
     "keyboard-mode",
     KeyboardMode.None,
     KeyboardModeSchema.parse
+  );
+
+  const [shouldFlipBitOnClick, setShouldFlipBitOnClick] = useSetting(
+    "flip-bit-enabled",
+    false,
+    z.boolean().parse
+  );
+
+  const [shouldMoveAfterTyping, setMoveAfterTypingEnabled] = useSetting(
+    "move-after-typing-enabled",
+    true,
+    z.boolean().parse
   );
 
   const [signedBinEnabled, setSignedBinEnabled] = useSetting(
@@ -259,8 +259,8 @@ export function App() {
 
   const props = {
     caret,
-    flipBitEnabled,
-    moveAfterTypingEnabled,
+    shouldFlipBitOnClick,
+    shouldMoveAfterTyping,
     typingDirection,
     typingMode,
     unit,
@@ -299,7 +299,7 @@ export function App() {
         if (e.key === "q") return f(setCalculatorEnabled(toggle));
         if (e.key === "s") return f(setSettingsVisible(toggle));
         if (e.key === "h") return f(setInstructionsVisible(toggle));
-        if (e.key === "t") return f(setFlipBitEnabled(toggle));
+        if (e.key === "t") return f(setShouldFlipBitOnClick(toggle));
         if (e.key === "y") return f(setUnit(Unit.Byte));
         if (e.key === "w") return f(setUnit(Unit.Word));
         if (e.key === "i") return f(setTypingMode(TypingMode.Insert));
@@ -608,15 +608,15 @@ export function App() {
             <RadioGroup
               onChange={setMoveAfterTypingEnabled}
               options={binaryOptions}
-              value={moveAfterTypingEnabled}
+              value={shouldMoveAfterTyping}
             />
           </AppSetting>
 
           <AppSetting hotkey="T" label="Flip Bit">
             <RadioGroup
-              onChange={setFlipBitEnabled}
+              onChange={setShouldFlipBitOnClick}
               options={binaryOptions}
-              value={flipBitEnabled}
+              value={shouldFlipBitOnClick}
             />
           </AppSetting>
 

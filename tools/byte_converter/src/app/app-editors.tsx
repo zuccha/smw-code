@@ -22,7 +22,6 @@ import { forwardRef } from "preact/compat";
 export type AppEditorsProps = {
   autoFocus?: boolean;
   caret: Caret;
-  flipBitEnabled?: boolean;
   integer: number;
   isDisabled?: boolean;
   isSignedBin?: boolean;
@@ -31,13 +30,14 @@ export type AppEditorsProps = {
   isVisibleBin?: boolean;
   isVisibleDec?: boolean;
   isVisibleHex?: boolean;
-  moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
   prefixBin?: string;
   prefixDec?: string;
   prefixHex?: string;
   refNext?: Ref<AppEditorsRef>;
   refPrev?: Ref<AppEditorsRef>;
+  shouldFlipBitOnClick: boolean;
+  shouldMoveAfterTyping: boolean;
   spaceFrequency: SpaceFrequency;
   typingDirection: TypingDirection;
   typingMode: TypingMode;
@@ -62,7 +62,6 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
   {
     autoFocus,
     caret,
-    flipBitEnabled,
     integer,
     isDisabled = false,
     isSignedBin = false,
@@ -71,13 +70,14 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
     isVisibleBin = false,
     isVisibleDec = false,
     isVisibleHex = false,
-    moveAfterTypingEnabled,
     onChange,
     prefixBin = "",
     prefixDec = "",
     prefixHex = "",
     refNext,
     refPrev,
+    shouldFlipBitOnClick,
+    shouldMoveAfterTyping,
     spaceFrequency,
     typingDirection,
     typingMode,
@@ -87,11 +87,11 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
 ) {
   const props = {
     caret,
-    flipBitEnabled,
     integer,
     isDisabled,
-    moveAfterTypingEnabled,
     onChange,
+    shouldFlipBitOnClick,
+    shouldMoveAfterTyping,
     spaceFrequency,
     typingDirection,
     typingMode,

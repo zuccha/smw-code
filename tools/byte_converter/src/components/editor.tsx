@@ -5,29 +5,25 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
 } from "preact/hooks";
-import useChars from "../hooks/use-chars";
-import { Radix, useValue } from "../hooks/use-value";
+import { useValue } from "../hooks/use-value";
 import {
   Caret,
   Direction,
   Encoding,
   Focusable,
+  Sign,
   SpaceFrequency,
   TypingDirection,
   TypingMode,
   Unit,
+  isSign,
 } from "../types";
 import {
   classNames,
   isPositiveDigit,
-  digitToHex,
   firstIndexOf,
-  hexToDigit,
   lastIndexOf,
-  mod,
-  replace,
 } from "../utils";
 import "./editor.css";
 
@@ -35,11 +31,11 @@ export type EditorProps = {
   autoFocus?: boolean;
   caret: Caret;
   encoding: Encoding;
-  flipBitEnabled?: boolean;
   integer: number;
   isDisabled?: boolean;
   isSigned?: boolean;
-  moveAfterTypingEnabled: boolean;
+  shouldFlipBitOnClick?: boolean;
+  shouldMoveAfterTyping: boolean;
   onChange: (integer: number) => void;
   refNext?: Ref<Focusable>;
   refPrev?: Ref<Focusable>;
@@ -59,11 +55,11 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     autoFocus,
     caret,
     encoding,
-    flipBitEnabled = false,
     integer,
     isDisabled = false,
     isSigned = false,
-    moveAfterTypingEnabled,
+    shouldFlipBitOnClick = false,
+    shouldMoveAfterTyping,
     onChange,
     refNext,
     refPrev,
@@ -80,25 +76,36 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [index, setIndex] = useState(0);
-  const [value, { parse, validChar }] = useValue(
-    integer,
+  const [
+    digits,
+    index,
+    sign,
+    {
+      copy,
+      deleteDigit,
+      insertDigit,
+      isValidDigit,
+      jumpTo,
+      moveLeft,
+      moveRight,
+      negate,
+      paste,
+      removeDigit,
+      replaceDigit,
+      shiftDigit,
+      shiftLeft,
+      shiftRight,
+    },
+  ] = useValue({
     encoding,
+    integer,
+    isDisabled,
+    isReversed: typingDirection === TypingDirection.Left,
+    isSigned,
+    shouldMoveAfterTyping,
+    onChange,
     unit,
-    isSigned
-  );
-  const chars = useMemo(() => value.split(""), [value]);
-
-  const {
-    deleteChar,
-    insertChar,
-    negate,
-    removeChar,
-    replaceChar,
-    shiftAndReplaceChar,
-    shiftLeft,
-    shiftRight,
-  } = useChars(chars, index, typingDirection, moveAfterTypingEnabled);
+  });
 
   //----------------------------------------------------------------------------
   // Chars Styles
@@ -107,9 +114,9 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   const last = useMemo(
     () =>
       typingDirection === TypingDirection.Right
-        ? Math.max(lastIndexOf(chars, isPositiveDigit), index - 1)
-        : Math.min(firstIndexOf(chars, isPositiveDigit), index),
-    [chars, index, typingDirection]
+        ? Math.max(lastIndexOf(digits, isPositiveDigit), index - 1)
+        : Math.min(firstIndexOf(digits, isPositiveDigit), index),
+    [digits, index, typingDirection]
   );
 
   const isSolid = useCallback(
@@ -139,69 +146,11 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     ["space-8", spaceFrequency === SpaceFrequency.Digits8],
   ]);
 
-  //----------------------------------------------------------------------------
-  // Chars/Index Utilities
-  //----------------------------------------------------------------------------
-
-  const update = useCallback(
-    (nextChars: string[], nextIndex: number) => {
-      // The sign might be buried in the middle of the array after a deletion,
-      // which adds "0" at the extremity compensating for the removed character.
-      const sign = nextChars.find((char) => char === "-" || char === " ");
-      if (sign)
-        nextChars = [sign, ...nextChars.filter((char) => char !== sign)];
-
-      const nextInteger = parse(nextChars.join(""), { max: 0 });
-      if (nextInteger !== undefined) {
-        onChange(nextInteger);
-        setIndex(nextIndex);
-      }
-    },
-    [onChange, parse]
-  );
-
-  const moveLeft = useCallback(() => {
-    const nextIndex = index - 1;
-    if (nextIndex < 0) return setIndex(0);
-    if (nextIndex >= value.length) return setIndex(value.length - 1);
-    setIndex(nextIndex);
-  }, [index, value.length]);
-
-  const moveRight = useCallback(() => {
-    const nextIndex = index + 1;
-    if (nextIndex < 0) return setIndex(0);
-    if (nextIndex >= value.length) return setIndex(value.length - 1);
-    setIndex(nextIndex);
-  }, [index, value.length]);
-
-  const shiftDigit = useCallback(
-    (nextIndex: number, shift: number) => {
-      if (chars[nextIndex] === " ")
-        return update(replace(chars, nextIndex, "-"), nextIndex);
-      if (chars[nextIndex] === "-")
-        return update(replace(chars, nextIndex, " "), nextIndex);
-      const digit = hexToDigit(chars[nextIndex]!);
-      const nextChar = digitToHex(mod(digit + shift, Radix[encoding]));
-      update(replace(chars, nextIndex, nextChar), nextIndex);
-    },
-    [chars, encoding]
-  );
-
-  //----------------------------------------------------------------------------
-  // Clipboard
-  //----------------------------------------------------------------------------
-
-  const copy = useCallback(() => {
-    navigator.clipboard.writeText(value);
-  }, [value]);
-
-  const paste = useCallback(() => {
-    if (isDisabled) return;
-    navigator.clipboard.readText().then((maybeValue) => {
-      const newInteger = parse(maybeValue);
-      if (newInteger !== undefined) onChange(newInteger);
-    });
-  }, [isDisabled, onChange, parse]);
+  const signClassName = classNames([
+    ["editor-char", true],
+    ["solid", typingDirection === TypingDirection.Right],
+    ["empty", typingDirection === TypingDirection.Left],
+  ]);
 
   //----------------------------------------------------------------------------
   // Keyboard Event Listener
@@ -222,53 +171,32 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         if (e.key === "ArrowUp")
           return Boolean(refPrev?.current?.focus(Direction.Up));
 
-        if (isDisabled) return false;
-
         if (e.shiftKey && e.key === "Backspace") return ok(onChange(0));
         if (e.shiftKey && e.key === "Delete") return ok(onChange(0));
 
         if (e.key === "ArrowLeft") return ok(moveLeft());
         if (e.key === "ArrowRight") return ok(moveRight());
 
-        if (e.key === ">") return ok(update(...shiftRight()));
-        if (e.key === "<") return ok(update(...shiftLeft()));
+        if (e.key === ">") return ok(shiftRight());
+        if (e.key === "<") return ok(shiftLeft());
 
-        if (e.key === "}") return ok(update(...shiftRight(true)));
-        if (e.key === "{") return ok(update(...shiftLeft(true)));
+        if (e.key === "}") return ok(shiftRight(true));
+        if (e.key === "{") return ok(shiftLeft(true));
 
-        if (e.key === " ") return ok(shiftDigit(index, e.shiftKey ? -1 : 1));
+        if (e.key === " ") return ok(shiftDigit(e.shiftKey ? -1 : 1));
 
-        if (e.key === "!") return ok(update(...negate()));
+        if (e.key === "!") return ok(negate());
 
-        if (!isSigned || index > 0) {
-          if (e.key === "Delete") return ok(update(...deleteChar()));
+        if (e.key === "Delete") return ok(deleteDigit());
+        if (e.key === "Backspace") return ok(removeDigit());
 
-          if (validChar(e.key)) {
-            switch (typingMode) {
-              case TypingMode.Insert:
-                return ok(update(...insertChar(e.key)));
-              case TypingMode.Overwrite:
-                return ok(update(...replaceChar(e.key)));
-            }
+        if (isValidDigit(e.key)) {
+          switch (typingMode) {
+            case TypingMode.Insert:
+              return ok(insertDigit(e.key));
+            case TypingMode.Overwrite:
+              return ok(replaceDigit(e.key));
           }
-        }
-
-        if (
-          !isSigned ||
-          index > 1 ||
-          typingDirection === TypingDirection.Left
-        ) {
-          if (e.key === "Backspace") return ok(update(...removeChar()));
-        }
-
-        if (isSigned && index === 0) {
-          if (e.key === "-") return ok(update(...replaceChar("-")));
-          if (e.key === "Backspace") return ok(update(...replaceChar(" ")));
-          if (e.key === "Delete") return ok(update(...replaceChar(" ")));
-        }
-
-        if (isSigned && index === 1 && e.key === "Backspace") {
-          return ok(update(...shiftAndReplaceChar(" ", -1)));
         }
 
         return false;
@@ -278,24 +206,19 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
     },
     [
       copy,
-      deleteChar,
-      index,
-      insertChar,
-      isDisabled,
+      deleteDigit,
+      insertDigit,
       moveLeft,
       moveRight,
       negate,
       onChange,
-      isSigned,
       refNext,
       refPrev,
-      removeChar,
-      replaceChar,
+      removeDigit,
+      replaceDigit,
       shiftLeft,
       shiftRight,
       typingMode,
-      update,
-      validChar,
     ]
   );
 
@@ -327,7 +250,11 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       ref={containerRef}
       tabIndex={0}
     >
-      {chars.map((char, i) => {
+      {isSign(sign) && (
+        <div class={signClassName}>{sign === Sign.Negative ? "-" : "+"}</div>
+      )}
+
+      {digits.map((digit, i) => {
         const className = classNames([
           ["editor-char", true],
           ["selected", i === index],
@@ -343,11 +270,12 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
               e.preventDefault();
               focus();
               if (isDisabled) return;
-              if (flipBitEnabled && encoding === Encoding.Bin) shiftDigit(i, 1);
-              else setIndex(i);
+              if (shouldFlipBitOnClick && encoding === Encoding.Bin)
+                shiftDigit(1, i);
+              else jumpTo(i);
             }}
           >
-            {char}
+            {digit}
             {!isDisabled && i === index && <div class="editor-caret" />}
           </div>
         );

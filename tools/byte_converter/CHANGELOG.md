@@ -7,6 +7,14 @@
 - Add "Paste" icon button next to "Copy button.
 - Show tooltip when hovering icon buttons.
 
+### Changed
+
+- Always show the plus signed in front of signed digits, to make it clear that they are signed.
+
+### Removed
+
+- Remove possibility to delete, type, and select the minus sign in front of signed digits. After some refactoring, I decided that the feature is not worth the hassle of maintaining it. To invert a number, either use the "!" keybinding, or the "NEG" button in the visual keyboard.
+
 ## [1.4.0] - 2024-01-09
 
 ### Added

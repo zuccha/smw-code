@@ -74,3 +74,11 @@ export function padL(text: string, length: number, fill: string): string {
 export function padR(text: string, length: number, fill: string): string {
   return `${text}${fill.repeat(length - text.length)}`;
 }
+
+export function ok(_: unknown): true {
+  return true;
+}
+
+export function ko(_: unknown): false {
+  return false;
+}

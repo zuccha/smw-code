@@ -142,3 +142,16 @@ export enum KeyboardMode {
 }
 
 export const KeyboardModeSchema = z.nativeEnum(KeyboardMode);
+
+//==============================================================================
+// Sign
+//==============================================================================
+
+export enum Sign {
+  Positive = "+",
+  Negative = "-",
+}
+
+export function isSign(maybeSign: unknown): maybeSign is Sign {
+  return maybeSign === Sign.Negative || maybeSign === Sign.Positive;
+}
