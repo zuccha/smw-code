@@ -2,6 +2,32 @@ import { useCallback, useMemo } from "preact/hooks";
 import { TypingDirection } from "../types";
 import { insert, remove, replace } from "../utils";
 
+enum Sign {
+  Positive = " ",
+  Negative = "-",
+}
+
+const isSign = (maybeSign: unknown): maybeSign is Sign => {
+  return maybeSign === Sign.Negative || maybeSign === Sign.Positive;
+};
+
+const invertSign = (sign: Sign | undefined): Sign | undefined => {
+  return !isSign(sign)
+    ? undefined
+    : sign === Sign.Positive
+    ? Sign.Negative
+    : Sign.Positive;
+};
+
+const stripSign = (chars: string[]): [Sign | undefined, string[]] => {
+  if (!isSign(chars[0])) return [undefined, chars];
+  return [chars[0], chars.slice(1)];
+};
+
+const applySign = (chars: string[], sign: Sign | undefined): string[] => {
+  return sign ? [sign, ...chars] : chars;
+};
+
 export default function useChars(
   chars: string[],
   index: number,
@@ -11,8 +37,11 @@ export default function useChars(
   insertChar: (char: string) => [string[], number];
   replaceChar: (char: string) => [string[], number];
   deleteChar: () => [string[], number];
+  negate: () => [string[], number];
   removeChar: () => [string[], number];
   shiftAndReplaceChar: (char: string, shift: number) => [string[], number];
+  shiftLeft: (withCarry?: boolean) => [string[], number];
+  shiftRight: (withCarry?: boolean) => [string[], number];
 } {
   const prepare = useCallback(
     (nextChars: string[], nextIndex: number): [string[], number] => {
@@ -83,11 +112,38 @@ export default function useChars(
     return prepare(nextChars, nextIndex);
   }, [_chars, _index, deleteChar, prepare]);
 
+  const shiftLeft = useCallback(
+    (withCarry = false): [string[], number] => {
+      const [sign, unsignedChars] = stripSign(chars);
+      const carry = withCarry ? unsignedChars[0]! : "0";
+      return [applySign([...unsignedChars.slice(1), carry], sign), index];
+    },
+    [chars, index]
+  );
+
+  const shiftRight = useCallback(
+    (withCarry = false): [string[], number] => {
+      const [sign, unsignedChars] = stripSign(chars);
+      const carry = withCarry ? unsignedChars[unsignedChars.length - 1]! : "0";
+      const end = unsignedChars.length - 1;
+      return [applySign([carry, ...unsignedChars.slice(0, end)], sign), index];
+    },
+    [chars, index]
+  );
+
+  const negate = useCallback((): [string[], number] => {
+    const [sign, unsignedChars] = stripSign(chars);
+    return [applySign(unsignedChars, invertSign(sign)), index];
+  }, [chars, index]);
+
   return {
     deleteChar,
     insertChar,
+    negate,
     removeChar,
     replaceChar,
     shiftAndReplaceChar,
+    shiftLeft,
+    shiftRight,
   };
 }

@@ -76,7 +76,7 @@
   display: flex;
 }
 
-.app-keyboards {
+.app-keyboard {
   display: flex;
   flex-direction: column;
   gap: 1em;

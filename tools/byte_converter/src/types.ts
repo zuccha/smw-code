@@ -130,3 +130,15 @@ export const HexDigits = [
 export const HexDigitSchema = z.enum(HexDigits);
 
 export type HexDigit = z.infer<typeof HexDigitSchema>;
+
+//==============================================================================
+// Keyboard
+//==============================================================================
+
+export enum KeyboardMode {
+  Compact,
+  Full,
+  None,
+}
+
+export const KeyboardModeSchema = z.nativeEnum(KeyboardMode);

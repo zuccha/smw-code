@@ -1,4 +1,3 @@
-import { ArrowDownUp } from "lucide-preact";
 import {
   useCallback,
   useEffect,
@@ -10,7 +9,7 @@ import { isMobile } from "react-device-detect";
 import { z } from "zod";
 import Caption from "../components/caption";
 import CheckGroup from "../components/check-group";
-import Keyboard from "../components/keyboard";
+import Keyboard, { KeyboardAction } from "../components/keyboard";
 import RadioGroup, { Option } from "../components/radio-group";
 import SectionCollapsible from "../components/section-collapsible";
 import SectionStatic from "../components/section-static";
@@ -23,6 +22,8 @@ import {
   Direction,
   Encoding,
   HexDigits,
+  KeyboardMode,
+  KeyboardModeSchema,
   Operation,
   SpaceFrequency,
   SpaceFrequencySchema,
@@ -54,6 +55,12 @@ const caretOptions: Option<Caret>[] = [
   { label: "Underline", value: Caret.Underline },
 ] as const;
 
+const keyboardModeOptions: Option<KeyboardMode>[] = [
+  { label: "None", value: KeyboardMode.None },
+  { label: "Compact", value: KeyboardMode.Compact },
+  { label: "Full", value: KeyboardMode.Full },
+] as const;
+
 const spaceFrequencyOptions: Option<SpaceFrequency>[] = [
   { label: "None", value: SpaceFrequency.None },
   { label: "8 Digits", value: SpaceFrequency.Digits8 },
@@ -78,11 +85,11 @@ const unitOptions: Option<Unit>[] = [
 const groupVisibilityLabels = ["B", "D", "H"];
 
 const OperationLabel = {
-  [Operation.And]: "&",
+  [Operation.And]: "AND",
   [Operation.Add]: "+",
-  [Operation.Or]: "|",
+  [Operation.Or]: "OR",
   [Operation.Subtract]: "-",
-  [Operation.Xor]: "^",
+  [Operation.Xor]: "XOR",
 };
 
 //==============================================================================
@@ -148,6 +155,12 @@ export function App() {
     "settings-visible",
     false,
     z.boolean().parse
+  );
+
+  const [keyboardMode, setKeyboardMode] = useSetting(
+    "keyboard-mode",
+    KeyboardMode.None,
+    KeyboardModeSchema.parse
   );
 
   const [signedBinEnabled, setSignedBinEnabled] = useSetting(
@@ -271,6 +284,9 @@ export function App() {
         if (e.key === "k") return f(setHotkeysEnabled((prev) => !prev));
 
         if (calculatorEnabled) {
+          if (e.ctrlKey && e.key === "Backspace") return t(clear());
+          if (e.ctrlKey && e.key === "Delete") return t(clear());
+          if (e.key === ";") return t(swap());
           if (e.key === "+") return f(add());
           if (e.key === "-") return f(subtract());
           if (e.key === "&") return f(and());
@@ -302,6 +318,7 @@ export function App() {
       add,
       and,
       calculatorEnabled,
+      clear,
       finalize,
       hotkeysEnabled,
       or,
@@ -309,6 +326,7 @@ export function App() {
       setTypingMode,
       setUnit,
       subtract,
+      swap,
       xor,
     ]
   );
@@ -319,24 +337,10 @@ export function App() {
   }, [handleKeyDown]);
 
   //----------------------------------------------------------------------------
-  // Keyboards
+  // Keyboard
   //----------------------------------------------------------------------------
 
-  const calculatorActions = useMemo(() => {
-    const is = (other: Operation) => other === operation;
-    return [
-      { label: "+", isActive: is(Operation.Add), onClick: add },
-      { label: "-", isActive: is(Operation.Subtract), onClick: subtract },
-      { label: "&", isActive: is(Operation.And), onClick: and },
-      { label: "|", isActive: is(Operation.Or), onClick: or },
-      { label: "^", isActive: is(Operation.Xor), onClick: xor },
-      { label: "=", onClick: finalize },
-      { label: "C", onClick: clear },
-      { label: <ArrowDownUp />, onClick: swap },
-    ];
-  }, [add, and, clear, finalize, operation, or, subtract, swap, xor]);
-
-  const mobileActions = useMemo(() => {
+  const keyboardActions = useMemo(() => {
     const type = (key: string, shiftKey?: boolean) => () => {
       if (document.activeElement)
         document.activeElement.dispatchEvent(
@@ -344,15 +348,60 @@ export function App() {
         );
     };
 
-    return [
-      ...HexDigits.map((digit) => ({ label: digit, onClick: type(digit) })),
-      { label: "⌫", onClick: type("Backspace") },
-      { label: "␡", onClick: type("Delete") },
-      { label: "±", onClick: type("±") },
-      { label: "↑", onClick: type(" ") },
-      { label: "↓", onClick: type(" ", true) },
-    ];
-  }, []);
+    if (!isMobile && keyboardMode === KeyboardMode.None) return [];
+
+    const keys: KeyboardAction[] = [];
+
+    if (isMobile || (keyboardMode !== KeyboardMode.None && calculatorEnabled))
+      keys.push(
+        { label: "+", onClick: add },
+        { label: "-", onClick: subtract },
+        { label: "AND", onClick: and, size: "xs" },
+        { label: "OR", onClick: or, size: "xs" },
+        { label: "XOR", onClick: xor, size: "xs" },
+        { label: "=", onClick: finalize },
+        { label: "SWAP", onClick: swap, size: "xs" },
+        { label: "AC", onClick: clear, size: "s" }
+      );
+
+    if (isMobile || keyboardMode !== KeyboardMode.None)
+      keys.push(
+        { label: "NEG", onClick: type("!"), size: "xs" },
+        { label: "«", onClick: type("<") },
+        { label: "»", onClick: type(">") },
+        { label: "ROL", onClick: type("{"), size: "xs" },
+        { label: "ROR", onClick: type("}"), size: "xs" },
+        { label: "DEL", onClick: type("Delete"), size: "xs" },
+        { label: "⌫", onClick: type("Backspace") },
+        { label: "Cl", onClick: type("Delete", true), size: "s" }
+      );
+
+    if (isMobile || keyboardMode === KeyboardMode.Full)
+      keys.push(
+        ...HexDigits.map((digit) => ({ label: digit, onClick: type(digit) })),
+        { label: "INC", onClick: type(" "), size: "xs" },
+        { label: "DEC", onClick: type(" ", true), size: "xs" },
+        { label: " ", onClick: type(" "), colSpan: 2 },
+        { label: "←", onClick: type("ArrowLeft") },
+        { label: "↑", onClick: type("ArrowUp") },
+        { label: "↓", onClick: type("ArrowDown") },
+        { label: "→", onClick: type("ArrowRight") }
+      );
+
+    return keys;
+  }, [
+    add,
+    and,
+    calculatorEnabled,
+    clear,
+    finalize,
+    keyboardMode,
+    operation,
+    or,
+    subtract,
+    swap,
+    xor,
+  ]);
 
   //----------------------------------------------------------------------------
   // Caption
@@ -408,7 +457,6 @@ export function App() {
               isVisibleDec={operand1Visibility[1]}
               isVisibleHex={operand1Visibility[2]}
               onChange={setOperand1}
-              onClear={clearOperand1}
               prefixBin="BIN"
               prefixDec="DEC"
               prefixHex="HEX"
@@ -438,7 +486,6 @@ export function App() {
                   isVisibleDec={operand2Visibility[1]}
                   isVisibleHex={operand2Visibility[2]}
                   onChange={setOperand2}
-                  onClear={clearOperand2}
                   prefixBin={
                     operand2Visibility[0] ? OperationLabel[operation] : ""
                   }
@@ -501,12 +548,7 @@ export function App() {
             )}
           </div>
 
-          {(isMobile || calculatorEnabled) && (
-            <div class="app-keyboards">
-              {isMobile && <Keyboard actions={mobileActions} />}
-              {calculatorEnabled && <Keyboard actions={calculatorActions} />}
-            </div>
-          )}
+          {keyboardActions.length > 0 && <Keyboard actions={keyboardActions} />}
         </div>
       </SectionStatic>
 
@@ -516,6 +558,14 @@ export function App() {
         onChange={setSettingsVisible}
       >
         <div class="app-settings">
+          <AppSetting hotkey="K" label="Hotkeys">
+            <RadioGroup
+              onChange={setHotkeysEnabled}
+              options={binaryOptions}
+              value={hotkeysEnabled}
+            />
+          </AppSetting>
+
           <AppSetting hotkey="Q" label="Calculator">
             <RadioGroup
               onChange={setCalculatorEnabled}
@@ -527,6 +577,16 @@ export function App() {
           <AppSetting hotkey="Y/W" label="Unit">
             <RadioGroup onChange={setUnit} options={unitOptions} value={unit} />
           </AppSetting>
+
+          {!isMobile && (
+            <AppSetting label="Keyboard">
+              <RadioGroup
+                onChange={setKeyboardMode}
+                options={keyboardModeOptions}
+                value={keyboardMode}
+              />
+            </AppSetting>
+          )}
 
           <AppSetting hotkey="I/O" label="Typing Mode">
             <RadioGroup
@@ -557,22 +617,6 @@ export function App() {
               onChange={setFlipBitEnabled}
               options={binaryOptions}
               value={flipBitEnabled}
-            />
-          </AppSetting>
-
-          <AppSetting label="Space Frequency">
-            <RadioGroup
-              onChange={setSpaceFrequency}
-              options={spaceFrequencyOptions}
-              value={spaceFrequency}
-            />
-          </AppSetting>
-
-          <AppSetting hotkey="K" label="Hotkeys">
-            <RadioGroup
-              onChange={setHotkeysEnabled}
-              options={binaryOptions}
-              value={hotkeysEnabled}
             />
           </AppSetting>
 
@@ -607,6 +651,14 @@ export function App() {
               value={caret}
             />
           </AppSetting>
+
+          <AppSetting label="Space Frequency">
+            <RadioGroup
+              onChange={setSpaceFrequency}
+              options={spaceFrequencyOptions}
+              value={spaceFrequency}
+            />
+          </AppSetting>
         </div>
       </SectionCollapsible>
 
@@ -616,7 +668,7 @@ export function App() {
       />
 
       <div class="app-footer">
-        v1.2.0 | zuccha |&nbsp;
+        v1.4.0 | zuccha |&nbsp;
         <a
           href="https://github.com/zuccha/smw-code/blob/main/tools/byte_converter/CHANGELOG.md"
           target="_blank"

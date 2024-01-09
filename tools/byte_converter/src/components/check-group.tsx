@@ -23,7 +23,14 @@ export default function CheckGroup({
           const nextValues = replace(values, i, !value);
           onChange(nextValues);
         };
-        return <Button isSelected={value} label={label} onClick={onClick} />;
+        return (
+          <Button
+            isSelected={value}
+            key={label}
+            label={label}
+            onClick={onClick}
+          />
+        );
       })}
     </div>
   );

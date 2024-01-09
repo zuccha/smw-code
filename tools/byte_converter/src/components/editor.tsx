@@ -89,11 +89,14 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
   const chars = useMemo(() => value.split(""), [value]);
 
   const {
-    insertChar,
-    replaceChar,
     deleteChar,
+    insertChar,
+    negate,
     removeChar,
+    replaceChar,
     shiftAndReplaceChar,
+    shiftLeft,
+    shiftRight,
   } = useChars(chars, index, typingDirection, moveAfterTypingEnabled);
 
   //----------------------------------------------------------------------------
@@ -220,10 +223,21 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
         if (isDisabled) return false;
 
+        if (e.shiftKey && e.key === "Backspace") return ok(onChange(0));
+        if (e.shiftKey && e.key === "Delete") return ok(onChange(0));
+
         if (e.key === "ArrowLeft") return ok(moveLeft());
         if (e.key === "ArrowRight") return ok(moveRight());
 
+        if (e.key === ">") return ok(update(...shiftRight()));
+        if (e.key === "<") return ok(update(...shiftLeft()));
+
+        if (e.key === "}") return ok(update(...shiftRight(true)));
+        if (e.key === "{") return ok(update(...shiftLeft(true)));
+
         if (e.key === " ") return ok(shiftDigit(index, e.shiftKey ? -1 : 1));
+
+        if (e.key === "!") return ok(update(...negate()));
 
         if (!isSigned || index > 0) {
           if (e.key === "Delete") return ok(update(...deleteChar()));
@@ -248,7 +262,6 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
 
         if (isSigned && index === 0) {
           if (e.key === "-") return ok(update(...replaceChar("-")));
-          if (e.key === "±") return ok(shiftDigit(index, 1));
           if (e.key === "Backspace") return ok(update(...replaceChar(" ")));
           if (e.key === "Delete") return ok(update(...replaceChar(" ")));
         }
@@ -270,11 +283,15 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
       isDisabled,
       moveLeft,
       moveRight,
+      negate,
+      onChange,
       isSigned,
       refNext,
       refPrev,
       removeChar,
       replaceChar,
+      shiftLeft,
+      shiftRight,
       typingMode,
       update,
       validChar,
@@ -316,6 +333,7 @@ export default forwardRef<EditorRef, EditorProps>(function Editor(
         return (
           <div
             class={className}
+            key={i}
             onMouseDown={(e: MouseEvent) => {
               e.preventDefault();
               focus();

@@ -1,3 +1,4 @@
+import { Fragment } from "preact";
 import SectionCollapsible from "../components/section-collapsible";
 
 type AppInstructions = {
@@ -5,38 +6,153 @@ type AppInstructions = {
   onChangeVisibility: (isVisible: boolean) => void;
 };
 
-const keybindings = [
-  { hotkeys: ["<arrows>"], description: "Move across editors." },
+const actions = [
   {
-    hotkeys: ["TAB", "SHIFT+TAB"],
+    name: "Type",
     description:
-      "Move to the next/previous focusable element. If nothing is focused, it should focus the binary editor.",
+      "Type a valid digit in the editor. The digit will either be inserted to the right of the cursor, or replace the selected digit depending on which typing mode is selected. Afterwards, the cursor moves to the right.",
+    hotkeys: ["<digits>"],
   },
   {
+    name: "Delete (DEL)",
+    description: "Delete the digit on the right of the cursor.",
+    hotkeys: ["DELETE"],
+  },
+  {
+    name: "Backspace (⌫)",
+    description:
+      "Delete the digit on the left of the cursor, then move the cursor to the left. If the cursors is already all the way to the left, then it will behave like Delete.",
+    hotkeys: ["BACKSPACE"],
+  },
+  {
+    name: "Negate (NEG)",
+    description:
+      "If the selected editor is negative it becomes positive and vice-versa. It works only if it is signed.",
+    hotkeys: ["!"],
+  },
+  {
+    name: "Shift Left («)",
+    description:
+      "Shift the digits of the selected editor to the left. The left-most digit is lost.",
+    hotkeys: ["<"],
+  },
+  {
+    name: "Shift Right (»)",
+    description:
+      "Shift the digits of the selected editor to the right. The right-most digit is lost.",
+    hotkeys: [">"],
+  },
+  {
+    name: "Rotate Left (ROL)",
+    description:
+      "Shift the digits of the selected editor to the left. The left-most digit is carried on the right side.",
+    hotkeys: ["{"],
+  },
+  {
+    name: "Rotate Right (ROR)",
+    description:
+      "Shift the digits of the selected editor to the right. The right-most digit is carried on the left side.",
+    hotkeys: ["}"],
+  },
+  {
+    name: "Clear (Cl)",
+    description: "Set the value of the selected editor to zero.",
+    hotkeys: ["SHIFT+BACKSPACE", "SHIFT+DELETE"],
+  },
+  {
+    name: "Increase (INC)",
+    description:
+      "Increase the selected digit by one. It wraps around if it exceeds the maximum. In binary, this is the equivalent of a bit flip.",
+    hotkeys: ["SPACE"],
+  },
+  {
+    name: "Decrease (DEC)",
+    description:
+      "Decrease the selected digit by one. It wraps around if it goes below zero. In binary, this is the equivalent of a bit flip.",
+    hotkeys: ["SHIFT+SPACE"],
+  },
+  {
+    name: "Movement",
+    description: "Move across editors.",
+    hotkeys: ["<arrows>"],
+  },
+  {
+    name: "Navigate",
+    hotkeys: ["TAB", "SHIFT+TAB"],
+    description: "Navigate to the next/previous focusable element.",
+  },
+  {
+    name: "Copy",
     hotkeys: ["CTRL+C", "CMD+C"],
-    description: "Copy the value of the focused editor in the clipboard.",
+    description:
+      "Copy the value of the focused editor in the clipboard. You can also use the button on the right of the editor.",
   },
   {
+    name: "Paste",
     hotkeys: ["CTRL+V", "CMD+V"],
     description:
-      "Paste a value in the focused editor from the clipboard. It won't do anything if the clipboard doesn't contain a valid value.",
+      "Paste a value from the clipboard in the focused editor. It won't do anything if the clipboard doesn't contain a valid value.",
+  },
+];
+
+const operations = [
+  {
+    name: "Add (+)",
+    description: "Add the two operands together.",
+    hotkeys: ["+"],
   },
   {
-    hotkeys: ["SPACE", "SHIFT+SPACE"],
-    description:
-      "Increase/decrease the selected digit by one. In binary, this is the equivalent of a bit flip.",
+    name: "Subtract (-)",
+    description: "Subtract operand 2 from operand 1.",
+    hotkeys: ["-"],
   },
   {
-    hotkeys: ["S"],
-    description: "Toggle settings visibility.",
+    name: "AND",
+    description: "Logical AND between the two operands.",
+    hotkeys: ["&"],
   },
   {
-    hotkeys: ["H"],
-    description: "Toggle instructions visibility.",
+    name: "OR",
+    description: "Logical OR between the two operands.",
+    hotkeys: ["|"],
+  },
+  {
+    name: "XOR",
+    description: "Logical XOR between the two operands.",
+    hotkeys: ["^"],
+  },
+  {
+    name: "Finalize (=)",
+    description: "Transfer the result in operand 2.",
+    hotkeys: ["="],
+  },
+  {
+    name: "Clear All (CA)",
+    description: "Clear all values (set them to 0).",
+    hotkeys: ["CTRL+BACKSPACE", "CTRL+DELETE"],
+  },
+  {
+    name: "Swap Operands (↓↑)",
+    description: "Swap operand 1 with operand 2.",
+    hotkeys: [";"],
   },
 ];
 
 const settings = [
+  // Hotkeys
+  {
+    name: "Hotkeys",
+    nameRowSpan: 2,
+    value: "On",
+    description: "Settings hotkeys are enabled.",
+    hotkey: "K",
+    hotkeyRowSpan: 2,
+  },
+  {
+    value: "Off",
+    description: "Settings hotkeys are disabled, except for this one.",
+  },
+  // Functionalities
   {
     name: "Calculator",
     nameRowSpan: 2,
@@ -53,7 +169,8 @@ const settings = [
     name: "Unit",
     nameRowSpan: 2,
     value: "Byte",
-    description: "8-bit editing mode.",
+    description:
+      "8-bit editing mode. The high byte is preserved and restored once switching back to 16-bit.",
     hotkey: "Y",
   },
   {
@@ -61,6 +178,14 @@ const settings = [
     description: "16-bit editing mode.",
     hotkey: "W",
   },
+  {
+    name: "Keyboard",
+    value: "None, Compact, Full",
+    description:
+      "Display a visual keyboard in the widget. Some keys are visible only in calculator mode.",
+    hotkey: "",
+  },
+  // Typing & Cursor
   {
     name: "Typing Mode",
     nameRowSpan: 2,
@@ -111,6 +236,7 @@ const settings = [
     value: "Off",
     description: "Don't flip any bit when clicking on the editors.",
   },
+  // Signed
   {
     name: "Signed Binary",
     nameRowSpan: 2,
@@ -147,18 +273,7 @@ const settings = [
     value: "Off",
     description: "Hexadecimal numbers are always positive.",
   },
-  {
-    name: "Hotkeys",
-    nameRowSpan: 2,
-    value: "On",
-    description: "Hotkeys are enabled.",
-    hotkey: "K",
-    hotkeyRowSpan: 2,
-  },
-  {
-    value: "Off",
-    description: "Hotkeys are disabled, except for this one.",
-  },
+  // Appearance
   {
     name: "Caret",
     value: "Bar, Box, Underline",
@@ -171,48 +286,17 @@ const settings = [
     description: "Add some space between digits to improve readability.",
     hotkey: "",
   },
-];
-
-const operations = [
   {
-    name: "+",
-    description: "Add the two operands together.",
-    hotkey: "+",
+    name: "Settings",
+    value: "-",
+    description: "Toggle settings visibility.",
+    hotkey: "S",
   },
   {
-    name: "-",
-    description: "Subtract operand 2 from operand 1.",
-    hotkey: "-",
-  },
-  {
-    name: "&",
-    description: "Logical AND between the two operands.",
-    hotkey: "&",
-  },
-  {
-    name: "|",
-    description: "Logical OR between the two operands.",
-    hotkey: "|",
-  },
-  {
-    name: "^",
-    description: "Logical XOR between the two operands.",
-    hotkey: "^",
-  },
-  {
-    name: "=",
-    description: "Transfer the result in operand 2.",
-    hotkey: "=",
-  },
-  {
-    name: "C",
-    description: "Clear all values (set them to 0).",
-    hotkey: "",
-  },
-  {
-    name: "↓↑",
-    description: "Swap operand 1 with operand 2.",
-    hotkey: "",
+    name: "Instructions",
+    value: "-",
+    description: "Toggle instructions visibility.",
+    hotkey: "H",
   },
 ];
 
@@ -230,51 +314,77 @@ export default function AppInstructions({
         <div class="app-instructions-sections">
           <div>
             <div class="app-instructions-section-label">General:</div>
-            <ul>
-              <li>
-                Click on a number to edit it. In a group (bin/dec/hex), the
-                numbers are connected, editing one will cause the others to
-                update. To hide numbers, click on the three toggle buttons on
-                the top-right of the group.
-              </li>
-              <li>
-                Copy a specific value (in its format) by pressing on the
-                "copy-to-clipboard" button. The "X" button sets the value to 0
-                for the entire group.
-              </li>
-              <li>
-                When in "Byte" mode, the high byte will be preserved and
-                restored when switching back to "Word".
-              </li>
-              <li>
-                When "Negative Decimal" is enabled, it's possible to manually
-                change its sign by selecting it and either delete it if it's a
-                minus sign, or type "-" to make the number negative.
-              </li>
-            </ul>
+            <div>
+              Click on a number to edit it. In a group (bin/dec/hex), the
+              numbers are connected, editing one will cause the others to
+              update. To hide numbers, click on the three toggle buttons on the
+              top-right of the group.
+            </div>
           </div>
 
           <div>
-            <div class="app-instructions-section-label">Keybindings:</div>
+            <div class="app-instructions-section-label">Editor Actions:</div>
+            <div>
+              Actions that can be performed while an editor is selected. Between
+              parenthesis, you find the equivalent of the command on the visual
+              keyboard.
+            </div>
             <table>
               <thead>
                 <tr>
-                  <th>Keybinding</th>
+                  <th>Name</th>
                   <th>Description</th>
+                  <th>Keybinding</th>
                 </tr>
               </thead>
               <tbody>
-                {keybindings.map((keybinding) => (
-                  <tr>
+                {actions.map((action, i) => (
+                  <tr key={i}>
+                    <td>{action.name}</td>
+                    <td>{action.description}</td>
                     <td>
-                      {keybinding.hotkeys.map((hotkey, index) => (
-                        <>
+                      {action.hotkeys.map((hotkey, index) => (
+                        <Fragment key={index}>
                           <code>{hotkey}</code>
-                          {index < keybinding.hotkeys.length - 1 && " "}
-                        </>
+                          {index < action.hotkeys.length - 1 && " "}
+                        </Fragment>
                       ))}
                     </td>
-                    <td>{keybinding.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="app-instructions-section-label">Calculator Mode:</div>
+            <div>
+              Calculator mode allows to perform operations between two values.
+              The widget is divided in three groups (separated by lines): the
+              first two are the operands, the last one holds the result of the
+              operation (it cannot be modified manually).
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Keybinding</th>
+                </tr>
+              </thead>
+              <tbody>
+                {operations.map((operation, i) => (
+                  <tr key={i}>
+                    <td>{operation.name}</td>
+                    <td>{operation.description}</td>
+                    <td>
+                      {operation.hotkeys.map((hotkey, index) => (
+                        <Fragment key={index}>
+                          <code>{hotkey}</code>
+                          {index < operation.hotkeys.length - 1 && " "}
+                        </Fragment>
+                      ))}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -293,8 +403,8 @@ export default function AppInstructions({
                 </tr>
               </thead>
               <tbody>
-                {settings.map((setting) => (
-                  <tr>
+                {settings.map((setting, i) => (
+                  <tr key={i}>
                     {setting.name && (
                       <td rowSpan={setting.nameRowSpan}>{setting.name}</td>
                     )}
@@ -305,36 +415,6 @@ export default function AppInstructions({
                         {setting.hotkey ? <code>{setting.hotkey}</code> : "-"}
                       </td>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            <div class="app-instructions-section-label">Calculator Mode:</div>
-            <div>
-              Calculator mode allows to perform operations between two values.
-              The widget is divided in three groups (separated by lines): the
-              first two are the operands, the last one holds the result of the
-              operation (it cannot be modified manually).
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Operation</th>
-                  <th>Description</th>
-                  <th>Hotkey</th>
-                </tr>
-              </thead>
-              <tbody>
-                {operations.map((operation) => (
-                  <tr>
-                    <td>{operation.name}</td>
-                    <td>{operation.description}</td>
-                    <td>
-                      {operation.hotkey ? <code>{operation.hotkey}</code> : "-"}
-                    </td>
                   </tr>
                 ))}
               </tbody>

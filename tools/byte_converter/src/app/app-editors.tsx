@@ -33,7 +33,6 @@ export type AppEditorsProps = {
   isVisibleHex?: boolean;
   moveAfterTypingEnabled: boolean;
   onChange: (integer: number) => void;
-  onClear?: () => void;
   prefixBin?: string;
   prefixDec?: string;
   prefixHex?: string;
@@ -73,7 +72,6 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
     isVisibleHex = false,
     moveAfterTypingEnabled,
     onChange,
-    onClear,
     prefixBin = "",
     prefixDec = "",
     prefixHex = "",
@@ -132,7 +130,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
   return (
     <>
       {isVisibleBin && (
-        <AppEditor label={prefixBin} onCopy={binProps.copy} onClear={onClear}>
+        <AppEditor label={prefixBin} onCopy={binProps.copy}>
           <Editor
             {...props}
             {...binProps}
@@ -144,7 +142,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
       )}
 
       {isVisibleDec && (
-        <AppEditor label={prefixDec} onCopy={decProps.copy} onClear={onClear}>
+        <AppEditor label={prefixDec} onCopy={decProps.copy}>
           <Editor
             {...props}
             {...decProps}
@@ -155,7 +153,7 @@ export default forwardRef<AppEditorsRef, AppEditorsProps>(function AppEditors(
       )}
 
       {isVisibleHex && (
-        <AppEditor label={prefixHex} onCopy={hexProps.copy} onClear={onClear}>
+        <AppEditor label={prefixHex} onCopy={hexProps.copy}>
           <Editor
             {...props}
             {...hexProps}

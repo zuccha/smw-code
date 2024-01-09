@@ -6,7 +6,33 @@
   gap: 0.3em;
 }
 
-.keyboard .button {
+.keyboard-key {
   height: 1.5em;
   width: 1.5em;
+}
+
+.keyboard-key > .button > div {
+  display: flex;
+}
+
+.keyboard-key .button {
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
+.keyboard-key .xxs {
+  font-size: 0.4em;
+}
+
+.keyboard-key .xs {
+  font-size: 0.5em;
+}
+
+.keyboard-key .s {
+  font-size: 0.7em;
+}
+
+.keyboard-key .l {
+  font-size: 1.2em;
 }

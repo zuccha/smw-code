@@ -36,7 +36,9 @@ export default function Caption({
         </div>
       )}
       {digits.map((digit) => (
-        <div class="caption-char">{<span>{digitToHex(digit)}</span>}</div>
+        <div class="caption-char" key={digit}>
+          {<span>{digitToHex(digit)}</span>}
+        </div>
       ))}
     </div>
   );

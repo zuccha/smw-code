@@ -41,7 +41,7 @@ export function useValue(
   integer: number,
   encoding: Encoding,
   unit: Unit,
-  signedEnabled: boolean
+  isSigned: boolean
 ): [
   string,
   {
@@ -54,20 +54,20 @@ export function useValue(
 ] {
   const toSigned = useCallback(
     (n: number): number => {
-      if (!signedEnabled) return n;
+      if (!isSigned) return n;
       if (n <= SignedBoundaries[unit].max) return n;
       return -(2 * (SignedBoundaries[unit].max + 1) - n);
     },
-    [signedEnabled, unit]
+    [isSigned, unit]
   );
 
   const fromSigned = useCallback(
     (n: number): number => {
-      if (!signedEnabled) return n;
+      if (!isSigned) return n;
       if (n >= 0) return n;
       return 2 * (SignedBoundaries[unit].max + 1) + n;
     },
-    [signedEnabled, unit]
+    [isSigned, unit]
   );
 
   const value = useMemo(() => {
@@ -77,7 +77,7 @@ export function useValue(
     const signedStr = signed.toString(Radix[encoding]).toUpperCase();
     return signed < 0
       ? `-${padL(signedStr.substring(1), length, "0")}`
-      : signedEnabled
+      : isSigned
       ? ` ${padL(signedStr, length, "0")}`
       : padL(signedStr, length, "0");
   }, [encoding, integer, toSigned, unit]);
@@ -89,13 +89,11 @@ export function useValue(
     ): number | undefined => {
       const signed = Number.parseInt(maybeValue, Radix[encoding]);
       if (Number.isNaN(signed)) return undefined;
-      const { min, max } = signedEnabled
-        ? SignedBoundaries[unit]
-        : Boundaries[unit];
+      const { min, max } = isSigned ? SignedBoundaries[unit] : Boundaries[unit];
       bounds = { ...Boundaries[unit], ...bounds };
       return fromSigned(clamp(signed, min, max));
     },
-    [encoding, fromSigned, signedEnabled, unit]
+    [encoding, fromSigned, isSigned, unit]
   );
 
   const validChar = useCallback(

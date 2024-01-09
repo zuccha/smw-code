@@ -22,6 +22,7 @@ export default function RadioGroup<T>({
         return (
           <Button
             isSelected={option.value === value}
+            key={option.value}
             label={option.label}
             onClick={onClick}
           />

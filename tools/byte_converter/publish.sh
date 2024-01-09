@@ -9,32 +9,36 @@ publish_website() {
   elif [[ ! -d $WEBSITE_PATH ]]; then
     log_warn "Skip publish $WEBSITE_NAME: website $WEBSITE_PATH is doesn't exist"
   else
-    cp dist/byte_converter.html $WEBSITE_PATH
     pushd $WEBSITE_PATH > /dev/null
 
-    if [[ -n $(git log --all --grep="$GIT_TAG") ]]; then
+    if [[ -n $(git log --all --grep="$TAG") ]]; then
       log_warn "Skip publish $WEBSITE_NAME: already published"
-      git reset byte_converter.html
     else
       log_info "Publish $WEBSITE_NAME"
 
-      local BRANCH_NAME="$(git_current_branch)"
-      git stash
-      git checkout main
+      if git status --porcelain | grep -q "^.M"; then git stash; STASHED=1; fi
 
-      git add byte_converter.html
-      git commit -m $GIT_TAG
+      local BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
+      if [[ $BRANCH_NAME != main ]]; then git checkout main; fi
+
+      cp $BYTE_CONVERTER_HTML_PATH $WEBSITE_PATH
+      git add $BYTE_CONVERTER_HTML_NAME
+      git commit -m $TAG
       git push
 
-      git checkout $BRANCH_NAME
-      git stash pop
+      if [[ $BRANCH_NAME != main ]]; then git checkout $BRANCH_NAME; fi
+      if [[ -n $STASHED ]]; then git stash pop; fi
     fi
 
     popd > /dev/null
   fi
 }
 
-if [[ -z $GIT_TAG ]]; then
+source $ROOT/_utils/log.sh
+BYTE_CONVERTER_HTML_NAME="byte_converter.html"
+BYTE_CONVERTER_HTML_PATH="$(pwd)/dist/$BYTE_CONVERTER_HTML_NAME"
+
+if [[ -z $TAG ]]; then
   log_warn "Skip publish: no Git tag"
 else
   publish_website $WEBSITE_1_NAME $WEBSITE_1_PATH

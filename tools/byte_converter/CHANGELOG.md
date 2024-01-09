@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased
+## [1.4.0] - 2024-01-09
+
+### Added
+
+- Implement digit shifts.
+- Allow to display keyboard on desktop, in compact or full mode.
+- Add command to negate the selected number.
+- Bind all commands that can be performed on the editor to hotkeys.
+
+### Changed
+
+- Restyle keyboard.
+- Rename "&", "|", and "^" to "AND", "OR", and "XOR" respectively.
+- Reorganize settings (again).
+- Improve instructions.
+- Remove "X" button next to editor, since it's now redundant with the "Clear" command.
+
+## [1.3.0] - 2024-01-09
 
 ### Added
 
