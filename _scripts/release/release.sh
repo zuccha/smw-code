@@ -134,10 +134,10 @@ case $TYPE in
 esac
 
 # Args validation
-if [[ -z "$TYPE" ]];     then echo Type $TYPE is empty;     exit 1; fi
-if [[ -z "$TYPE_DIR" ]]; then echo Type $TYPE is not valid; exit 1; fi
-if [[ -z "$NAME" ]];     then echo Type $NAME is empty;     exit 1; fi
-if [[ -z "$VERSION" ]];  then echo Type $VERSION is empty;  exit 1; fi
+if [[ -z "$TYPE" ]];     then log_fail "Type is empty";           exit 1; fi
+if [[ -z "$TYPE_DIR" ]]; then log_fail "Type $TYPE is not valid"; exit 1; fi
+if [[ -z "$NAME" ]];     then log_fail "Name is empty";           exit 1; fi
+if [[ -z "$VERSION" ]];  then log_fail "Version is empty";        exit 1; fi
 
 
 #-------------------------------------------------------------------------------
@@ -195,8 +195,8 @@ FLAG_DOC_TEXT=1
 FLAG_DOC_IMAGES=0
 
 # Resource flags
-if [[ -f $CLI_CONFIG_PATH ]]; then
-  source $CLI_CONFIG_PATH
+if [[ -f "$CLI_CONFIG_PATH" ]]; then
+  source "$CLI_CONFIG_PATH"
 fi
 
 # All phases are enabled by default, but they become opt-in if any flag is set
@@ -244,25 +244,25 @@ if [[ -n $FLAG_DOC_IMAGES_TEMP ]];   then FLAG_DOC_IMAGES=$FLAG_DOC_IMAGES_TEMP;
 if [[ -z $FIRST_RELEASE ]]; then
   # Check if resource exists
   if [[ ! -d "$SRC_PATH" ]]; then
-    log_fail "Resource $SRC_PATH doesn\'t exist"
+    log_fail "Resource $SRC_PATH doesn't exist"
     exit 1
   fi
 
   # Check if readme exists
   if [[ ! -f "$README_PATH" ]]; then
-    log_fail "Resource $SRC_PATH doesn\'t have a README"
+    log_fail "Resource $SRC_PATH doesn't have a README"
     exit 1
   fi
 
   # Check if changelog exists
   if [[ ! -f "$CHANGELOG_PATH" ]]; then
-    log_fail "Resource $SRC_PATH doesn\'t have a CHANGELOG"
+    log_fail "Resource $SRC_PATH doesn't have a CHANGELOG"
     exit 1
   fi
 fi
 
 # Setup Git commit
-if [[ -z $GIT_HASH ]]; then
+if [[ -z "$GIT_HASH" ]]; then
   GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
 fi
 
@@ -271,17 +271,17 @@ fi
 # Git Merge
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_MERGE != 1 ]]; then
+if [[ "$FLAG_PHASE_MERGE" != 1 ]]; then
   log_warn "Skip merge: disabled"
-elif [[ -n $GIT_HASH ]]; then
+elif [[ -n "$GIT_HASH" ]]; then
   log_warn "Skip merge: already merged"
-elif [[ ! $(git branch --list $GIT_BRANCH) ]]; then
+elif [[ ! $(git branch --list "$GIT_BRANCH") ]]; then
   log_warn "Skip merge: branch $GIT_BRANCH doesn\'t exist"
 else
   log_info "Merge $GIT_BRANCH"
 
-  git merge --squash $GIT_BRANCH > /dev/null
-  git commit -m $GIT_TAG > /dev/null
+  git merge --squash "$GIT_BRANCH" > /dev/null
+  git commit -m "$GIT_TAG" > /dev/null
   git push > /dev/null
   GIT_HASH=$(git log --all --grep="$GIT_TAG" | grep commit | cut -d\  -f2)
 fi
@@ -291,17 +291,17 @@ fi
 # Git Tag
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_TAG != 1 ]]; then
+if [[ "$FLAG_PHASE_TAG" != 1 ]]; then
   log_warn "Skip tag: disabled"
-elif [[ -z $GIT_HASH ]]; then
+elif [[ -z "$GIT_HASH" ]]; then
   log_warn "Skip tag: no commit found for $GIT_TAG"
-elif [[ $(git tag --list $GIT_TAG) ]]; then
+elif [[ $(git tag --list "$GIT_TAG") ]]; then
   log_warn "Skip tag: tag $GIT_TAG already exists"
 else
   log_info "Tag $GIT_TAG"
 
-  git tag -a $GIT_TAG $GIT_HASH -m $GIT_TAG > /dev/null
-  git push origin $GIT_TAG > /dev/null
+  git tag -a "$GIT_TAG" "$GIT_HASH" -m "$GIT_TAG" > /dev/null
+  git push origin "$GIT_TAG" > /dev/null
 fi
 
 
@@ -309,72 +309,72 @@ fi
 # Generate Archive
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_ARCHIVE != 1 ]]; then
+if [[ "$FLAG_PHASE_ARCHIVE" != 1 ]]; then
   log_warn "Skip archive: disabled"
 else
   log_info "Create archive $ZIP_PATH"
 
   # Copy output directory
-  mkdir -p $OUT_DIR
-  rm -rf $OUT_PATH $ZIP_PATH
+  mkdir -p "$OUT_DIR"
+  rm -rf "$OUT_PATH" "$ZIP_PATH"
 
-  if [[ -f $CLI_BUILD_PATH ]]; then
-    pushd $SRC_PATH > /dev/null
-    BUILD_OUT_PATH=$(./$CLI_BUILD_NAME)
+  if [[ -f "$CLI_BUILD_PATH" ]]; then
+    pushd "$SRC_PATH" > /dev/null
+    BUILD_OUT_PATH=$("./$CLI_BUILD_NAME")
     popd > /dev/null
 
-    mkdir -p $OUT_DIR
-    cp -r "$SRC_PATH/$BUILD_OUT_PATH" $OUT_PATH
+    mkdir -p "$OUT_DIR"
+    cp -r "$SRC_PATH/$BUILD_OUT_PATH" "$OUT_PATH"
   else
-    cp -r $SRC_PATH $OUT_PATH
+    cp -r "$SRC_PATH" "$OUT_PATH"
   fi
 
   # Remove images
-  if [[ $FLAG_DOC_IMAGES == 1 ]]; then
+  if [[ "$FLAG_DOC_IMAGES" == 1 ]]; then
     log_info "\t...with images"
   else
-    rm -rf $OUT_PATH/docs/assets/images/
+    rm -rf "$OUT_PATH/docs/assets/images/"
     if [[ -d "$OUT_PATH/docs/markdown" ]];
-    then sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md $OUT_PATH/docs/markdown/*.md
-    else sed -i "" -e 's/<img[^>]*>//g' $OUT_PATH/*.md
+    then sed -i "" -e 's/<img[^>]*>//g' "$OUT_PATH"/*.md "$OUT_PATH"/docs/markdown/*.md
+    else sed -i "" -e 's/<img[^>]*>//g' "$OUT_PATH"/*.md
     fi
   fi
 
   # Generate HTML documentation
-  if [[ $FLAG_DOC_HTML == 1 ]]; then
-    deno run --allow-read --allow-write $MD2HTML $DIST_DIR $TYPE $OUT_NAME
+  if [[ "$FLAG_DOC_HTML" == 1 ]]; then
+    deno run --allow-read --allow-write "$MD2HTML" "$DIST_DIR" "$TYPE" "$OUT_NAME"
     log_info "\t...with HTML"
   fi
 
   # Generate text documentation (README and CHANGELOG only)
-  if [[ $FLAG_DOC_TEXT == 1 ]]; then
-    deno run --allow-read --allow-write $MD2TEXT $DIST_DIR $TYPE $OUT_NAME
+  if [[ "$FLAG_DOC_TEXT" == 1 ]]; then
+    deno run --allow-read --allow-write "$MD2TEXT" "$DIST_DIR" "$TYPE" "$OUT_NAME"
     log_info "\t...with text"
   fi
 
   # Remove markdown documentation
-  if [[ $FLAG_DOC_MARKDOWN == 1 ]]; then
+  if [[ "$FLAG_DOC_MARKDOWN" == 1 ]]; then
     log_info "\t...with markdown"
   else
     rm $OUT_PATH/*.md
-    rm -rf $OUT_PATH/docs/markdown/
+    rm -rf "$OUT_PATH/docs/markdown/"
   fi
 
   # Remove all documentation
-  if [[ $FLAG_DOC_HTML != 1 && $FLAG_DOC_MARKDOWN != 1 && $FLAG_DOC_TEXT != 1 ]]; then
-    rm -rf $OUT_PATH/docs/
+  if [[ "$FLAG_DOC_HTML" != 1 && "$FLAG_DOC_MARKDOWN" != 1 && "$FLAG_DOC_TEXT" != 1 ]]; then
+    rm -rf "$OUT_PATH/docs/"
   fi
 
   # Remove CLI custom files
   if [[ -d "$OUT_PATH/$CLI_DIR" ]]; then rm -rf "$OUT_PATH/$CLI_DIR"; fi
 
   # Create archive
-  cd $OUT_DIR
-  zip -qr $ZIP_NAME $OUT_NAME -x "*.DS_Store"
+  cd "$OUT_DIR"
+  zip -qr "$ZIP_NAME" "$OUT_NAME" -x "*.DS_Store"
   cd - > /dev/null
 
   # Verify that archive has been created
-  if [[ ! -f $ZIP_PATH ]]; then
+  if [[ ! -f "$ZIP_PATH" ]]; then
     log_fail "Failed to create archive";
     exit 1
   fi
@@ -385,21 +385,21 @@ fi
 # Create Release
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_RELEASE != 1 ]]; then
+if [[ "$FLAG_PHASE_RELEASE" != 1 ]]; then
   log_warn "Skip release: disabled"
-elif [[ $(gh release list | grep $GIT_TAG) ]]; then
+elif [[ $(gh release list | grep "$GIT_TAG") ]]; then
   log_warn "Skip release: already released"
-elif [[ ! $(git tag --list $GIT_TAG) ]]; then
+elif [[ ! $(git tag --list "$GIT_TAG") ]]; then
   log_warn "Skip release: tag $GIT_TAG found"
 else
   log_info "Publish release $GH_URL"
 
   # Get notes and title
-  GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $ROOT $TYPE $NAME)
-  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $ROOT $TYPE $NAME) $VERSION"
+  GH_NOTES=$(deno run --allow-read "$GH_GET_NOTES" "$ROOT" "$TYPE" "$NAME")
+  GH_TITLE="$(deno run --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME") $VERSION"
 
   # Generate release
-  GH_URL=$(gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
+  GH_URL=$(gh release create "$GIT_TAG" "$ZIP_PATH" --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
 fi
 
 
@@ -407,11 +407,11 @@ fi
 # Notify Discord
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_DISCORD != 1 ]]; then
+if [[ "$FLAG_PHASE_DISCORD" != 1 ]]; then
   log_warn "Skip Discord: disabled"
-elif [[ -z $GH_URL ]]; then
+elif [[ -z "$GH_URL" ]]; then
   log_warn "Skip Discord: no release"
-elif [[ -z $DISCORD_WEBHOOK ]]; then
+elif [[ -z "$DISCORD_WEBHOOK" ]]; then
   log_warn "Skip Discord: no webhook"
 else
   log_info "Notify Discord"
@@ -423,26 +423,26 @@ fi
 # Update Main README
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_SUMMARY != 1 ]]; then
+if [[ "$FLAG_PHASE_SUMMARY" != 1 ]]; then
   log_warn "Skip summary: disabled"
-elif [[ -z $(gh release list | grep $GIT_TAG) ]]; then
+elif [[ -z $(gh release list | grep "$GIT_TAG") ]]; then
   log_warn "Skip summary: no release for $GIT_TAG"
-elif [[ $(jq ".$TYPE_DIR.$NAME.version" $SUMMARY_JSON) == "\"$VERSION\"" ]]; then
+elif [[ $(jq ".$TYPE_DIR.$NAME.version" "$SUMMARY_JSON") == "\"$VERSION\"" ]]; then
   log_warn "Skip summary: already up to date"
 else
   log_info "Update summary"
 
   # Update JSON
-  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $ROOT $TYPE $NAME)"
-  jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" $SUMMARY_JSON > $SUMMARY_JSON.temp
-  rm $SUMMARY_JSON
-  mv $SUMMARY_JSON.temp $SUMMARY_JSON
+  GH_TITLE="$(deno run --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME")"
+  jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" "$SUMMARY_JSON" > "$SUMMARY_JSON.temp"
+  rm "$SUMMARY_JSON"
+  mv "$SUMMARY_JSON.temp" "$SUMMARY_JSON"
 
   # Generate README
-  deno run --allow-read --allow-write $SUMMARY_UPDATE $SUMMARY_PATH $SUMMARY_JSON
+  deno run --allow-read --allow-write "$SUMMARY_UPDATE" "$SUMMARY_PATH" "$SUMMARY_JSON"
 
   # Commit update
-  git add $SUMMARY_PATH $SUMMARY_JSON > /dev/null
+  git add "$SUMMARY_PATH" "$SUMMARY_JSON" > /dev/null
   git commit -m "Update README" > /dev/null
   git push > /dev/null
 fi
@@ -452,13 +452,13 @@ fi
 # Custom Publish
 #-------------------------------------------------------------------------------
 
-if [[ $FLAG_PHASE_PUBLISH != 1 ]]; then
+if [[ "$FLAG_PHASE_PUBLISH" != 1 ]]; then
   log_warn "Skip publish: disabled"
-elif [[ ! -f $CLI_PUBLISH_PATH ]]; then
+elif [[ ! -f "$CLI_PUBLISH_PATH" ]]; then
   log_warn "Skip publish: no custom publish script"
 else
-  pushd $SRC_PATH > /dev/null
-  ./$CLI_PUBLISH_NAME
+  pushd "$SRC_PATH" > /dev/null
+  "./$CLI_PUBLISH_NAME"
   popd > /dev/null
 fi
 
@@ -468,4 +468,4 @@ fi
 
 # If all went well, print a message
 log_good "Release complete!"
-if [[ $OPEN_OUT_PATH == 1 ]]; then open $OUT_PATH; fi
+if [[ "$OPEN_OUT_PATH" == 1 ]]; then open "$OUT_PATH"; fi
