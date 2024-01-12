@@ -1,0 +1,17 @@
+verbose: on
+
+level:
+105 example.asm
+
+overworld:
+
+gamemode:
+11 csb_gm11.asm
+
+global:         other/global_code.asm
+statusbar:      other/status_code.asm
+macrolib:       other/macro_library.asm
+sprite:         $7FAC80   # 38 (SNES) or 68 (SA-1) bytes of free RAM.
+sprite-sa1:     $41AC80   # Optional for SA-1 ROMs.
+
+# rom:            none

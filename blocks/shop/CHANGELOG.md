@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Include example list file for GPS.
+
 ## [2.0.0] - 2024-01-02
 
 ### Breaking

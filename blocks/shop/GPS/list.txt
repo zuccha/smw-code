@@ -1,0 +1,4 @@
+200:130 shop_item_from_below.asm
+201:25  shop_item_through.asm
+202:130 shop_powerup_from_below.asm
+203:25  shop_powerup_through.asm
