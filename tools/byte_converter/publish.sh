@@ -34,7 +34,7 @@ publish_website() {
   fi
 }
 
-source $ROOT/_utils/log.sh
+source $ROOT/_scripts/log.sh
 BYTE_CONVERTER_HTML_NAME="byte_converter.html"
 BYTE_CONVERTER_HTML_PATH="$(pwd)/dist/$BYTE_CONVERTER_HTML_NAME"
 

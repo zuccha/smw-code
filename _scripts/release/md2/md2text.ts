@@ -1,10 +1,11 @@
-// Usage: deno run ./_utils/md2/md2text.ts --allow-read --allow-write [-v] <type> <name>
+// Usage: deno run ./md2text.ts --allow-read --allow-write [-v] <root> <type> <name>
 //  -v      Verbose
+//  <root>  Root directory
 //  <type>  Resource type, one of: "block" | "patch" | "port" | "sprite" | "tool" | "uberasm"
 //  <name>  Name of the resource
 
-import parseArgs from "../args.ts";
-import validateResource from "../resource.ts";
+import parseArgs from "../_shared/args.ts";
+import validateResource from "../_shared/resource.ts";
 
 const SEPARATOR_1 = "=".repeat(80);
 const SEPARATOR_2 = "-".repeat(80);
@@ -44,7 +45,7 @@ const convertFile = async (
 };
 
 const args = parseArgs();
-const resource = await validateResource(".dist", args.type, args.name);
+const resource = await validateResource(args.root, args.type, args.name);
 
 await convertFile(
   resource.readme.markdown.path,

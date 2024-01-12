@@ -1,7 +1,11 @@
+// Usage: deno run ./update_summary.ts --allow-read --allow-write <summary_path> <summary_json>
+//  <summary_path>  Path of the summary file to be updated
+//  <summary_json>  Path of the JSON file containing the info about the summary
+
 import { exists } from "https://deno.land/std@0.193.0/fs/mod.ts";
 import { parse } from "https://deno.land/std@0.193.0/flags/mod.ts";
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { Type, typeToDir, typeToStringPlural } from "../type.ts";
+import { Type, typeToDir, typeToStringPlural } from "../_shared/type.ts";
 
 const url = "https://github.com/zuccha/smw-code/releases/download";
 

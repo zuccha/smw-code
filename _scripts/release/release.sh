@@ -2,7 +2,7 @@
 #                                RELEASE SCRIPT                                #
 ################################################################################
 
-# Usage: ./_utils/release [flags] <type> <name> <version>
+# Usage: ./release [flags] <type> <name> <version>
 #
 #   Go through all the steps to publish a release of a resource on GitHub:
 #     - Merge: Merge a branch named as the resource tag into main. This branch
@@ -63,9 +63,14 @@
 # Make script exit if any command fails
 set -e
 
+# Variables used in child scripts
+export ROOT=$(pwd)
+export TAG="$TYPE/$NAME/$VERSION"
+SCRIPT_PATH="$(dirname ${BASH_SOURCE[0]})"
+
 # Load env and utilities
 source .env
-source _utils/log.sh
+source $SCRIPT_PATH/../log.sh
 
 
 #-------------------------------------------------------------------------------
@@ -191,16 +196,12 @@ if [[ -n $FLAG_DOC_IMAGES_TEMP ]];   then FLAG_DOC_IMAGES=$FLAG_DOC_IMAGES_TEMP;
 # Defines
 #-------------------------------------------------------------------------------
 
-# Variables used in child scripts
-export ROOT=$(pwd)
-export TAG="$TYPE/$NAME/$VERSION"
-
 # Tools
-MD2HTML="./_utils/md2/md2html.ts"
-MD2TEXT="./_utils/md2/md2text.ts"
-GH_GET_TITLE="./_utils/gh/gh_get_title.ts"
-GH_GET_NOTES="./_utils/gh/gh_get_notes.ts"
-SUMMARY_UPDATE="./_utils/summary/update_summary.ts"
+MD2HTML="$SCRIPT_PATH/md2/md2html.ts"
+MD2TEXT="$SCRIPT_PATH/md2/md2text.ts"
+GH_GET_TITLE="$SCRIPT_PATH/gh/gh_get_title.ts"
+GH_GET_NOTES="$SCRIPT_PATH/gh/gh_get_notes.ts"
+SUMMARY_UPDATE="$SCRIPT_PATH/summary/update_summary.ts"
 
 # Git
 GIT_TAG=$TAG
@@ -222,7 +223,8 @@ CHANGELOG_NAME="CHANGELOG.md"
 CHANGELOG_PATH="$SRC_PATH/$CHANGELOG_NAME"
 
 # Output directory and files
-OUT_DIR="./.dist/$TYPE_DIR"
+DIST_DIR="./.dist"
+OUT_DIR="$DIST_DIR/$TYPE_DIR"
 OUT_NAME="$NAME-$VERSION"
 OUT_PATH="$OUT_DIR/$OUT_NAME"
 ZIP_NAME="$OUT_NAME.zip"
@@ -334,13 +336,13 @@ else
 
   # Generate HTML documentation
   if [[ $FLAG_DOC_HTML == 1 ]]; then
-    deno run --allow-read --allow-write $MD2HTML $TYPE $OUT_NAME
+    deno run --allow-read --allow-write $MD2HTML $DIST_DIR $TYPE $OUT_NAME
     log_info "\t...with HTML"
   fi
 
   # Generate text documentation (README and CHANGELOG only)
   if [[ $FLAG_DOC_TEXT == 1 ]]; then
-    deno run --allow-read --allow-write $MD2TEXT $TYPE $OUT_NAME
+    deno run --allow-read --allow-write $MD2TEXT $DIST_DIR $TYPE $OUT_NAME
     log_info "\t...with text"
   fi
 
@@ -387,8 +389,8 @@ else
   log_info "Publish release $GH_URL"
 
   # Get notes and title
-  GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $TYPE $NAME)
-  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME) $VERSION"
+  GH_NOTES=$(deno run --allow-read $GH_GET_NOTES $ROOT $TYPE $NAME)
+  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $ROOT $TYPE $NAME) $VERSION"
 
   # Generate release
   GH_URL=$(gh release create $GIT_TAG $ZIP_PATH --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
@@ -425,7 +427,7 @@ else
   log_info "Update summary"
 
   # Update JSON
-  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $TYPE $NAME)"
+  GH_TITLE="$(deno run --allow-read $GH_GET_TITLE $ROOT $TYPE $NAME)"
   jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" $SUMMARY_JSON > $SUMMARY_JSON.temp
   rm $SUMMARY_JSON
   mv $SUMMARY_JSON.temp $SUMMARY_JSON

@@ -1,5 +1,6 @@
-// Usage: deno run ./_utils/md2/md2html.ts --allow-read --allow-write [-v] <type> <name>
+// Usage: deno run ./md2html.ts --allow-read --allow-write [-v] <root> <type> <name>
 //  -v      Verbose
+//  <root>  Root directory
 //  <type>  Resource type, one of: "block" | "patch" | "port" | "sprite" | "tool" | "uberasm"
 //  <name>  Name of the resource
 
@@ -12,8 +13,8 @@ import {
 import { CSS, render } from "https://deno.land/x/gfm@0.2.5/mod.ts";
 import prettier from "npm:prettier";
 import "https://esm.sh/prismjs@1.29.0/components/prism-asm6502?no-check";
-import parseArgs from "../args.ts";
-import validateResource from "../resource.ts";
+import parseArgs from "../_shared/args.ts";
+import validateResource from "../_shared/resource.ts";
 import "./assets/syntax_asar.js";
 import "./assets/syntax_uberasm.js";
 
