@@ -2,7 +2,7 @@
 #                                RELEASE SCRIPT                                #
 ################################################################################
 
-# Usage: ./release [flags] <type> <name> <version>
+# Usage: ./release.sh [flags] <type> <name> <version>
 #
 #   Go through all the steps to publish a release of a resource on GitHub:
 #     - Merge: Merge a branch named as the resource tag into main. This branch
@@ -23,10 +23,11 @@
 #   phase flag will disable that phase.
 #
 #   By default, only text documentation is included in the release, but it can
-#   be controlled either by defining a ".release" file in the resource that
-#   overrides the defaults, or via flags. Flags have the highest priority. Using
-#   a positive documentation flag will produce that type of documentation, while
-#   a negative flag will prohibit it (if enabled by default or in ".release").
+#   be controlled either by defining a ".smw/config_release.sh" file in the
+#   resource that overrides the defaults, or via flags. Flags have the highest
+#   priority. Using a positive documentation flag will produce that type of
+#   documentation, while a negative flag will prohibit it (if enabled by default
+#   or in ".smw/config_release.sh").
 #
 #   Args:
 #     <type>      Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
@@ -140,6 +141,50 @@ if [[ -z "$VERSION" ]];  then echo Type $VERSION is empty;  exit 1; fi
 
 
 #-------------------------------------------------------------------------------
+# Defines
+#-------------------------------------------------------------------------------
+
+# Tools
+MD2HTML="$SCRIPT_PATH/md2/md2html.ts"
+MD2TEXT="$SCRIPT_PATH/md2/md2text.ts"
+GH_GET_TITLE="$SCRIPT_PATH/gh/gh_get_title.ts"
+GH_GET_NOTES="$SCRIPT_PATH/gh/gh_get_notes.ts"
+SUMMARY_UPDATE="$SCRIPT_PATH/summary/update_summary.ts"
+
+# Git
+GIT_TAG=$TAG
+GIT_BRANCH="feat/$GIT_TAG"
+
+# Summary
+SUMMARY_PATH="./README.md"
+SUMMARY_JSON="./releases.json"
+
+# Source directory and files
+SRC_PATH="./$TYPE_DIR/$NAME"
+README_NAME="README.md"
+README_PATH="$SRC_PATH/$README_NAME"
+CHANGELOG_NAME="CHANGELOG.md"
+CHANGELOG_PATH="$SRC_PATH/$CHANGELOG_NAME"
+
+# Custom CLI scripts
+CLI_DIR=".smw"
+CLI_CONFIG_NAME="$CLI_DIR/release_config.sh"
+CLI_CONFIG_PATH="$SRC_PATH/$CLI_CONFIG_NAME"
+CLI_BUILD_NAME="$CLI_DIR/release_build.sh"
+CLI_BUILD_PATH="$SRC_PATH/$CLI_BUILD_NAME"
+CLI_PUBLISH_NAME="$CLI_DIR/release_publish.sh"
+CLI_PUBLISH_PATH="$SRC_PATH/$CLI_PUBLISH_NAME"
+
+# Output directory and files
+DIST_DIR="./.dist"
+OUT_DIR="$DIST_DIR/$TYPE_DIR"
+OUT_NAME="$NAME-$VERSION"
+OUT_PATH="$OUT_DIR/$OUT_NAME"
+ZIP_NAME="$OUT_NAME.zip"
+ZIP_PATH="$OUT_DIR/$ZIP_NAME"
+
+
+#-------------------------------------------------------------------------------
 # Flags
 #-------------------------------------------------------------------------------
 
@@ -150,8 +195,8 @@ FLAG_DOC_TEXT=1
 FLAG_DOC_IMAGES=0
 
 # Resource flags
-if [[ -f "./$TYPE_DIR/$NAME/.release" ]]; then
-  source "./$TYPE_DIR/$NAME/.release"
+if [[ -f $CLI_CONFIG_PATH ]]; then
+  source $CLI_CONFIG_PATH
 fi
 
 # All phases are enabled by default, but they become opt-in if any flag is set
@@ -190,45 +235,6 @@ if [[ -n $FLAG_DOC_MARKDOWN_TEMP ]]; then FLAG_DOC_MARKDOWN=$FLAG_DOC_MARKDOWN_T
 if [[ -n $FLAG_DOC_HTML_TEMP ]];     then FLAG_DOC_HTML=$FLAG_DOC_HTML_TEMP;         fi
 if [[ -n $FLAG_DOC_TEXT_TEMP ]];     then FLAG_DOC_TEXT=$FLAG_DOC_TEXT_TEMP;         fi
 if [[ -n $FLAG_DOC_IMAGES_TEMP ]];   then FLAG_DOC_IMAGES=$FLAG_DOC_IMAGES_TEMP;     fi
-
-
-#-------------------------------------------------------------------------------
-# Defines
-#-------------------------------------------------------------------------------
-
-# Tools
-MD2HTML="$SCRIPT_PATH/md2/md2html.ts"
-MD2TEXT="$SCRIPT_PATH/md2/md2text.ts"
-GH_GET_TITLE="$SCRIPT_PATH/gh/gh_get_title.ts"
-GH_GET_NOTES="$SCRIPT_PATH/gh/gh_get_notes.ts"
-SUMMARY_UPDATE="$SCRIPT_PATH/summary/update_summary.ts"
-
-# Git
-GIT_TAG=$TAG
-GIT_BRANCH="feat/$GIT_TAG"
-
-# Summary
-SUMMARY_PATH="./README.md"
-SUMMARY_JSON="./releases.json"
-
-# Source directory and files
-SRC_PATH="./$TYPE_DIR/$NAME"
-SRC_BUILD_NAME="build.sh"
-SRC_BUILD_PATH="$SRC_PATH/$SRC_BUILD_NAME"
-SRC_PUBLISH_NAME="publish.sh"
-SRC_PUBLISH_PATH="$SRC_PATH/$SRC_PUBLISH_NAME"
-README_NAME="README.md"
-README_PATH="$SRC_PATH/$README_NAME"
-CHANGELOG_NAME="CHANGELOG.md"
-CHANGELOG_PATH="$SRC_PATH/$CHANGELOG_NAME"
-
-# Output directory and files
-DIST_DIR="./.dist"
-OUT_DIR="$DIST_DIR/$TYPE_DIR"
-OUT_NAME="$NAME-$VERSION"
-OUT_PATH="$OUT_DIR/$OUT_NAME"
-ZIP_NAME="$OUT_NAME.zip"
-ZIP_PATH="$OUT_DIR/$ZIP_NAME"
 
 
 #-------------------------------------------------------------------------------
@@ -312,9 +318,9 @@ else
   mkdir -p $OUT_DIR
   rm -rf $OUT_PATH $ZIP_PATH
 
-  if [[ -f $SRC_BUILD_PATH ]]; then
+  if [[ -f $CLI_BUILD_PATH ]]; then
     pushd $SRC_PATH > /dev/null
-    BUILD_OUT_PATH=$(./$SRC_BUILD_NAME)
+    BUILD_OUT_PATH=$(./$CLI_BUILD_NAME)
     popd > /dev/null
 
     mkdir -p $OUT_DIR
@@ -359,8 +365,8 @@ else
     rm -rf $OUT_PATH/docs/
   fi
 
-  # Remove config file
-  if [[ -f "$OUT_PATH/.release" ]]; then rm $OUT_PATH/.release; fi
+  # Remove CLI custom files
+  if [[ -d "$OUT_PATH/$CLI_DIR" ]]; then rm -rf "$OUT_PATH/$CLI_DIR"; fi
 
   # Create archive
   cd $OUT_DIR
@@ -448,11 +454,11 @@ fi
 
 if [[ $FLAG_PHASE_PUBLISH != 1 ]]; then
   log_warn "Skip publish: disabled"
-elif [[ ! -f $SRC_PUBLISH_PATH ]]; then
+elif [[ ! -f $CLI_PUBLISH_PATH ]]; then
   log_warn "Skip publish: no custom publish script"
 else
   pushd $SRC_PATH > /dev/null
-  ./$SRC_PUBLISH_NAME
+  ./$CLI_PUBLISH_NAME
   popd > /dev/null
 fi
 
