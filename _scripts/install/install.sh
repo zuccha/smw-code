@@ -4,6 +4,9 @@
 
 # Usage: ./install.sh [flags] <type> <name> [<project_name>]
 #
+#   Install a resource in a project. If the project doesn't exist, it will
+#   create a new one.
+#
 #   Args:
 #     <type>          Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
 #     <name>          Name of the resource
