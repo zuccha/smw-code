@@ -9,19 +9,6 @@
 ; Utils
 ;-------------------------------------------------------------------------------
 
-; Draw empty spaces to erase any previous drawing.
-; @param Y: Slot position.
-; @param <size>: How many empty spaces to draw.
-macro draw_empty_spaces(size)
-    SEP #$20 : LDA #$FC
-    !i #= 0
-    while !i < <size>
-        STA $0000+!i|!addr,y
-        !i #= !i+1
-    endif
-    REP #$20
-endmacro
-
 ; Draw a group of items in given slot positions.
 ; We iterate over items (coins, time, etc.) to display in the status bar. If the
 ; item can be shown, it will be drawn in the current slot, otherwise we go to
@@ -36,27 +23,44 @@ endmacro
 macro handle_group(group, size)
     !items = group<group>_items_table
     !slots = group<group>_slots_table
-    !items_size = #group<group>_items_table_end-!items
-    !slots_size = #group<group>_slots_table_end-!slots
+    !items_size = group<group>_items_table_end-!items
+    !slots_size = group<group>_slots_table_end-!slots
+
     ; Draw every visible item in a slot.
-    LDX #$0000                        ; Track items
-    LDY #$0000                        ; Track slots
--   CPX.w !items_size : BCS +         ; If we still have elements...
-    CPY.w !slots_size : BCS +         ; ...and slots available
-    PHX : TYX : LDA.l !slots,x : PLX  ; "We have `LDA.l <slots>,y` at home"
-    JSR (!items,x) : BEQ ++           ; Handle current item X at slot position Y
-    INY : INY                         ; Go to the next slot
-++  INX : INX                         ; Go to the next item
-    BRA -                             ; Loop
-+   ; Draw unoccupied slots with empty spaces to erase any previous drawing (in
+    LDX #$00                          ; Track slots
+    LDY #$00                          ; Track items
+?-  CPY.b #!items_size : BCS ?cleanup ; If we still have elements...
+    CPX.b #!slots_size : BCS ?cleanup ; ...and slots available
+
+    REP #$20                          ; Fetch and store the next tile address
+    LDA.l !slots,x : STA !tile_addr   ; that will be used by handlers to draw
+    SEP #$20                          ; in the status bar
+
+    PHX : PHY                         ; Invoke item handler
+    TYX : JSR (!items,x)              ; We have `JSR (!items,y)` at home
+    PLY : PLX                         ; If handler didn't draw anything
+    BCC ?++                           ; Then don't shift slot
+
+    INX #2                            ; Go to the next slot
+?++ INY #2                            ; Go to the next item
+    BRA ?-                            ; Loop
+
+    ; Draw unoccupied slots with empty spaces to erase any previous drawing (in
     ; case elements shifted).
-    TYX                               ; We no longer need X, we can use it for slots
--   CPX.w !slots_size : BCS +         ; If we still have slots
-    LDA.l !slots,x : TAY              ; Load slot position
-    %draw_empty_spaces(<size>)        ; Fill the slot with empty spaces
-    INX : INX                         ; Go to the next slot
-    BRA -
-+
+?cleanup
+    CPX.b #!slots_size : BCS ?+       ; If we still have slots
+
+    REP #$20                          ; Fetch and store the next tile address
+    LDA.l !slots,x : STA !tile_addr   ; that will be used by handlers to draw
+    SEP #$20                          ; in the status bar
+
+    LDA #$FC                          ; Draw a number of empty spaces
+    LDY.b #(<size>-1)                 ; equal to the size of the slot
+?-  %draw_tile()
+    DEY : BPL ?-
+
+    INX #2 : BRA ?cleanup             ; Go to the next slot
+?+
 endmacro
 
 
@@ -66,14 +70,12 @@ endmacro
 
 ; Main routine, draw all the elements of the status bar.
 main:
-    SEP #$30 : LDA ram_status_bar_visibility : BNE +
+    LDA ram_status_bar_visibility : BNE +
     RTL
 
-+   REP #$30
-    %handle_group(1, 4)
++   %handle_group(1, 4)
     %handle_group(2, 7)
     JSR handle_power_up
-    SEP #$30
     RTL
 
 
