@@ -68,7 +68,13 @@ JMP Ignore : JMP Ignore : JMP Ignore
 
 ; Redefine RAM base address.
 ; It has to be the same as the one in ram.asm!
-!freeram_address = $7FB700
+!freeram_address     = $7FB700
+!freeram_address_sa1 = $40A700
+
+; Update freeram address if SA-1.
+if read1($00FFD5) == $23
+    !freeram_address = !freeram_address_sa1
+endif
 
 ; Macro for generating addresses.
 macro define_ram(offset, name)
