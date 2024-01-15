@@ -6,7 +6,17 @@
 
 
 ;-------------------------------------------------------------------------------
-; Slot Addresses
+; Constants
+;-------------------------------------------------------------------------------
+
+; How many tiles are in each group and in total.
+!group_1_tiles_count = $04
+!group_2_tiles_count = $07
+!total_tiles_count   = $37
+
+
+;-------------------------------------------------------------------------------
+; Tilemap
 ;-------------------------------------------------------------------------------
 
 ; We use $0E-$0F to store the address of the next status bar RAM address where
@@ -14,7 +24,7 @@
 !tile_addr = $0E
 
 ; Draw the value in A by storing it in the status bar tilemap RAM address, then
-; go to next tile.
+; go to next tile address.
 ; @param A: The tile to draw in the status bar.
 macro draw_tile()
     STA (!tile_addr)

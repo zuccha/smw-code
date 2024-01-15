@@ -67,12 +67,12 @@ if !sa1
 else
     LDA #$81 : STA $4200
 endif
-    LDA $22 : STA $2111
-    LDA $23 : STA $2111
-    LDA $24 : STA $2112
-    LDA $25 : STA $2112
-    LDA $3E : STA $2105
-    LDA $40 : STA $2131
+    LDA $22 : STA $2111   ;\
+    LDA $23 : STA $2111   ;|
+    LDA $24 : STA $2112   ;| Draw normal layer 3 in place of the status bar
+    LDA $25 : STA $2112   ;| on layer 3 (duh)
+    LDA $3E : STA $2105   ;|
+    LDA $40 : STA $2131   ;/
     JML $0082B0|!bank
 .enable:
     LDA $4211 : STY $4209 ; Restore original code

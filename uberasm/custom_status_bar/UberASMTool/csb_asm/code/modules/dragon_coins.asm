@@ -36,10 +36,10 @@ are_dragon_coins_collected:
 draw_dragon_coins_custom_collected_graphics:
     LDA ram_use_custom_dragon_coins_collected_graphics : BEQ +
     LDA $00 : CMP #$05 : BCC +
-    LDX #$00
+    LDX #!group_2_tiles_count-1
 -   LDA ram_custom_dragon_coins_collected_graphics,x
-    %draw_tile()
-    INX : CPX #$06 : BCC -
+    TXY : STA (!tile_addr),y
+    DEX : BPL -
     SEC : RTS
 +   CLC : RTS
 
@@ -88,9 +88,9 @@ handle_dragon_coins:
 .skip
     ; Draw custom collected graphics if necessary.
     JSR draw_dragon_coins_custom_collected_graphics : BCS .return
-    ; Draw empty spaces (size is 7) to erase the indicator.
+    ; Draw empty spaces to erase the indicator.
     LDA #$FC
-    LDY #$06
+    LDY #!group_2_tiles_count-1
 -   %draw_tile()
     DEY : BPL -
     BRA .return
