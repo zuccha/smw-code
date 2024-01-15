@@ -28,11 +28,18 @@
 ; Whether to enable the status bar or not.
 ; When disabled, nothing will render and layer 3 is free.
 ; * Values:
-;     0 = Disabled
-;     1 = Enabled
-; * Default: 1
+;     0 = Never, and free layer 3 space
+;     1 = Never
+;     2 = Always
+; * Default: 2
 ; * RAM: csb_ram_status_bar_visibility
-!status_bar_visibility = 1
+; N.B.: Visibility = 0 should be used only in levels with a layer 3 background,
+; where you need the extra space at the top. You should set the value in the
+; level init, and don't change it mid-level (e.g., via toggle block), since the
+; status bar will reappear with the wrong colors. Also, don't use message boxes,
+; or the status bar will reappear, but broken (why would you use message boxes
+; in a layer 3 level anyway, right?).
+!status_bar_visibility = 2
 
 
 ;-------------------------------------------------------------------------------

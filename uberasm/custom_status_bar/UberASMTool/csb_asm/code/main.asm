@@ -73,6 +73,13 @@ main:
     LDA ram_status_bar_visibility : BNE +
     RTL
 
++   CMP #$02 : BCS +
+    LDA #$FC
+    LDX #!total_tiles_count-1
+-   STA $0EF9|!addr,x
+    DEX : BPL -
+    RTL
+
 +   %handle_group(1, 4)
     %handle_group(2, 7)
     JSR handle_power_up

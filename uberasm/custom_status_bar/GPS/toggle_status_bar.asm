@@ -70,8 +70,8 @@ Toggle:
     RTL
 
     ; If visibility is 1 set it to 0, if it is 0 set it to 1.
-+   LDA ram_status_bar_visibility : BEQ +
-    LDA #$00 : STA ram_status_bar_visibility : RTL
++   LDA ram_status_bar_visibility : CMP #$02 : BEQ +
+    LDA #$02 : STA ram_status_bar_visibility : RTL
 +   LDA #$01 : STA ram_status_bar_visibility : RTL
 
 
