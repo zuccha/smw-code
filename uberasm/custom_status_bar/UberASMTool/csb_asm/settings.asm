@@ -39,6 +39,9 @@
 ; status bar will reappear with the wrong colors. Also, don't use message boxes,
 ; or the status bar will reappear, but broken (why would you use message boxes
 ; in a layer 3 level anyway, right?).
+; N.B.: When 0 and 1, status bar features will never work, even if the related
+; !always_check_<feature> flag is turned on. For example, time will not tick
+; even if !always_check_time = 1.
 !status_bar_visibility = 2
 
 
