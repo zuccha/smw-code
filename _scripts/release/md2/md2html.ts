@@ -1,4 +1,4 @@
-// Usage: deno run ./md2html.ts --allow-read --allow-write [-v] <root> <type> <name>
+// Usage: deno run ./md2html.ts --allow-read --allow-sys --allow-write [-v] <root> <type> <name>
 //  -v      Verbose
 //  <root>  Root directory
 //  <type>  Resource type, one of: "block" | "patch" | "port" | "sprite" | "tool" | "uberasm"

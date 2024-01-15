@@ -64,9 +64,7 @@
 # Make script exit if any command fails
 set -e
 
-# Variables used in child scripts
-export ROOT=$(pwd)
-export TAG="$TYPE/$NAME/$VERSION"
+# Name of the script
 SCRIPT_PATH="$(dirname ${BASH_SOURCE[0]})"
 
 # Load env and utilities
@@ -143,6 +141,10 @@ if [[ -z "$VERSION" ]];  then log_fail "Version is empty";        exit 1; fi
 #-------------------------------------------------------------------------------
 # Defines
 #-------------------------------------------------------------------------------
+
+# Variables used in child scripts
+export ROOT=$(pwd)
+export TAG="$TYPE/$NAME/$VERSION"
 
 # Tools
 MD2HTML="$SCRIPT_PATH/md2/md2html.ts"
@@ -342,7 +344,7 @@ else
 
   # Generate HTML documentation
   if [[ "$FLAG_DOC_HTML" == 1 ]]; then
-    deno run --allow-read --allow-write "$MD2HTML" "$DIST_DIR" "$TYPE" "$OUT_NAME"
+    deno run --allow-read --allow-sys --allow-write "$MD2HTML" "$DIST_DIR" "$TYPE" "$OUT_NAME"
     log_info "\t...with HTML"
   fi
 
