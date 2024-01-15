@@ -15,9 +15,9 @@
 ; the next one. Whenever we draw an item into a slot, then we select the next
 ; slot. This way, items are drawn in slots by their priority. Pseudo-code:
 ;   x = 0, y = 0
-;   while (x < items.size && y < slots.size)
-;     if (items[x].handle(slots[y])) ++y
-;     ++x
+;   while (x < slots.size && y < items.size)
+;     if (items[y].handle(slots[x])) ++x
+;     ++y
 ; @param <group>: Number of the group (either 1 or 2).
 ; @param <size>: Width of the group, in tiles.
 macro handle_group(group, size)
@@ -70,18 +70,23 @@ endmacro
 
 ; Main routine, draw all the elements of the status bar.
 main:
-    LDA ram_status_bar_visibility : BNE +
+    LDA ram_status_bar_visibility : ASL : TAX
+    JMP (.visibility_ptrs,x)
+.visibility_ptrs: dw .disabled, .hidden, .visible
+
+.disabled
     RTL
 
-+   CMP #$02 : BCS +
-    LDA #$FC
-    LDX #!total_tiles_count-1
--   STA $0EF9|!addr,x
-    DEX : BPL -
+.hidden
+    LDA #$FC                    ;\
+    LDX #!total_tiles_count-1   ;| Clear each tile of the status bar tilemap
+-   STA $0EF9|!addr,x           ;|
+    DEX : BPL -                 ;/
     RTL
 
-+   %handle_group(1, 4)
-    %handle_group(2, 7)
+.visible
+    %handle_group(1, !group_1_tiles_count)
+    %handle_group(2, !group_2_tiles_count)
     JSR handle_power_up
     RTL
 
