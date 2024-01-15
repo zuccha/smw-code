@@ -9,9 +9,9 @@
 ; N.B.: We are inside CSB's namespace, so you don't have to prefix RAM addresses
 ; with `csb`. You use the plain RAM address.
 ; For example, this is correct
-;   LDA #$00 : STA ram_status_bar_visibility
+;   LDA #$01 : STA ram_status_bar_visibility
 ; and this is wrong
-;   LDA #$00 : STA csb_ram_status_bar_visibility
+;   LDA #$01 : STA csb_ram_status_bar_visibility
 
 ; Registers come in 8-bit and should be in 8-bit when returning. You don't have
 ; to worry about pushing registers to the stack or resetting them, this is

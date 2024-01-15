@@ -86,8 +86,8 @@
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
 ; !reset_bonus_stars_when_bonus_stars_limit_reached.
 ; * Values:
-;     0 = Don't add bonus stars when completing level
-;     1 = Add bonus stars when completing level (vanilla)
+;     0 = Don't start bonus game
+;     1 = Start bonus game (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_start_bonus_game_when_bonus_stars_limit_reached
 !start_bonus_game_when_bonus_stars_limit_reached = 1
@@ -173,6 +173,7 @@
 ;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_lives_visibility
+; N.B.: Disabling this will not prevent the player to lose lives and game over.
 !lives_visibility = 1
 
 ; Symbol in front of the lives counter.
@@ -305,6 +306,7 @@
 ;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_score_visibility
+; N.B.: Even when hidden, the score will still be increased.
 !score_visibility = 1
 
 
