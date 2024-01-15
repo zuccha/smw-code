@@ -1,7 +1,6 @@
 verbose: on
 
 level:
-105 example.asm
 
 overworld:
 

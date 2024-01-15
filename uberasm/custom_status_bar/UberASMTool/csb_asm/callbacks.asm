@@ -9,13 +9,13 @@
 ; N.B.: We are inside CSB's namespace, so you don't have to prefix RAM addresses
 ; with `csb`. You use the plain RAM address.
 ; For example, this is correct
-;   LDA #$ 00 : STA ram_status_bar_visibility
+;   LDA #$01 : STA ram_status_bar_visibility
 ; and this is wrong
-;   LDA #$ 00 : STA csb_ram_status_bar_visibility
+;   LDA #$01 : STA csb_ram_status_bar_visibility
 
-; Every routine specifies in which modes the registers are in. You don't have to
-; worry about pushing registers to the stack or resetting them, this is handled
-; automatically.
+; Registers come in 8-bit and should be in 8-bit when returning. You don't have
+; to worry about pushing registers to the stack or resetting them, this is
+; handled automatically.
 
 
 ;-------------------------------------------------------------------------------
@@ -23,7 +23,6 @@
 ;-------------------------------------------------------------------------------
 
 ; Called when the amount of collected bonus stars equals !bonus_stars_limit.
-; Registers: A (8-bit), X/Y (16-bit)
 trigger_bonus_stars_limit_reached:
     ; Add your code here.
     RTS
@@ -34,7 +33,6 @@ trigger_bonus_stars_limit_reached:
 ;-------------------------------------------------------------------------------
 
 ; Called when the amount of collected coins equals !coins_limit.
-; Registers: A (8-bit), X/Y (16-bit)
 trigger_coins_limit_reached:
     ; Add your code here.
     RTS
@@ -45,7 +43,6 @@ trigger_coins_limit_reached:
 ;-------------------------------------------------------------------------------
 
 ; Called when the time reaches zero.
-; Registers: A (8-bit), X/Y (16-bit)
 trigger_time_run_out:
     ; Add your code here.
     RTS

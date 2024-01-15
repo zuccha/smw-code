@@ -1,10 +1,24 @@
 # Changelog
 
-## Unreleased
+## [0.3.0] - 2024-01-15
 
 ### Added
 
 - Include example list file for UberASMTool.
+- Include level files to enable and disable the status bar, and one with a
+  version with only coins and time.
+- Include a GPS block to toggle the status bar visibility.
+- Allow to hide the status bar without disabling IRQ (and all problems that come
+  with that).
+
+### Modified
+
+- Reorganize code folder structure.
+- Refactor code to almost always operate in 8-bit mode.
+
+### Removed
+
+- Remove generic example level code.
 
 ## [0.2.1] - 2024-01-03
 

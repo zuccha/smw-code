@@ -83,7 +83,7 @@ org $008C89
     db $FC, !color_white ; (28,02), ($1C,$02), RAM: $0F13
     db $FC, !color_white ; (29,02), ($1D,$02), RAM: $0F14
     ; Bottom row
-    ; Not available :(  ; (02,03), ($02,$03), RAM: N/A
+    ; Not available :(   ; (02,03), ($02,$03), RAM: N/A
     db $FC, !color_gold  ; (03,03), ($03,$03), RAM: $0F15
     db $FC, !color_gold  ; (04,03), ($04,$03), RAM: $0F16
     db $FC, !color_gold  ; (05,03), ($05,$03), RAM: $0F17

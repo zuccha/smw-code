@@ -40,15 +40,15 @@ pushpc
 pullpc
 
 ; Hijack
-%include_code("generic/hijacks.asm")
+%include_code("hijacks.asm")
 
 ; RAM
 %include_file("ram.asm") ; RAM turns off namespace
 namespace "internal"
 
 ; Utils
-%include_code("generic/utils.asm")
-%include_code("generic/reset.asm")
+%include_code("utils.asm")
+%include_code("reset.asm")
 %include_file("callbacks.asm")
 
 ; Modules
@@ -61,7 +61,7 @@ namespace "internal"
 %include_code("modules/time.asm")
 
 ; Main routine
-%include_code("generic/main.asm")
+%include_code("main.asm")
 
 ; Public stuff
-%include_code("generic/public.asm")
+%include_code("public.asm")

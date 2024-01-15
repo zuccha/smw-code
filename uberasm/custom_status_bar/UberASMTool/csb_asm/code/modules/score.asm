@@ -18,22 +18,15 @@
 ;-------------------------------------------------------------------------------
 
 ; Draw score counter on status bar.
-; @param A (16-bit): Slot position.
-; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
-; @return Z: 0 if the indicator has been drawn, 1 otherwise.
+; @return C: 1 if the indicator has been drawn, 0 otherwise.
 handle_score:
-    ; Backup registers and check visibility.
-    PHX : PHY : PHA ; Stack: X, Y, Slot <-
     %check_visibility(score)
 
 .visibility0
 .visibility2
-    %return_handler_hidden()
+    CLC : RTS
 
 .visibility1
-    ; Draw last hardcoded zero, before we start incrementing X.
-    PLX : SEP #$20 : LDA #$00 : STA $0006|!addr,x : PHX ; Stack: X, Y, Slot <-
-
     ; This part draws the three-bytes hexadecimal number as six decimal digits.
     ;   00 00 FF => 000255
     ;   0F 32 4F => 999999
@@ -41,31 +34,32 @@ handle_score:
     ; understand what the formula is for the conversion. I suggest to take a
     ; look at the original code at address $009012.
     ; https://www.smwcentral.net/?p=memorymap&game=smw&region=rom&address=009012&context=
-    SEP #$10 : LDA $0DB3|!addr : ASL ; Load player number * 3 in Y
-    CLC : ADC $0DB3|!addr : TAY      ; $00 = Mario, $03 = Luigi
-    LDA $0F36|!addr,y : STA $00      ; Setup for drawing numbers:
-    STZ $01                          ; - $00-$01: High word of subtraend
-    LDA $0F35|!addr,y : STA $03      ; - $02-$03: Low word of subtraend
-    LDA $0F34|!addr,y : STA $02      ; Check original code for more info
-    REP #$10 : PLX : LDY #$0000      ; Setup indices, Stack: X, Y <-
+    LDA $0DB3|!addr : ASL           ; Load player number * 3 in Y
+    CLC : ADC $0DB3|!addr : TAY     ; $00 = Mario, $03 = Luigi
+    LDA $0F36|!addr,y : STA $00     ; Setup for drawing numbers:
+    STZ $01                         ; - $00-$01: High word of subtraend
+    LDA $0F35|!addr,y : STA $03     ; - $02-$03: Low word of subtraend
+    LDA $0F34|!addr,y : STA $02     ; Check original code for more info
+    LDX #$00                        ; X iterates something ¯\_(ツ)_/¯
 .draw_six_digits_number
-    SEP #$20
-    STZ $0000|!addr,x
+    LDA #$00 : STA (!tile_addr)
 -   REP #$20
-    PHX : TYX ; We need to use X for this because `SBC.l addr,y` doesn't exist
     LDA $02 : SEC : SBC.l six_digits_low_byte_table,x : STA $06
     LDA $00 : SBC.l six_digits_high_byte_table,x : STA $04
-    PLX
     BCC +
     LDA $06 : STA $02
     LDA $04 : STA $00
-    SEP #$20 : INC $0000|!addr,x
+    SEP #$20
+    LDA (!tile_addr) : INC A : STA (!tile_addr)
     BRA -
-+   INX : INY : INY : INY : INY
-    CPY #$0018 : BNE .draw_six_digits_number
++   SEP #$20 : INX #4 : INC !tile_addr
+    CPX #$18 : BNE .draw_six_digits_number
+
+    ; Draw last hardcoded zero
+    LDA #$00 : %draw_tile()
 
     ; Return
-    %return_handler_visible()
+    SEC : RTS
 
 ; Tables for computing offset.
 six_digits_high_byte_table: dw $0001

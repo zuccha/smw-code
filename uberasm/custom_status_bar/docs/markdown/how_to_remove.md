@@ -11,8 +11,8 @@ ROM addresses, in which case they will go back to vanilla).
 
 Follow these steps in UberASMTool's top folder:
 
-1. Remove folder `csb_asm/`
-2. Remove file `library/csb.asm`
+1. Remove folder `csb_asm/`.
+2. Remove file `library/csb.asm`.
 3. Open file `other/status_code.asm` and remove the call to `csb_main`
 
    ```asar
@@ -22,7 +22,7 @@ Follow these steps in UberASMTool's top folder:
        RTS
    ```
 
-4. Remove file `gamemode/csb_gm11.asm`
+4. Remove file `gamemode/csb_gm11.asm`.
 5. Open file `list.txt` and remove `11 csb_gm11.asm` under the `gamemode:` label
 
    ```uberasm
@@ -30,8 +30,8 @@ Follow these steps in UberASMTool's top folder:
    11 csb_gm11.asm ; <- Remove this line
    ```
 
-6. Run UberASMTool
-7. Patch `Patches/csb_unpatch.asm` with Asar
+6. Run UberASMTool.
+7. Patch `Patches/csb_unpatch.asm` with Asar.
 
 ## 2. Clarifications
 

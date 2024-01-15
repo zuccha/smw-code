@@ -17,17 +17,13 @@
 ;-------------------------------------------------------------------------------
 
 ; Draw power up on status bar.
-; @return A (16-bit): #$0001 if the indicator has been drawn, #$0000 otherwise.
-; @return Z: 0 if the indicator has been drawn, 1 otherwise.
 handle_power_up:
-    ; Backup registers and check visibility.
-    PHX : PHY ; Stack: X, Y <-
     %check_visibility(power_up)
 
 .visibility1
     ; Slightly modified version of routine found at $009079 to draw the power up
     ; sprite. The X position is customizable.
-    SEP #$30 : LDX #$E0                             ; Default power up sprite is feather
+    LDX #$E0                                        ; Default power up sprite is feather
     BIT $0D9B|!addr : BVC +                         ; If Reznor's, Morton's, or Roy's battle mode
     LDX #$00                                        ; Then set power up sprite to none
     LDA $0D9B|!addr : CMP #$C1 : BEQ +              ; If not Bowser's battle mode
@@ -48,12 +44,8 @@ handle_power_up:
     LDA #$02 : STA $0420|!addr,y                    ; ...and set it's size to $02
 
 .return
-    REP #$30 : PLY : PLX
-    RTS
-
 .visibility0
 .visibility2
-    REP #$30 : PLY : PLX
     RTS
 
 

@@ -49,7 +49,7 @@ where `value` is any of the possible listed in the setting's description (always
 prefixed by a `#` and written with two digits), and `RAM address` is the name of
 the setting, prefixed by `csb_ram`.
 
-An example for a level file is provided under `asm/level/example.asm`.
+The UberASM comes with a few example levels listed in `UberASMTool/level`.
 
 ## 3. Using RAM addresses in other tools
 
@@ -68,7 +68,13 @@ JMP Ignore : JMP Ignore : JMP Ignore
 
 ; Redefine RAM base address.
 ; It has to be the same as the one in ram.asm!
-!freeram_address = $7FB700
+!freeram_address     = $7FB700
+!freeram_address_sa1 = $40A700
+
+; Update freeram address if SA-1.
+if read1($00FFD5) == $23
+    !freeram_address = !freeram_address_sa1
+endif
 
 ; Macro for generating addresses.
 macro define_ram(offset, name)
@@ -123,6 +129,9 @@ print "Toggle status bar when hit from below"
 
 For more, check out `csb_asm/ram.asm`.
 
+This UberASM comes with an example block that toggles the status bar's
+visibility (in `GPS/toggle_status_bar.asm`).
+
 ## 4. Status bar tilemap color palette
 
 The colors used for tiles of the status bar are defined in `csb_asm/colors.asm`.
@@ -138,7 +147,7 @@ status bar. Currently, the following are supported:
 
 - Bonus stars limit reached
 - Coins limit reached
-- Time run out
+- Time runs out
 
 To add custom behaviors, modify the contents of `csb_asm/callbacks.asm`.
 
@@ -159,6 +168,17 @@ trigger_coins_limit_reached:
 Notice that since we are in CSB's namespace, in this file we don't have to
 prefix RAM addresses with `csb_`. In fact, we use `ram_coins_symbol` instead of
 `csb_ram_coins_symbol`.
+
+You can also define behaviors that are not related to the status bar, for
+example we can hurt the player when the time runs out:
+
+```asar
+trigger_time_run_out:
+    JSL $00F5B7|!bank
+    RTS
+```
+
+Obviously this makes sense only if we set `!kill_player_when_time_runs_out = 0`.
 
 ## 6. Base RAM address
 

@@ -6,6 +6,33 @@
 
 
 ;-------------------------------------------------------------------------------
+; Constants
+;-------------------------------------------------------------------------------
+
+; How many tiles are in each group and in total.
+!group_1_tiles_count = $04
+!group_2_tiles_count = $07
+!total_tiles_count   = $37
+
+
+;-------------------------------------------------------------------------------
+; Tilemap
+;-------------------------------------------------------------------------------
+
+; We use $0E-$0F to store the address of the next status bar RAM address where
+; we want to draw to.
+!tile_addr = $0E
+
+; Draw the value in A by storing it in the status bar tilemap RAM address, then
+; go to next tile address.
+; @param A: The tile to draw in the status bar.
+macro draw_tile()
+    STA (!tile_addr)
+    INC !tile_addr
+endmacro
+
+
+;-------------------------------------------------------------------------------
 ; Check Visibility
 ;-------------------------------------------------------------------------------
 
@@ -20,10 +47,9 @@
 ; @branch .visibility1: Jump here if the setting = 1.
 ; @branch .visibility2: Jump here if the setting = 2.
 macro check_visibility(item)
-    SEP #$20 : LDA ram_<item>_visibility
-    CMP #$02 : BEQ .visibility2
-    CMP #$01 : BEQ .visibility1
-    BRA .visibility0
+    LDA ram_<item>_visibility : ASL : TAX
+    JMP (?visibility_ptrs,x)
+?visibility_ptrs: dw .visibility0, .visibility1, .visibility2
 endmacro
 
 
@@ -33,21 +59,20 @@ endmacro
 
 ; Draw a one-byte long hexadecimal number as a three-digits decimal.
 ; @param A (8-bit): The hexadecimal number to be drawn.
-; @param Y (16-bit): Slot position.
 draw_3_digits_number:
-    LDX #$0000                          ; X counts 100s
+    LDX #$00                            ; X counts 100s
 -   CMP #$64 : BCC +                    ; While A >= 100
     SBC #$64 : INX                      ; Subtract 100 and increase 100s count
     BRA -                               ; Repeat
-+   PHA : TXA : STA $0001|!addr,y : PLA ; Draw 100s.
++   XBA : TXA : %draw_tile() : XBA      ; Draw 100s.
 
-    LDX #$0000                          ; X counts 10s
+    LDX #$00                            ; X counts 10s
 -   CMP #$0A : BCC +                    ; While A >= 10
     SBC #$0A : INX                      ; Subtract 10 and increase 10s count
     BRA -                               ; Repeat
-+   PHA : TXA : STA $0002|!addr,y : PLA ; Draw 10s.
++   XBA : TXA : %draw_tile() : XBA      ; Draw 10s.
 
-    STA $0003|!addr,y                   ; Draw 1s.
+    %draw_tile()                        ; Draw 1s.
 
     RTL
 
@@ -55,49 +80,9 @@ draw_3_digits_number:
 ; The number will be drawn in format "SHTO", where "S" is the symbol, "H" is the
 ; hundreds' digit, "T" is the tens' digit, and "O" is the ones' digit.
 ; @param A (8-bit): The hexadecimal number.
-; @param Y (16-bit): Slot position.
-; @param <symbol>: Address (label) containing the symbol to display before the
+; @param <symbol>: Address or value containing the symbol to display before the
 ; number.
 macro draw_3_digits_number_with_symbol(symbol)
-    JSL.l draw_3_digits_number       ; Draw 100s, 10s, and 1s
-    LDA <symbol> : STA $0000|!addr,y ; Draw symbol
-endmacro
-
-
-;-------------------------------------------------------------------------------
-; Return Handler Hidden/Visible
-;-------------------------------------------------------------------------------
-
-; Cleanup an element handler for elements that have not been rendered.
-; Reset A/X/Y to 16-bit, restore previous X/Y values, and set Z flag to 1.
-; @return A (16-bit): Always #$0000.
-; @return Z: Always 1.
-macro return_handler_hidden()
-    REP #$30 : PLA : PLY : PLX
-    LDA #$0000
-    RTS
-endmacro
-
-; Cleanup an element handler for elements that have been rendered.
-; Reset A/X/Y to 16-bit, restore previous X/Y values, and set Z flag to 0.
-; @return A (16-bit): Always #$0001.
-; @return Z: Always 0.
-macro return_handler_visible()
-    REP #$30 : PLY : PLX
-    LDA #$0001
-    RTS
-endmacro
-
-
-;-------------------------------------------------------------------------------
-; Debug Value
-;-------------------------------------------------------------------------------
-
-; Draw a value as a 3-digits decimal in the bottom-left corner of the status
-; bar, preceded by a ! (e.g., !293).
-; @param <value>: The value to debug.
-macro debug_value(value)
-    PHA : PHY : PHP : SEP #$20
-    LDA <value> : LDY #$0F15 : %draw_3_digits_number_with_symbol(#$28)
-    PLP : PLY : PLA
+    PHA : LDA <symbol> : %draw_tile() : PLA ; Draw symbol
+    JSL.l draw_3_digits_number              ; Draw 100s, 10s, and 1s
 endmacro

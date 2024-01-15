@@ -28,11 +28,21 @@
 ; Whether to enable the status bar or not.
 ; When disabled, nothing will render and layer 3 is free.
 ; * Values:
-;     0 = Disabled
-;     1 = Enabled
-; * Default: 1
+;     0 = Hidden, and free layer 3 space
+;     1 = Hidden
+;     2 = Visible (vanilla)
+; * Default: 2
 ; * RAM: csb_ram_status_bar_visibility
-!status_bar_visibility = 1
+; N.B.: Visibility = 0 should be used only in levels with a layer 3 background,
+; where you need the extra space at the top. You should set the value in the
+; level init, and don't change it mid-level (e.g., via toggle block), since the
+; status bar will reappear with the wrong colors. Also, don't use message boxes,
+; or the status bar will reappear, but broken (why would you use message boxes
+; in a layer 3 level anyway, right?).
+; N.B.: When 0 and 1, status bar features will never work, even if the related
+; !always_check_<feature> flag is turned on. For example, time will not tick
+; even if !always_check_time = 1.
+!status_bar_visibility = 2
 
 
 ;-------------------------------------------------------------------------------
@@ -41,8 +51,8 @@
 
 ; Global setting for showing the bonus stars counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always (vanilla)
+;     0 = Hidden
+;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_bonus_stars_visibility
 !bonus_stars_visibility = 1
@@ -79,8 +89,8 @@
 ; N.B.: This doesn't control whether the limit is reset, for that refer to
 ; !reset_bonus_stars_when_bonus_stars_limit_reached.
 ; * Values:
-;     0 = Don't add bonus stars when completing level
-;     1 = Add bonus stars when completing level (vanilla)
+;     0 = Don't start bonus game
+;     1 = Start bonus game (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_start_bonus_game_when_bonus_stars_limit_reached
 !start_bonus_game_when_bonus_stars_limit_reached = 1
@@ -102,9 +112,9 @@
 
 ; Global setting for showing the coins counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always (vanilla)
-;     2 = If limit > 0 (see "CoinLimitTable" in "configuration/levels.asm")
+;     0 = Hidden
+;     1 = Visible (vanilla)
+;     2 = Visible if !coins_limit > 0
 ; * Default: 1
 ; * RAM: csb_ram_coins_visibility
 !coins_visibility = 1
@@ -162,10 +172,11 @@
 
 ; Global setting for showing the lives counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always (vanilla)
+;     0 = Hidden
+;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_lives_visibility
+; N.B.: Disabling this will not prevent the player to lose lives and game over.
 !lives_visibility = 1
 
 ; Symbol in front of the lives counter.
@@ -184,9 +195,9 @@
 
 ; Global setting for showing the time counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always (vanilla)
-;     2 = If limit > 0 (via Lunar Magic)
+;     0 = Hidden
+;     1 = Visible (vanilla)
+;     2 = Visible if limit > 0 (limit set via Lunar Magic)
 ; * Default: 1
 ; * RAM: csb_ram_time_visibility
 !time_visibility = 1
@@ -236,9 +247,9 @@
 
 ; Global setting for showing the dragon coins counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always
-;     2 = If not all coins have been collected (vanilla)
+;     0 = Hidden
+;     1 = Visible
+;     2 = Visible if not all coins have been collected (vanilla)
 ; * Default: 2
 ; * RAM: csb_ram_dragon_coins_visibility
 !dragon_coins_visibility = 2
@@ -294,10 +305,11 @@
 
 ; Global setting for showing the score counter in the status bar.
 ; * Values:
-;     0 = Never
-;     1 = Always (vanilla)
+;     0 = Hidden
+;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_score_visibility
+; N.B.: Even when hidden, the score will still be increased.
 !score_visibility = 1
 
 
@@ -307,9 +319,9 @@
 
 ; Global setting for showing the power up in the item box in the status bar.
 ; * Values:
-;     0 = Hidden if present in the item box, items can still be stored and dropped
-;     1 = Visible if present in the item box (vanilla)
-;     2 = Items cannot be stored and dropped
+;     0 = Hidden, items can still be stored and dropped
+;     1 = Visible (vanilla)
+;     2 = Hidden, items cannot be stored and dropped
 ; * Default: 1
 ; * RAM: csb_ram_power_up_visibility
 !power_up_visibility = 1
@@ -338,19 +350,20 @@
 !group1_order = !lives, !bonus_stars, !time, !coins
 
 ; Position of each slot where elements are displayed.
-; The value is the RAM address for the status bar tiles (check "Status Bar
-; Static Configuration" below). The address represents the first of the four
-; tiles that the group 1 element occupies. The first tile is used for the symbol
-; and the other three for the digits of the counter.
+; The values are the RAM address for the status bar tiles (see "colors.asm").
+; The address represents the first of the four tiles that the group 1 element
+; occupies. The first tile is used for the symbol and the other three for the
+; digits of the counter.
 ; N.B.: The color palette of each tile cannot be controlled dynamically. By
-; * default, it is set to be GWWW, that is gold for the symbol (tile 0) and white
+; default it is set to be GWWW, that is gold for the symbol (tile 0) and white
 ; for the digits (tiles 1-3). The palette is configured the same way for all
-; slots in the "Status Bar Static Configuration" down below.
+; slots in "colors.asm".
 ; * Values: $0EF9-$0F11/$0F15-$0F2C
 ; * Default: $0F11, $0F2C, $0F0C, $0F27
 ; * RAM: N/A
 ; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
 ; will automatically convert the addresses into SA-1.
+; N.B.: Make sure to leave a space after every comma!
 !group1_slots = $0F11, $0F2C, $0F0C, $0F27
 
 
@@ -358,10 +371,7 @@
 ; Group 2
 ;-------------------------------------------------------------------------------
 
-; Group 2 consists of: Dragon Coins and Score. Slot size: 7x1. Notice that even
-; if the Power Up per-level visibility is controlled in "Group2VisibilityTable",
-; Power Up is not actually in group 2, its setting is stored there just to be
-; space efficient.
+; Group 2 consists of: Dragon Coins and Score. Slot size: 7x1.
 ; For an explanation on how groups and slots work, check "README.md".
 
 ; Order in which group 2 elements fill available slots. Reorder the elements to
@@ -373,17 +383,18 @@
 !group2_order = !score, !dragon_coins
 
 ; Position of each slot where elements are displayed.
-; The value is the RAM address for the status bar tiles (check "Status Bar
-; Static Configuration" below). The address represents the first of the six
-; tiles that the group 2 element occupies.
+; The values are the RAM address for the status bar tiles (see "colors.asm").
+; The address represents the first of the six tiles that the group 2 element
+; occupies.
 ; N.B.: The color palette of each tile cannot be controlled dynamically. By
-; * default, all siz tiles are set to gold. The palette is configured the same way
-; for all slots in the "Status Bar Static Configuration" down below.
+; default, all seven tiles are set to gold. The palette is configured the same
+; way for all slots in the "colors.asm".
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
 ; * Default: $0EF9, $0F15
 ; * RAM: N/A
 ; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
 ; will automatically convert the addresses into SA-1.
+; N.B.: Make sure to leave a space after every comma!
 !group2_slots = $0EF9, $0F15
 
 
