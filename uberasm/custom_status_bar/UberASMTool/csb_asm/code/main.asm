@@ -33,7 +33,9 @@ macro handle_group(group, size)
     CPX.b #!slots_size : BCS ?cleanup ; ...and slots available
 
     REP #$20                          ; Fetch and store the next tile address
-    LDA.l !slots,x : STA !tile_addr   ; that will be used by handlers to draw
+    LDA.l !slots,x                    ; for the current slot
+    if !addr > 0 : ORA.w #!addr       ; (including the SA-1 offset!)
+    STA !tile_addr                    ; that will be used by handlers to draw
     SEP #$20                          ; in the status bar
 
     PHX : PHY                         ; Invoke item handler
