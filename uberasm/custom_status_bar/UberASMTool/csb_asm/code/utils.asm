@@ -47,9 +47,10 @@ endmacro
 ; @branch .visibility1: Jump here if the setting = 1.
 ; @branch .visibility2: Jump here if the setting = 2.
 macro check_visibility(item)
-    LDA ram_<item>_visibility : ASL : TAX
-    JMP (?visibility_ptrs,x)
-?visibility_ptrs: dw .visibility0, .visibility1, .visibility2
+    LDA ram_<item>_visibility
+    CMP #$02 : BEQ .visibility2
+    CMP #$01 : BEQ .visibility1
+    BRA .visibility0
 endmacro
 
 
