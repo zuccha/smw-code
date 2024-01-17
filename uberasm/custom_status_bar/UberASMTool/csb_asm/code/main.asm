@@ -72,9 +72,9 @@ endmacro
 
 ; Main routine, draw all the elements of the status bar.
 main:
-    LDA ram_status_bar_visibility : ASL : TAX
-    JMP (.visibility_ptrs,x)
-.visibility_ptrs: dw .disabled, .hidden, .visible
+    LDA ram_status_bar_visibility
+    CMP #$02 : BEQ .visible
+    CMP #$01 : BEQ .hidden
 
 .disabled
     RTL

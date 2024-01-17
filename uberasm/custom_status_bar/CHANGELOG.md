@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] - Unreleased
+
+### Fixed
+
+- Fix crash on startup.
+
 ## [0.3.0] - 2024-01-15
 
 ### Added
