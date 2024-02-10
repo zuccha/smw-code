@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.1] - 2024-02-10
+
+### Fixed
+
+- Glitched graphics when killed (by MarioFanGamer).
+- Interaction with spike ball sprite when it's being eaten by Yoshi (by
+  MarioFanGamer).
+- Documentation describing how to customize the spike ball sprite's number in
+  README and in `orbinaut.asm`.
+
 ## [1.1.0] - 2023-12-24
 
 ### Added

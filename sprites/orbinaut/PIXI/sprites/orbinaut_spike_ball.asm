@@ -198,7 +198,7 @@ orbit:
 ; Handle interactions with player and other sprites.
 interact:
     LDA !sprite_speed_x,x : BNE +              ; If ball has not been thrown...
-    %orbinaut($15D8|!addr) : CMP #$00 : BEQ +  ; ...and orbinaut's core is not being eaten
+    %orbinaut($15D0|!addr) : CMP #$00 : BEQ +  ; ...and orbinaut's core is not being eaten
     RTS                                        ; Then do not interact
 
 +   JSL $01A7DC|!bank                          ; Check for player contact

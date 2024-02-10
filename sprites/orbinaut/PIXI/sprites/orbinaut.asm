@@ -10,9 +10,6 @@
 ; Configuration (extra bytes)
 ;-------------------------------------------------------------------------------
 
-; Extra Property Byte 2: Number for "orbinaut_spike_ball.cfg" as defined in
-; PIXI's "list.asm".
-
 ; Extra bit: If 1, the orbinaut can go through solid walls (blocks), otherwise
 ; it stops there.
 

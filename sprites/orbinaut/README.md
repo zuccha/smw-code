@@ -1,7 +1,6 @@
 # Orbinaut
 
-Author: zuccha, requested by NopeContest. The code for orbital movement is based
-on GreenHammerBro and Akaginite routines.
+Made by zuccha, requested by NopeContest. Bugfixes by MarioFanGamer.
 
 Sprite featuring a central orbinaut, with four spike balls orbiting around it.
 
@@ -52,18 +51,17 @@ do the following:
 ### Customize Sprite Numbers
 
 If you change the number for `orbinaut_spike_ball.json` in PIXI's `list.txt`
-(anything other than the default "01"), you also have to change the "Extra
-Property Byte 2" in `orbinaut.json` to match that number.
+(anything other than the default "00"), you also have to change `!ball_number`
+in `orbinaut.asm` to match that number.
 
-For instance, if you modify "list.txt" as follows
+For instance, if you modify `list.txt` as follows
 
 ```
 12 orbinaut.json
 2F orbinaut_spike_ball.json
 ```
 
-then you have to open `orbinaut.json` (either with a text editor or with PIXI's
-CFG Editor) and set _Extra Property Byte 2_ to `2F`.
+then you have to set `!ball_number = $2F` in `orbinaut.asm`.
 
 ### Customize Graphics
 

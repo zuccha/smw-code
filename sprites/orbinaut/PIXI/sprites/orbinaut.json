@@ -2,14 +2,14 @@
   "$1656": {
     "Object Clipping": 0,
     "Can be jumped on": true,
-    "Dies when jumped on": true,
+    "Dies when jumped on": false,
     "Hop in/kick shell": false,
     "Disappears in cloud of smoke": false
   },
   "$1662": {
     "Sprite Clipping": 0,
     "Use shell as death frame": false,
-    "Fall straight down when killed": false
+    "Fall straight down when killed": true
   },
   "$166E": {
     "Use second graphics page": true,
