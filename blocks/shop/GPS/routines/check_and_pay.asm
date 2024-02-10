@@ -1,11 +1,11 @@
 ;===============================================================================
-; SHOP PAY
+; CHECK AND PAY
 ;===============================================================================
 
 ; Routine that checks if there are enough funds and, if so, it will subtract
 ; them from their relative counters.
-; Costs are defined via defines. All costs must be met for buying; if all costs
-; are met, the routine will subtract them from the counter.
+; Costs are defined via scratch RAM. All costs must be met for buying; if all
+; costs are met, the routine will subtract them from the counters.
 ; This routine doesn't determine what's going to happen after paying, that's up
 ; to the user.
 
@@ -21,10 +21,10 @@
 ; @output C: 0 if didn't pay (insufficient funds), 1 if it paid.
 
 ; Usage example:
-;   STZ $00                     ; Bonus Stars
-;   LDA #$10 : STA $01          ; Coins
-;   STZ $02                     ; Lives
-;   STZ $03 : STZ $04 : STZ $05 ; Score
+;   STZ $00                             ; Bonus Stars = 0
+;   LDA #$10 : STA $01                  ; Coins       = 10
+;   STZ $02                             ; Lives       = 0
+;   STZ $03 : STZ $04 : STZ $05         ; Score       = 0
 ;   %check_and_pay() : BCC .not_paid
 ; .paid
 ;   ; Handle payment successful
@@ -51,7 +51,7 @@
     BCC ?dont_pay                        ; ...then don't buy
 
     ; Score
-    LDA $0DB3|!addr                      ; Load current player (0 =  Mario, 1 = Luigi)...
+    LDA $0DB3|!addr                      ; Load current player (0 = Mario, 1 = Luigi)...
     ASL : CLC : ADC $0DB3|!addr : TAX    ; ...and multiply it by 3 (0 = Mario, 3 = Luigi)
     LDA $0F36|!addr,x : CMP $05          ; \
     BCC ?dont_pay : BNE ?pay             ; | Compare score and cost, from high to low bytes:
@@ -67,13 +67,13 @@
     STA $0F48|!addr,x                    ; Update counter
 
     ; Coins
-    LDA $0DBF|!addr                      ; Get current player's bonus stars
-    SEC : SBC $01                        ; Subtract cost from bonus stars counter
+    LDA $0DBF|!addr                      ; Get current player's coins
+    SEC : SBC $01                        ; Subtract cost from coins counter
     STA $0DBF|!addr                      ; Update counter
 
     ; Lives
-    LDA $0DBE|!addr                      ; Get current player's bonus stars
-    SEC : SBC $02                        ; Subtract cost from bonus stars counter
+    LDA $0DBE|!addr                      ; Get current player's lives
+    SEC : SBC $02                        ; Subtract cost from lives counter
     STA $0DBE|!addr                      ; Update counter
 
     ; Score

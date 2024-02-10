@@ -45,15 +45,26 @@
 !score_cost       = 0 ; 0-16777216 ($000000-$FFFFFF)
 
 ; Sound effects for when buying the item. The list of values can be found here:
-; https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=294be88c9dcc
-!buy_sfx      = $3E ; Default = $3E (get powerup)
-!dont_buy_sfx = $35 ; Default = $35 (hit head)
+; https://smwc.me/m/smw/ram/7E1DF9
+!buy_sfx       = $3E   ; Default = $0B (get powerup), $00 for no sound
+!buy_port      = $1DFC ; Default = $1DFC
+!dont_buy_sfx  = $35   ; Default = $35 (hit head), $00 for no sound
+!dont_buy_port = $1DFC ; Default = $1DFC
 
 ; What the shop block turns into after the item has been bought. It applies only
 ; if !availability = 1. By default it is set to become a solid block (like after
 ; hitting a question block). The list of values can be found here:
 ; https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=dd11aeb933a0
 !shop_after_usage = $0D
+
+
+;-------------------------------------------------------------------------------
+; Macros
+;-------------------------------------------------------------------------------
+
+macro play_sfx(name)
+    if !<name>_sfx : LDA.b #!<name>_sfx : STA.w !<name>_port|!addr
+endmacro
 
 
 ;-------------------------------------------------------------------------------
@@ -95,7 +106,7 @@ BuyItem:
 
     ; Add item
     LDA.b #!powerup : STA $19         ; Add powerup to player
-    LDA.b #!buy_sfx : STA $1DFC|!addr ; Play sound effect
+    %play_sfx(buy)
 
     ; Transform block
 if !availability > 0
@@ -108,7 +119,7 @@ endif
 
     ; Don't buy
 .dont_buy
-    LDA.b #!dont_buy_sfx : STA $1DFC|!addr ; Play sound effect
+    %play_sfx(dont_buy)
     RTL
 
 

@@ -44,8 +44,9 @@
 !score_cost       = 0 ; 0-16777216 ($000000-$FFFFFF)
 
 ; Sound effect for when buying the item. The list of values can be found here:
-; https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=294be88c9dcc
-!buy_sfx = $0B
+; https://smwc.me/m/smw/ram/7E1DF9
+!buy_sfx  = $0B   ; Default = $0B (item placed in reserve box), $00 for no sound
+!buy_port = $1DFC ; Default = $1DFC
 
 
 ;-------------------------------------------------------------------------------
@@ -61,6 +62,15 @@ JMP Return : JMP BuyItem : JMP Return   ; TopCorner, BodyInside, HeadInside
 
 Return:
     RTL
+
+
+;-------------------------------------------------------------------------------
+; Macros
+;-------------------------------------------------------------------------------
+
+macro play_sfx(name)
+    if !<name>_sfx : LDA.b #!<name>_sfx : STA.w !<name>_port|!addr
+endmacro
 
 
 ;-------------------------------------------------------------------------------
@@ -83,7 +93,7 @@ BuyItem:
 
     ; Add item
     LDA.b #!item : STA $0DC2|!addr    ; Add item to item box
-    LDA.b #!buy_sfx : STA $1DFC|!addr ; Play sound effect
+    %play_sfx(buy)
 
     ; Remove block
 if !availability > 0

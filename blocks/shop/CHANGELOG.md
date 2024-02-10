@@ -1,10 +1,15 @@
 # Changelog
 
-## Unreleased
+## [2.1.0] - 2025-02-10
 
 ### Added
 
-- Include example list file for GPS.
+- Defines to customize sound effects ports.
+- Example list file for GPS.
+
+### Fixed
+
+- `check_and_pay` documentation on how to customize costs.
 
 ## [2.0.0] - 2024-01-02
 
