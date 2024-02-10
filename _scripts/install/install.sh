@@ -294,7 +294,7 @@ fi
 if [[ -d "$SRC_SPRITES" ]]; then
   log_info "Copy sprites"
 
-  # copy_file_if "$IS_NEW" SPRITES_LIST
+  copy_file_if "$IS_NEW" SPRITES_LIST
 
   copy_files SPRITES_SPRITES
   copy_files SPRITES_SPRITES json
