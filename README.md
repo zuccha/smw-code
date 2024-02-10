@@ -6,7 +6,7 @@ A collection of SMW resources.
 
 | Name                  | Download                                                                                           |
 | --------------------- | -------------------------------------------------------------------------------------------------- |
-| [Shop](./blocks/shop) | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/block%2Fshop%2F2.0.0/shop-2.0.0.zip) |
+| [Shop](./blocks/shop) | [v2.1.0](https://github.com/zuccha/smw-code/releases/download/block%2Fshop%2F2.1.0/shop-2.1.0.zip) |
 
 ## Sprites
 
