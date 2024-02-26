@@ -59,6 +59,7 @@ namespace "internal"
 %include_code("modules/player.asm")
 %include_code("modules/power_up.asm")
 %include_code("modules/score.asm")
+%include_code("modules/speed_meter.asm")
 %include_code("modules/time.asm")
 
 ; Main routine

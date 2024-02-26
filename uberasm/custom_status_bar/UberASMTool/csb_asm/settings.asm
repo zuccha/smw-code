@@ -314,6 +314,37 @@
 
 
 ;-------------------------------------------------------------------------------
+; Speed Meter
+;-------------------------------------------------------------------------------
+
+; Global setting for showing the speed meter in the status bar.
+; The speed meter is composed of seven indicators that fill as the player
+; gathers speed. The last indicator represents reaching p-speed.
+; * Values:
+;     0 = Hidden
+;     1 = Visible
+; * Default: 1
+; * RAM: csb_ram_speed_meter_visibility
+!speed_meter_visibility = 1
+
+; Symbol for empty speed indicator.
+; The value is the position of the 8x8 tile in "GFX28".
+; * Values: $00-$7F/$FC
+; * Default: $31 (coin)
+; * RAM: csb_ram_speed_meter_empty_symbol
+; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
+!speed_meter_empty_symbol = $31
+
+; Symbol for full speed indicator.
+; The value is the position of the 8x8 tile in "GFX28".
+; * Values: $00-$7F/$FC
+; * Default: $32 (coin)
+; * RAM: csb_ram_speed_meter_full_symbol
+; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
+!speed_meter_full_symbol = $32
+
+
+;-------------------------------------------------------------------------------
 ; Player
 ;-------------------------------------------------------------------------------
 

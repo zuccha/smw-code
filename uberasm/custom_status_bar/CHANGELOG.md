@@ -6,6 +6,9 @@
 
 - Add player indicator, that can be hidden, allowing to choose which symbol to
   display for Mario and Luigi. Its settings can be controlled via RAM addresses.
+- Add speed meter, that can be hidden, allowing to choose which symbol to
+  display for empty and full indicators. Its settings can be controlled via RAM
+  addresses.
 
 ### Changed
 

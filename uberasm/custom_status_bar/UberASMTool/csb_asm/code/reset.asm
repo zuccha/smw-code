@@ -73,5 +73,10 @@ reset_ram:
     %reset_ram_byte(player_mario_symbol)
     %reset_ram_byte(player_luigi_symbol)
 
+    ; Speed Meter
+    %reset_ram_byte(speed_meter_visibility)
+    %reset_ram_byte(speed_meter_empty_symbol)
+    %reset_ram_byte(speed_meter_full_symbol)
+
     ; Return
     RTL
