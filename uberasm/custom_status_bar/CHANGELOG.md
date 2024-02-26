@@ -9,6 +9,8 @@
 ### Fixed
 
 - Use correct status bar tile address when drawing empty tiles in SA-1.
+- Draw tile in correct address when tilemap addresses transition from `$xyFF` to
+  `$xz00`.
 
 ## [0.3.1] - 2024-01-17
 

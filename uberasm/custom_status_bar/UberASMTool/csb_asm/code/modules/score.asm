@@ -45,7 +45,7 @@ score:
     SEP #$20
     LDA (!tile_addr) : INC A : STA (!tile_addr)
     BRA -
-+   SEP #$20 : INX #4 : INC !tile_addr
++   SEP #$20 : INX #4 : %next_tile()
     CPX #$18 : BNE .draw_six_digits_number
 
     ; Draw last hardcoded zero
