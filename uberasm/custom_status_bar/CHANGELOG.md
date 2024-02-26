@@ -12,6 +12,7 @@
 
 ### Changed
 
+- Reorganize custom tiles in `GFX28.bin`.
 - Use tables in `setting.asm` for group definitions instead of defines.
 - Move the first slot of group 2 two tiles to the right, and the second slot one
   tile to the right.

@@ -6,16 +6,16 @@
 ; status bar.
 
 ; Each setting comes with:
-; 1. A brief description of what it does.
-; 2. A list of valid values it accepts.
-; 3. The default value, i.e. the value it had prior to any modifications.
-; Useful to know if you changed it and wanted to set it back to the initial
-; value, but forgot what it was.
-; 4. The RAM name that controls the setting. The name can be used in any
-; UberASMTool's code to change the value of the setting; this is especially
-; useful to edit the settings on a level basis. For instance:
-;   LDA $01 : STA csb_ram_coins_visibility
-; could be used to enable the coin indicator when globally set to not-visible.
+;   1. A brief description of what it does.
+;   2. A list of valid values it accepts.
+;   3. The default value, i.e. the value it had prior to any modifications.
+;   Useful to know if you changed it and wanted to set it back to the initial
+;   value, but forgot what it was.
+;   4. The RAM name that controls the setting. The name can be used in any
+;   UberASMTool's code to change the value of the setting; this is especially
+;   useful to edit the settings on a level basis. For instance:
+;     LDA $01 : STA csb_ram_coins_visibility
+;   could be used to enable the coin indicator when globally set to not-visible.
 ; N.B.: It's `csb_ram_coins_visibility`, not `!csb_ram_coins_visibility` with an
 ; exclamation mark.
 ; N/A means "Not Available".
@@ -63,9 +63,8 @@
 ; * Default: $64 (star)
 ; * RAM: csb_ram_bonus_stars_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3F (star, alternative), which replaces the second part of the "TIME" text, no
-; longer used.
 !bonus_stars_symbol = $64
+; $3F (star, alternative).
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!bonus_stars_visibility = 0). If bonus stars reach
@@ -125,8 +124,8 @@
 ; * Default: $2E (coin)
 ; * RAM: csb_ram_coins_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3B (star, alternative), which replaces part of the now unused item box.
 !coins_symbol = $2E
+; $3D (coin, alternative).
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!coins_visibility = 0). If the bonus stars reach a
@@ -185,8 +184,8 @@
 ; * Default: $26 (x)
 ; * RAM: csb_ram_lives_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3E (heart), which replaces the second part of the "TIME" text, no longer used.
 !lives_symbol = $26
+; $3E (heart).
 
 
 ;-------------------------------------------------------------------------------
@@ -267,9 +266,8 @@
 ; * Default: $FC (empty)
 ; * RAM: csb_ram_dragon_coins_missing_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3D (empty coin), which replaces the first part of the "TIME" text, no longer
-; used.
 !dragon_coins_missing_symbol = $FC
+; $4A (empty coin).
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
 ; can be configured using !DragonCoinsCollectedGraphics.
@@ -293,9 +291,6 @@
 ; * Values: $00-$7F/$FC x7
 ; * Default: $0A, $15, $15, $28, $FC, $FC, $FC ("ALL!   ")
 ; * RAM: csb_ram_custom_dragon_coins_collected_graphics
-; If you are using the modified GFX28 bundled with this patch, you can also use
-; `$2E, $2E, $2E, $2E, $2E, $3A, $FC`, where $2E are the coin symbol and $3A is
-; a checkmark that replaces the corner of the item box in the graphics file.
 !custom_dragon_coins_collected_graphics = $0A, $15, $15, $28, $FC, $FC, $FC
 
 
@@ -320,6 +315,8 @@
 ; Global setting for showing the speed meter in the status bar.
 ; The speed meter is composed of seven indicators that fill as the player
 ; gathers speed. The last indicator represents reaching p-speed.
+; Even if enabled, by default the speed meter is not added to the list of items
+; to display in the status bar. Check `group_2_items` to add it.
 ; * Values:
 ;     0 = Hidden
 ;     1 = Visible
@@ -333,7 +330,7 @@
 ; * Default: $31 (coin)
 ; * RAM: csb_ram_speed_meter_empty_symbol
 ; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
-!speed_meter_empty_symbol = $31
+!speed_meter_empty_symbol = $3A
 
 ; Symbol for full speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -341,7 +338,7 @@
 ; * Default: $32 (coin)
 ; * RAM: csb_ram_speed_meter_full_symbol
 ; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
-!speed_meter_full_symbol = $32
+!speed_meter_full_symbol = $3B
 
 
 ;-------------------------------------------------------------------------------
@@ -361,8 +358,8 @@
 ; * Values: $00-$7F/$FC
 ; * Default: $FC (empty)
 ; * RAM: csb_ram_player_mario_symbol
-; If you are using the modified GFX28 bundled with this patch, Mario's "M" is
-; replaced by the basic text "M".
+; If you are using the modified GFX28 bundled with this patch, the "M" of
+; "MARIO" has been restyled.
 !player_mario_symbol = $30
 
 ; Symbol for Luigi.
@@ -370,8 +367,8 @@
 ; * Values: $00-$7F/$FC
 ; * Default: $FC (empty)
 ; * RAM: csb_ram_player_luigi_symbol
-; If you are using the modified GFX28 bundled with this patch, Luigi's "L" is
-; replaced by the basic text "L".
+; If you are using the modified GFX28 bundled with this patch, the "L" of
+; "LUIGI" has been restyled.
 !player_luigi_symbol = $40
 
 ; Position of the player indicator in the status bar.
@@ -433,7 +430,7 @@ group_1_items: dw lives, bonus_stars, time, coins
 ; for the digits (tiles 1-3). The palette is configured the same way for all
 ; slots in "colors.asm".
 ; * Values: $0EF9-$0F11/$0F15-$0F2C
-; * Default: $0F11, $0F2C, $0F0C, $0F27
+; * Default: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
 ; * RAM: N/A
 group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
 .end
@@ -443,12 +440,12 @@ group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
 ; Group 2
 ;-------------------------------------------------------------------------------
 
-; Group 2 consists of: Dragon Coins and Score. Slot size: 7x1.
+; Group 2 consists of: Dragon Coins, Score, and Speed Meter. Slot size: 7x1.
 ; For an explanation on how groups and slots work, check "README.md".
 
 ; Order in which group 2 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; * Values: dragon_coins, score
+; * Values: dragon_coins, score, speed_meter
 ; * Default: score, dragon_coins
 ; * RAM: N/A
 group_2_items: dw score, dragon_coins
@@ -462,7 +459,7 @@ group_2_items: dw score, dragon_coins
 ; default, all seven tiles are set to gold. The palette is configured the same
 ; way for all slots in the "colors.asm".
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
-; * Default: $0EFB, $0F16
+; * Default: dw $0EFB|!addr, $0F16|!addr
 ; * RAM: N/A
 group_2_slots: dw $0EFB|!addr, $0F16|!addr
 .end

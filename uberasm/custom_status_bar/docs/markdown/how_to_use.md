@@ -192,16 +192,22 @@ The patch comes with a modified version of `GFX28.bin` that you can use. The
 changes are:
 
 1. Lower the clock tile (`$76`) by one pixel.
-2. Replace the first part of the "TIME" text (`$3D`) with an empty coin that can
-   be used to display missing dragon coins (instead of a blank space).
-3. Replace the middle part of the "TIME" text (`$3E`) with a heart that can be
-   used in front of the lives counter.
-4. Replace the last part of the "TIME" text (`$3F`) with a star that can be used
-   in front of the bonus stars counter.
-5. Replace the corner of the item box (`$3A`) with a checkmark that can be used
+2. Restyle the "MARIO" text so that the "M" can be used as a single tile.
+3. Restyle the "L" of "LUIGI".
+4. Replace the second and third part of "MARIO" (`$31`, `$32`) with empty and
+   full arrow indicators for the speed meter.
+5. Replace the fourth part of "MARIO" (`$33`) with an empty coin that can be
+   used to display missing dragon coins (instead of a blank space).
+6. Replace the fifth part of "MARIO" (`$34`) with a checkmark that can be used
    to mark when all dragon coins have been collected.
-6. Replace the top of the item box (`$3B`) with an alternative coin that can be
-   used in front of the coins counter.
+7. Replace the "L" of "LUIGI" (`$40`) with an alternative, standalone "L".
+8. Remove the rest of "LUIGI", now unused, for future or custom use.
+9. Replace the first part of the "TIME" text (`$3D`) with an alternative coin
+   that can be used in front of the coins counter.
+10. Replace the middle part of the "TIME" text (`$3E`) with a heart that can be
+    used in front of the lives counter.
+11. Replace the last part of the "TIME" text (`$3F`) with a star that can be
+    used in front of the bonus stars counter.
 
 Using the modified version is entirely **optional**.
 
