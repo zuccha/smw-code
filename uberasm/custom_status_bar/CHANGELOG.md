@@ -18,6 +18,7 @@
 - Use correct status bar tile address when drawing empty tiles in SA-1.
 - Draw tile in correct address when tilemap addresses transition from `$xyFF` to
   `$xz00`.
+- Play "time is running out" effect only once when hitting the 99 seconds mark.
 
 ## [0.3.1] - 2024-01-17
 
