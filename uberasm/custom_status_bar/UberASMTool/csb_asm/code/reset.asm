@@ -68,5 +68,10 @@ reset_ram:
     %reset_ram_byte(power_up_visibility)
     %reset_ram_byte(power_up_position_x)
 
+    ; Player
+    %reset_ram_byte(player_visibility)
+    %reset_ram_byte(player_mario_symbol)
+    %reset_ram_byte(player_luigi_symbol)
+
     ; Return
     RTL

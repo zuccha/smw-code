@@ -44,6 +44,7 @@
 
 !color_empty = %00000000
 !color_gold  = %00111100
+!color_green = %00101000
 !color_white = %00111000
 
 org $008C81
@@ -54,15 +55,15 @@ org $008C81
     db $FC, !color_white ; (17,01), ($11,$01), RAM: N/A
 org $008C89
     ; Top row
-    db $FC, !color_gold  ; (02,02), ($02,$02), RAM: $0EF9
-    db $FC, !color_gold  ; (03,02), ($03,$02), RAM: $0EFA
+    db $FC, !color_green ; (02,02), ($02,$02), RAM: $0EF9
+    db $FC, !color_empty ; (03,02), ($03,$02), RAM: $0EFA
     db $FC, !color_gold  ; (04,02), ($04,$02), RAM: $0EFB
     db $FC, !color_gold  ; (05,02), ($05,$02), RAM: $0EFC
     db $FC, !color_gold  ; (06,02), ($06,$02), RAM: $0EFD
     db $FC, !color_gold  ; (07,02), ($07,$02), RAM: $0EFE
     db $FC, !color_gold  ; (08,02), ($08,$02), RAM: $0EFF
-    db $FC, !color_empty ; (09,02), ($09,$02), RAM: $0F00
-    db $FC, !color_empty ; (10,02), ($0A,$02), RAM: $0F01
+    db $FC, !color_gold  ; (09,02), ($09,$02), RAM: $0F00
+    db $FC, !color_gold  ; (10,02), ($0A,$02), RAM: $0F01
     db $FC, !color_empty ; (11,02), ($0B,$02), RAM: $0F02
     db $FC, !color_empty ; (12,02), ($0C,$02), RAM: $0F03
     db $FC, !color_empty ; (13,02), ($0D,$02), RAM: $0F04
@@ -84,14 +85,14 @@ org $008C89
     db $FC, !color_white ; (29,02), ($1D,$02), RAM: $0F14
     ; Bottom row
     ; Not available :(   ; (02,03), ($02,$03), RAM: N/A
-    db $FC, !color_gold  ; (03,03), ($03,$03), RAM: $0F15
+    db $FC, !color_empty ; (03,03), ($03,$03), RAM: $0F15
     db $FC, !color_gold  ; (04,03), ($04,$03), RAM: $0F16
     db $FC, !color_gold  ; (05,03), ($05,$03), RAM: $0F17
     db $FC, !color_gold  ; (06,03), ($06,$03), RAM: $0F18
     db $FC, !color_gold  ; (07,03), ($07,$03), RAM: $0F19
     db $FC, !color_gold  ; (08,03), ($08,$03), RAM: $0F1A
     db $FC, !color_gold  ; (09,03), ($09,$03), RAM: $0F1B
-    db $FC, !color_empty ; (10,03), ($0A,$03), RAM: $0F1C
+    db $FC, !color_gold  ; (10,03), ($0A,$03), RAM: $0F1C
     db $FC, !color_empty ; (11,03), ($0B,$03), RAM: $0F1D
     db $FC, !color_empty ; (12,03), ($0C,$03), RAM: $0F1E
     db $FC, !color_empty ; (13,03), ($0D,$03), RAM: $0F1F

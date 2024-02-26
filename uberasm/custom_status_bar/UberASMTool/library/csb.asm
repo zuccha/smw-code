@@ -56,6 +56,7 @@ namespace "internal"
 %include_code("modules/bonus_stars.asm")
 %include_code("modules/dragon_coins.asm")
 %include_code("modules/lives.asm")
+%include_code("modules/player.asm")
 %include_code("modules/power_up.asm")
 %include_code("modules/score.asm")
 %include_code("modules/time.asm")

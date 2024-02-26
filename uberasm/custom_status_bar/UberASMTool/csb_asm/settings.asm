@@ -314,6 +314,49 @@
 
 
 ;-------------------------------------------------------------------------------
+; Player
+;-------------------------------------------------------------------------------
+
+; Global setting for showing which player is currently being used.
+; * Values:
+;     0 = Hidden
+;     1 = Visible (vanilla)
+; * Default: 1
+; * RAM: csb_ram_player_visibility
+!player_visibility = 1
+
+; Symbol for Mario.
+; The value is the position of the 8x8 tile in "GFX28".
+; * Values: $00-$7F/$FC
+; * Default: $FC (empty)
+; * RAM: csb_ram_player_mario_symbol
+; If you are using the modified GFX28 bundled with this patch, Mario's "M" is
+; replaced by the basic text "M".
+!player_mario_symbol = $30
+
+; Symbol for Luigi.
+; The value is the position of the 8x8 tile in "GFX28".
+; * Values: $00-$7F/$FC
+; * Default: $FC (empty)
+; * RAM: csb_ram_player_luigi_symbol
+; If you are using the modified GFX28 bundled with this patch, Luigi's "L" is
+; replaced by the basic text "L".
+!player_luigi_symbol = $40
+
+; Position of the player indicator in the status bar.
+; The values are the RAM address for the status bar tiles (see "colors.asm").
+; The address represents the first of the six tiles that the group 2 element
+; occupies.
+; N.B.: The color palette of each tile cannot be controlled dynamically. By
+; default, all seven tiles are set to gold. The palette is configured the same
+; way for all slots in the "colors.asm".
+; * Values: $0EF9-$0F0E/$0F15-$0F29
+; * Default: $0EFA, $0F15
+; * RAM: N/A
+!player_slot = $0EF9|!addr
+
+
+;-------------------------------------------------------------------------------
 ; Power Up
 ;-------------------------------------------------------------------------------
 
@@ -388,9 +431,9 @@ group_2_items: dw score, dragon_coins
 ; default, all seven tiles are set to gold. The palette is configured the same
 ; way for all slots in the "colors.asm".
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
-; * Default: $0EF9, $0F15
+; * Default: $0EFB, $0F16
 ; * RAM: N/A
-group_2_slots: dw $0EF9|!addr, $0F15|!addr
+group_2_slots: dw $0EFB|!addr, $0F16|!addr
 .end
 
 

@@ -1,10 +1,17 @@
 # Changelog
 
-## [0.3.2] - Unreleased
+## [0.4.0] - Unreleased
+
+### Added
+
+- Add player indicator, that can be hidden, allowing to choose which symbol to
+  display for Mario and Luigi. Its settings can be controlled via RAM addresses.
 
 ### Changed
 
 - Use tables in `setting.asm` for group definitions instead of defines.
+- Move the first slot of group 2 two tiles to the right, and the second slot one
+  tile to the right.
 
 ### Fixed
 

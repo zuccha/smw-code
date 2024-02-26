@@ -87,5 +87,6 @@ main:
 .visible
     %handle_group(1)
     %handle_group(2)
+    JSR player
     JSR power_up
     RTL
