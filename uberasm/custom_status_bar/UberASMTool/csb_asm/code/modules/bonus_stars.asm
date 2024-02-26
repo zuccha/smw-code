@@ -7,19 +7,12 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-!bonus_stars = handle_bonus_stars
-
-
-;-------------------------------------------------------------------------------
 ; Handler
 ;-------------------------------------------------------------------------------
 
 ; Handle drawing bonus stars counter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_bonus_stars:
+bonus_stars:
     %check_visibility(bonus_stars)
 
 .visibility1

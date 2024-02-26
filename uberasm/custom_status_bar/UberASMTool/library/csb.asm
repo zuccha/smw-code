@@ -34,8 +34,8 @@ endmacro
 ; Do not change the order of the includes!
 
 ; Settings
-pushpc
 %include_file("settings.asm")
+pushpc
 %include_file("colors.asm")
 pullpc
 

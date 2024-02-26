@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.2] - Unreleased
+
+### Changed
+
+- Use tables in `setting.asm` for group definitions instead of defines.
+
+### Fixed
+
+- Use correct status bar tile address when drawing empty tiles in SA-1.
+
 ## [0.3.1] - 2024-01-17
 
 ### Fixed

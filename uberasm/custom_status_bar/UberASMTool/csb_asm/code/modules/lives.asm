@@ -7,20 +7,13 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-!lives = handle_lives
-
-
-;-------------------------------------------------------------------------------
 ; Handler
 ;-------------------------------------------------------------------------------
 
 ; Draw lives counter on status bar.
 ; @param A (16-bit): Slot position.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_lives:
+lives:
     %check_visibility(lives)
 
 .visibility1

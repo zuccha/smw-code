@@ -7,19 +7,12 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-!coins = handle_coins
-
-
-;-------------------------------------------------------------------------------
 ; Handler
 ;-------------------------------------------------------------------------------
 
 ; Handle increasing coins and draw coin counter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_coins:
+coins:
     %check_visibility(coins)
 
 .visibility2

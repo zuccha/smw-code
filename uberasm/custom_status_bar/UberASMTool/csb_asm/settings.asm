@@ -343,11 +343,11 @@
 
 ; Order in which group 1 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; * Values: !bonus_stars, !coins, !lives, !time
-; * Default: !lives, !bonus_stars, !time, !coins
+; * Values: bonus_stars, coins, lives, time
+; * Default: lives, bonus_stars, time, coins
 ; * RAM: N/A
-; N.B.: Make sure to leave a space after every comma!
-!group1_order = !lives, !bonus_stars, !time, !coins
+group_1_items: dw lives, bonus_stars, time, coins
+.end
 
 ; Position of each slot where elements are displayed.
 ; The values are the RAM address for the status bar tiles (see "colors.asm").
@@ -361,10 +361,8 @@
 ; * Values: $0EF9-$0F11/$0F15-$0F2C
 ; * Default: $0F11, $0F2C, $0F0C, $0F27
 ; * RAM: N/A
-; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
-; will automatically convert the addresses into SA-1.
-; N.B.: Make sure to leave a space after every comma!
-!group1_slots = $0F11, $0F2C, $0F0C, $0F27
+group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
+.end
 
 
 ;-------------------------------------------------------------------------------
@@ -376,11 +374,11 @@
 
 ; Order in which group 2 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
-; * Values: !dragon_coins, !score
-; * Default: !score, !dragon_coins
+; * Values: dragon_coins, score
+; * Default: score, dragon_coins
 ; * RAM: N/A
-; N.B.: Make sure to leave a space after every comma!
-!group2_order = !score, !dragon_coins
+group_2_items: dw score, dragon_coins
+.end
 
 ; Position of each slot where elements are displayed.
 ; The values are the RAM address for the status bar tiles (see "colors.asm").
@@ -392,9 +390,7 @@
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
 ; * Default: $0EF9, $0F15
 ; * RAM: N/A
-; N.B.: You don't need to worry about SA-1, use vanilla values here. The UberASM
-; will automatically convert the addresses into SA-1.
-; N.B.: Make sure to leave a space after every comma!
-!group2_slots = $0EF9, $0F15
+group_2_slots: dw $0EF9|!addr, $0F15|!addr
+.end
 
 

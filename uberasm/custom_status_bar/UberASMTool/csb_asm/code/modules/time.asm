@@ -7,14 +7,6 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-; Methods.
-!time = handle_time
-
-
-;-------------------------------------------------------------------------------
 ; Utilities
 ;-------------------------------------------------------------------------------
 
@@ -31,7 +23,7 @@ endmacro
 
 ; Draw time counter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_time:
+time:
     %check_visibility(time)
 
 .visibility2
