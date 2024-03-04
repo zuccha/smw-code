@@ -26,6 +26,7 @@ Notes about this showcase:
 8. [Change timer frequency](#change-timer-frequency)
 9. [Custom dragon coins messages and symbols](#custom-dragon-coins-messages-and-symbols)
 10. [Disable the item box](#disable-the-item-box)
+11. [Show speed meter](#show-speed-meter)
 
 ## Original elements in a minimalistic style
 
@@ -213,3 +214,22 @@ working
 | <img src="../assets/images/item-box-1.gif" width="400px" /> | <img src="../assets/images/item-box-2.gif" width="400px" /> |
 | :---------------------------------------------------------: | :---------------------------------------------------------: |
 |                    Invisible and enabled                    |                   Invisible and disabled                    |
+
+## Show speed meter
+
+Although not present in vanilla, I had fun implementing the speed meter. It
+displays the player's speed divided in seven indicators. When all indicators are
+full, the player has reached p-speed.
+
+| <img src="../assets/images/speed-meter-1.gif" width="400px" /> |
+| :------------------------------------------------------------: |
+|          The meter fills as the player gathers speed           |
+
+The empty and full indicators can be customized
+
+| <img src="../assets/images/speed-meter-2.gif" width="400px" /> |
+| :------------------------------------------------------------: |
+|                    = for full, - for empty                     |
+
+**N.B.: The speed meter is not enabled by default, it has to be added to the
+visible elements via settings.**
