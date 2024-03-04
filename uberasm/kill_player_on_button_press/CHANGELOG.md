@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.0] - 2024-03-03
+
+### Changed
+
+- Control sprite and status bar indicators directly from within the UberASM
+  level file.
+- Rename `level.asm` to `kill_player_on_button_press.asm`.
+
+### Removed
+
+- Removed redundant sprite indicator.
+- Removed redundant status bar file.
+
+### Fixed
+
+- Prevent "TIME" text to appear for one frame before rendering counter in the
+  status bar.
+
 ## [1.3.0] - 2024-01-02
 
 ### Changed
