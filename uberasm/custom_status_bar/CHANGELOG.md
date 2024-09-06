@@ -9,6 +9,7 @@
 - Add speed meter, that can be hidden, allowing to choose which symbol to
   display for empty and full indicators. Its settings can be controlled via RAM
   addresses.
+- Add settings presets (vanilla, standard, kaizo) that can be used as reference.
 
 ### Changed
 

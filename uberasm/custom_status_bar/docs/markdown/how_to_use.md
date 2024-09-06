@@ -12,6 +12,19 @@ Global settings are restored any time a level is loaded (from overworld,
 sub-level entrances, fast retry after death, _etc._), but they can be overridden
 on a level basis (see next section).
 
+The UberASM also comes with a list of settings presets
+(`csb_asm/settings_presets`) that you can use to replace `csb_asm/settings.asm`:
+
+- **vanilla:** Shows all the original elements of the status bar using graphics
+  from the original `GFX28.bin`.
+- **standard:** Shows all the original elements of the status bar using graphics
+  from the altered `GFX28.bin` included in the bundle. Time frequency is set to
+  a real time second and Yoshi coins don't disappear from the status bar when
+  reentering a level if all have been collected.
+- **kaizo:** Shows only the time if different from zero in Lunar Magic and time
+  frequency is set to a real time second. It requires the altered `GFX28.bin`
+  included in the bundle.
+
 ## 2. Per-level customization
 
 You can override global settings on a level basis. To do this, you just need to
