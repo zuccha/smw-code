@@ -12,7 +12,7 @@
 ; Draw speed meter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
 speed_meter:
-    %check_visibility(score)
+    %check_visibility(speed_meter)
 
 .visibility0
 .visibility2
