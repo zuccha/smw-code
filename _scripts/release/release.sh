@@ -344,13 +344,13 @@ else
 
   # Generate HTML documentation
   if [[ "$FLAG_DOC_HTML" == 1 ]]; then
-    deno run --allow-read --allow-sys --allow-write "$MD2HTML" "$DIST_DIR" "$TYPE" "$OUT_NAME"
+    deno run --allow-env --allow-read --allow-sys --allow-write "$MD2HTML" "$DIST_DIR" "$TYPE" "$OUT_NAME"
     log_info "\t...with HTML"
   fi
 
   # Generate text documentation (README and CHANGELOG only)
   if [[ "$FLAG_DOC_TEXT" == 1 ]]; then
-    deno run --allow-read --allow-write "$MD2TEXT" "$DIST_DIR" "$TYPE" "$OUT_NAME"
+    deno run --allow-env --allow-read --allow-write "$MD2TEXT" "$DIST_DIR" "$TYPE" "$OUT_NAME"
     log_info "\t...with text"
   fi
 
@@ -397,8 +397,8 @@ else
   log_info "Publish release $GH_URL"
 
   # Get notes and title
-  GH_NOTES=$(deno run --allow-read "$GH_GET_NOTES" "$ROOT" "$TYPE" "$NAME")
-  GH_TITLE="$(deno run --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME") $VERSION"
+  GH_NOTES=$(deno run --allow-env --allow-read "$GH_GET_NOTES" "$ROOT" "$TYPE" "$NAME")
+  GH_TITLE="$(deno run --allow-env --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME") $VERSION"
 
   # Generate release
   GH_URL=$(gh release create "$GIT_TAG" "$ZIP_PATH" --latest --notes "$GH_NOTES" --title "$GH_TITLE" --verify-tag)
@@ -435,13 +435,13 @@ else
   log_info "Update summary"
 
   # Update JSON
-  GH_TITLE="$(deno run --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME")"
+  GH_TITLE="$(deno run --allow-env --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME")"
   jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" "$SUMMARY_JSON" > "$SUMMARY_JSON.temp"
   rm "$SUMMARY_JSON"
   mv "$SUMMARY_JSON.temp" "$SUMMARY_JSON"
 
   # Generate README
-  deno run --allow-read --allow-write "$SUMMARY_UPDATE" "$SUMMARY_PATH" "$SUMMARY_JSON"
+  deno run --allow-env --allow-read --allow-write "$SUMMARY_UPDATE" "$SUMMARY_PATH" "$SUMMARY_JSON"
 
   # Commit update
   git add "$SUMMARY_PATH" "$SUMMARY_JSON" > /dev/null
