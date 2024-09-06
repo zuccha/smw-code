@@ -55,7 +55,7 @@
 ;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_bonus_stars_visibility
-!bonus_stars_visibility = 1
+!bonus_stars_visibility = 0
 
 ; Symbol in front of the bonus stars counter.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -64,7 +64,7 @@
 ; * RAM: csb_ram_bonus_stars_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3F (star, alternative).
-!bonus_stars_symbol = $64
+!bonus_stars_symbol = $3F
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!bonus_stars_visibility = 0). If bonus stars reach
@@ -116,7 +116,7 @@
 ;     2 = Visible if !coins_limit > 0
 ; * Default: 1
 ; * RAM: csb_ram_coins_visibility
-!coins_visibility = 1
+!coins_visibility = 0
 
 ; Symbol in front of the coins counter.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -125,7 +125,7 @@
 ; * RAM: csb_ram_coins_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3D (coin, alternative).
-!coins_symbol = $2E
+!coins_symbol = $3D
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!coins_visibility = 0). If the bonus stars reach a
@@ -176,7 +176,7 @@
 ; * Default: 1
 ; * RAM: csb_ram_lives_visibility
 ; N.B.: Disabling this will not prevent the player to lose lives and game over.
-!lives_visibility = 1
+!lives_visibility = 0
 
 ; Symbol in front of the lives counter.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -185,7 +185,7 @@
 ; * RAM: csb_ram_lives_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3E (heart).
-!lives_symbol = $26
+!lives_symbol = $3E
 
 
 ;-------------------------------------------------------------------------------
@@ -199,7 +199,7 @@
 ;     2 = Visible if limit > 0 (limit set via Lunar Magic)
 ; * Default: 1
 ; * RAM: csb_ram_time_visibility
-!time_visibility = 1
+!time_visibility = 2
 
 ; Symbol in front of the time counter.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -237,7 +237,7 @@
 ; You can set this value to $3C (60) to make the timer decrease every second (if
 ; the game runs at 60 FPS).
 ; N.B.: Don't use $FF as it is a reserved value (why would you use that anyway).
-!time_frequency = $28
+!time_frequency = $3C
 
 
 ;-------------------------------------------------------------------------------
@@ -251,7 +251,7 @@
 ;     2 = Visible if not all coins have been collected (vanilla)
 ; * Default: 2
 ; * RAM: csb_ram_dragon_coins_visibility
-!dragon_coins_visibility = 2
+!dragon_coins_visibility = 0
 
 ; Symbol for collected dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -267,7 +267,7 @@
 ; * RAM: csb_ram_dragon_coins_missing_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $4A (empty coin).
-!dragon_coins_missing_symbol = $FC
+!dragon_coins_missing_symbol = $4A
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
 ; can be configured using !DragonCoinsCollectedGraphics.
@@ -305,7 +305,7 @@
 ; * Default: 1
 ; * RAM: csb_ram_score_visibility
 ; N.B.: Even when hidden, the score will still be increased.
-!score_visibility = 1
+!score_visibility = 0
 
 
 ;-------------------------------------------------------------------------------
@@ -322,7 +322,7 @@
 ;     1 = Visible
 ; * Default: 1
 ; * RAM: csb_ram_speed_meter_visibility
-!speed_meter_visibility = 1
+!speed_meter_visibility = 0
 
 ; Symbol for empty speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -351,7 +351,7 @@
 ;     1 = Visible (vanilla)
 ; * Default: 1
 ; * RAM: csb_ram_player_visibility
-!player_visibility = 1
+!player_visibility = 0
 
 ; Symbol for Mario.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -448,7 +448,7 @@ group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
 ; * Values: dragon_coins, score, speed_meter
 ; * Default: score, dragon_coins
 ; * RAM: N/A
-group_2_items: dw score, dragon_coins
+group_2_items: dw speed_meter, dragon_coins
 .end
 
 ; Position of each slot where elements are displayed.

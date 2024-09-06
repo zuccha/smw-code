@@ -21,7 +21,7 @@ The code comes with a patch that can be applied to revert hijacks. For more, see
 
 ## Free RAM
 
-CSB requires 34 bytes of contiguous free RAM, that are set to start at `$7FB700`
+CSB requires 40 bytes of contiguous free RAM, that are set to start at `$7FB700`
 by default.
 
 In case of conflicts, this address can be modified in `csb_asm/ram.asm`.

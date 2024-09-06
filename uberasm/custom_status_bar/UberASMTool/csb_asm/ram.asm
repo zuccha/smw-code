@@ -11,7 +11,7 @@
 ; Base Address
 ;-------------------------------------------------------------------------------
 
-; This patch requires 34 bytes of free contiguous RAM to store settings that can
+; This patch requires 40 bytes of free contiguous RAM to store settings that can
 ; be changed dynamically (mostly used for per-level customization).
 ; RAM starts at the address indicated here. Unless you have some conflics with
 ; other custom code, you won't need to change it.
@@ -133,3 +133,13 @@ namespace off
 ; Power Up
 %define_ram($20, power_up_visibility)
 %define_ram($21, power_up_position_x)
+
+; Player
+%define_ram($22, player_visibility)
+%define_ram($23, player_mario_symbol)
+%define_ram($24, player_luigi_symbol)
+
+; Speed Meter
+%define_ram($25, speed_meter_visibility)
+%define_ram($26, speed_meter_empty_symbol)
+%define_ram($27, speed_meter_full_symbol)

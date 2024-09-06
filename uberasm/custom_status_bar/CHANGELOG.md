@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.4.0] - 2024-09-06
+
+### Added
+
+- Add player indicator, that can be hidden, allowing to choose which symbol to
+  display for Mario and Luigi. Its settings can be controlled via RAM addresses.
+- Add speed meter, that can be hidden, allowing to choose which symbol to
+  display for empty and full indicators. Its settings can be controlled via RAM
+  addresses.
+- Add settings presets (vanilla, standard, kaizo) that can be used as reference.
+
+### Changed
+
+- Reorganize custom tiles in `GFX28.bin`.
+- Use tables in `setting.asm` for group definitions instead of defines.
+- Move the first slot of group 2 two tiles to the right, and the second slot one
+  tile to the right.
+- Make UberASMTool's `list.txt` compatible with UberASMTool 2.0.
+
+### Fixed
+
+- Use correct status bar tile address when drawing empty tiles in SA-1.
+- Draw tile in correct address when tilemap addresses transition from `$xyFF` to
+  `$xz00`.
+- Play "time is running out" effect only once when hitting the 99 seconds mark.
+
 ## [0.3.1] - 2024-01-17
 
 ### Fixed

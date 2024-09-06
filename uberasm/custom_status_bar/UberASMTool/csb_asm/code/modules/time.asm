@@ -7,14 +7,6 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-; Methods.
-!time = handle_time
-
-
-;-------------------------------------------------------------------------------
 ; Utilities
 ;-------------------------------------------------------------------------------
 
@@ -31,7 +23,7 @@ endmacro
 
 ; Draw time counter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_time:
+time:
     %check_visibility(time)
 
 .visibility2
@@ -64,29 +56,30 @@ handle_time:
 ; Original routine that decrements timer, with a few tweaks:
 ;   1. Customizable decrease frequency.
 ;   2. Set timer's timer ($0F30) to $FF when time reaches 0, and don't decrease
-;   timer if it's value is already $FF. This is needed so that if the timer runs
+;   timer if its value is already $FF. This is needed so that if the timer runs
 ;   out while visibility = 2, the timer doesn't disappear from the status bar
 ;   (since with visibility = 2, the timer should not appear when it is 0, but
 ;   only at the start of the level).
 ;   3. Add custom routine to execute when time runs out.
 check_time:
-    LDA $1493|!addr : ORA $9D : BNE +               ; If levels not ending and sprites not locked
-    LDA $0D9B|!addr : CMP #$C1 : BEQ +              ; If not at Bowser's
-    LDA $0F30|!addr : CMP #$FF : BEQ +              ; If timer's timer is not $FF
+    LDA $1493|!addr : ORA $9D : BNE .return         ; If levels not ending and sprites not locked
+    LDA $0D9B|!addr : CMP #$C1 : BEQ .return        ; If not at Bowser's
+    LDA $0F30|!addr : CMP #$FF : BEQ .return        ; If timer's timer is not $FF
     DEC $0F30|!addr                                 ; Then decrement timer's timer and
-    BPL +                                           ; If it was 0
+    BPL .return                                     ; If it was 0
     LDA ram_time_frequency : STA $0F30|!addr        ; Then reset it
-    %is_time_zero() : BEQ +                         ; If timer is not 0
+    %is_time_zero() : BEQ .return                   ; If timer is not 0
     LDX #$02                                        ; Then decrease the timer, digit by digit
--   DEC $0F31|!addr,x : BPL ++                      ; If digit was 0
+-   DEC $0F31|!addr,x : BPL +                       ; If digit was 0
     LDA #$09 : STA $0F31|!addr,x : DEX : BPL -      ; Set it to 9 and go to next
-++  LDA $0F31|!addr : BNE ++                        ; If the hundreds' digit is 0...
-    LDA $0F32|!addr : AND $0F32|!addr               ; ...and tens and units...
-    CMP #$09 : BNE ++                               ; ...are 9s (timer is 099)
++   LDA $0F31|!addr : BNE +                         ; If the hundreds' digit is 0...
+    LDA $0F32|!addr : AND $0F33|!addr               ; ...and tens and units...
+    CMP #$09 : BNE +                                ; ...are 9s (timer is 099)
     LDA #$FF : STA $1DF9|!addr                      ; Then speed up the music
-++  %is_time_zero() : BNE +                         ; If timer is 0
++   %is_time_zero() : BNE .return                   ; If timer is 0
     JSR trigger_time_run_out                        ; Then trigger custom behavior
-    LDA ram_kill_player_when_time_runs_out : BEQ ++ ; If should kill player
+    LDA ram_kill_player_when_time_runs_out : BEQ +  ; If should kill player
     JSL $00F606|!bank                               ; Then kill player
-++  LDA #$FF : STA $0F30|!addr                      ; Set timer's timer to $FF marking time over
-+   RTS
++   LDA #$FF : STA $0F30|!addr                      ; Set timer's timer to $FF marking time over
+.return
+    RTS

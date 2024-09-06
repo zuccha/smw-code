@@ -7,19 +7,12 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-!score = handle_score
-
-
-;-------------------------------------------------------------------------------
 ; Handler
 ;-------------------------------------------------------------------------------
 
 ; Draw score counter on status bar.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_score:
+score:
     %check_visibility(score)
 
 .visibility0
@@ -52,7 +45,7 @@ handle_score:
     SEP #$20
     LDA (!tile_addr) : INC A : STA (!tile_addr)
     BRA -
-+   SEP #$20 : INX #4 : INC !tile_addr
++   SEP #$20 : INX #4 : %next_tile()
     CPX #$18 : BNE .draw_six_digits_number
 
     ; Draw last hardcoded zero

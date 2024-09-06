@@ -8,13 +8,6 @@
 
 
 ;-------------------------------------------------------------------------------
-; Methods Definition
-;-------------------------------------------------------------------------------
-
-!dragon_coins = handle_dragon_coins
-
-
-;-------------------------------------------------------------------------------
 ; Utilities
 ;-------------------------------------------------------------------------------
 
@@ -56,7 +49,7 @@ custom_dragon_coins_collected_graphics_table:
 ; Draw collected dragon coins on status bar.
 ; @param A (16-bit): Slot position.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
-handle_dragon_coins:
+dragon_coins:
     %check_visibility(dragon_coins)
 
 .visibility2

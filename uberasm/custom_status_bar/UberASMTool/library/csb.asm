@@ -34,8 +34,8 @@ endmacro
 ; Do not change the order of the includes!
 
 ; Settings
-pushpc
 %include_file("settings.asm")
+pushpc
 %include_file("colors.asm")
 pullpc
 
@@ -56,8 +56,10 @@ namespace "internal"
 %include_code("modules/bonus_stars.asm")
 %include_code("modules/dragon_coins.asm")
 %include_code("modules/lives.asm")
+%include_code("modules/player.asm")
 %include_code("modules/power_up.asm")
 %include_code("modules/score.asm")
+%include_code("modules/speed_meter.asm")
 %include_code("modules/time.asm")
 
 ; Main routine

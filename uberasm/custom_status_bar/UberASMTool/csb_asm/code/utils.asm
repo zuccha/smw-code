@@ -23,12 +23,18 @@
 ; we want to draw to.
 !tile_addr = $0E
 
+; Go to next tile's address.
+macro next_tile()
+    INC !tile_addr   : BNE ?+
+    INC !tile_addr+1 : ?+
+endmacro
+
 ; Draw the value in A by storing it in the status bar tilemap RAM address, then
 ; go to next tile address.
 ; @param A: The tile to draw in the status bar.
 macro draw_tile()
     STA (!tile_addr)
-    INC !tile_addr
+    %next_tile()
 endmacro
 
 

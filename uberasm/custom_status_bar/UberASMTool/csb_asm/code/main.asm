@@ -19,49 +19,47 @@
 ;     if (items[y].handle(slots[x])) ++x
 ;     ++y
 ; @param <group>: Number of the group (either 1 or 2).
-; @param <size>: Width of the group, in tiles.
-macro handle_group(group, size)
-    !items = group<group>_items_table
-    !slots = group<group>_slots_table
-    !items_size = group<group>_items_table_end-!items
-    !slots_size = group<group>_slots_table_end-!slots
+macro handle_group(group)
+    !items = group_<group>_items
+    !slots = group_<group>_slots
+    !items_count = group_<group>_items_end-!items
+    !slots_count = group_<group>_slots_end-!slots
+    !tiles_count = !group_<group>_tiles_count-1
 
     ; Draw every visible item in a slot.
-    LDX #$00                          ; Track slots
-    LDY #$00                          ; Track items
-?-  CPY.b #!items_size : BCS ?cleanup ; If we still have elements...
-    CPX.b #!slots_size : BCS ?cleanup ; ...and slots available
+    LDX #$00                            ; Track slots
+    LDY #$00                            ; Track items
+?-  CPY.b #!items_count : BCS ?cleanup  ; If we still have elements...
+    CPX.b #!slots_count : BCS ?cleanup  ; ...and slots available
 
-    REP #$20                          ; Fetch and store the next tile address
-    LDA.l !slots,x                    ; for the current slot
-    if !addr > 0 : ORA.w #!addr       ; (including the SA-1 offset!)
-    STA !tile_addr                    ; that will be used by handlers to draw
-    SEP #$20                          ; in the status bar
+    REP #$20                            ; Fetch and store the next tile address
+    LDA.l !slots,x : STA !tile_addr     ; that will be used by handlers to draw
+    SEP #$20                            ; in the status bar
 
-    PHX : PHY                         ; Invoke item handler
-    TYX : JSR (!items,x)              ; We have `JSR (!items,y)` at home
-    PLY : PLX                         ; If handler didn't draw anything
-    BCC ?++                           ; Then don't shift slot
+    PHX : PHY                           ; Invoke item handler
+    TYX : JSR (!items,x)                ; We have `JSR (!items,y)` at home
+    PLY : PLX                           ; If handler didn't draw anything
+    BCC ?++                             ; Then don't shift slot
 
-    INX #2                            ; Go to the next slot
-?++ INY #2                            ; Go to the next item
-    BRA ?-                            ; Loop
+    INX #2                              ; Go to the next slot
+?++ INY #2                              ; Go to the next item
+    BRA ?-                              ; Loop
 
     ; Draw unoccupied slots with empty spaces to erase any previous drawing (in
     ; case elements shifted).
 ?cleanup
-    CPX.b #!slots_size : BCS ?+       ; If we still have slots
+    CPX.b #!slots_count : BCS ?+        ; If we still have slots
 
-    REP #$20                          ; Fetch and store the next tile address
-    LDA.l !slots,x : STA !tile_addr   ; that will be used by handlers to draw
-    SEP #$20                          ; in the status bar
+    REP #$20                            ; Fetch and store the next tile address
+    LDA.l !slots,x : STA !tile_addr     ; that will be used by handlers to draw
+    SEP #$20                            ; in the status bar
 
-    LDA #$FC                          ; Draw a number of empty spaces
-    LDY.b #(<size>-1)                 ; equal to the size of the slot
+    LDA #$FC                            ; Draw a number of empty spaces
+    LDY.b #!tiles_count                 ; equal to the size of the slot
 ?-  %draw_tile()
     DEY : BPL ?-
 
-    INX #2 : BRA ?cleanup             ; Go to the next slot
+    INX #2 : BRA ?cleanup               ; Go to the next slot
 ?+
 endmacro
 
@@ -87,24 +85,8 @@ main:
     RTL
 
 .visible
-    %handle_group(1, !group_1_tiles_count)
-    %handle_group(2, !group_2_tiles_count)
-    JSR handle_power_up
+    %handle_group(1)
+    %handle_group(2)
+    JSR player
+    JSR power_up
     RTL
-
-
-;-------------------------------------------------------------------------------
-; Group Definitions
-;-------------------------------------------------------------------------------
-
-; Group 1.
-group1_items_table: dw !group1_order
-.end
-group1_slots_table: dw !group1_slots
-.end
-
-; Group 2.
-group2_items_table: dw !group2_order
-.end
-group2_slots_table: dw !group2_slots
-.end

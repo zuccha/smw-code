@@ -64,7 +64,7 @@
 ; * RAM: csb_ram_bonus_stars_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3F (star, alternative).
-!bonus_stars_symbol = $64
+!bonus_stars_symbol = $3F
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!bonus_stars_visibility = 0). If bonus stars reach
@@ -125,7 +125,7 @@
 ; * RAM: csb_ram_coins_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3D (coin, alternative).
-!coins_symbol = $2E
+!coins_symbol = $3D
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
 ; shown in the status bar (!coins_visibility = 0). If the bonus stars reach a
@@ -185,7 +185,7 @@
 ; * RAM: csb_ram_lives_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $3E (heart).
-!lives_symbol = $26
+!lives_symbol = $3E
 
 
 ;-------------------------------------------------------------------------------
@@ -237,7 +237,7 @@
 ; You can set this value to $3C (60) to make the timer decrease every second (if
 ; the game runs at 60 FPS).
 ; N.B.: Don't use $FF as it is a reserved value (why would you use that anyway).
-!time_frequency = $28
+!time_frequency = $3C
 
 
 ;-------------------------------------------------------------------------------
@@ -251,7 +251,7 @@
 ;     2 = Visible if not all coins have been collected (vanilla)
 ; * Default: 2
 ; * RAM: csb_ram_dragon_coins_visibility
-!dragon_coins_visibility = 2
+!dragon_coins_visibility = 1
 
 ; Symbol for collected dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
@@ -267,7 +267,7 @@
 ; * RAM: csb_ram_dragon_coins_missing_symbol
 ; If you are using the modified GFX28 bundled with this patch, you can also use
 ; $4A (empty coin).
-!dragon_coins_missing_symbol = $FC
+!dragon_coins_missing_symbol = $4A
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
 ; can be configured using !DragonCoinsCollectedGraphics.

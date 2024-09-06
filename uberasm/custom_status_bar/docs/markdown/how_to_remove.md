@@ -52,3 +52,6 @@ init:
 ```
 
 If you do this, you don't need to change anything in `list.txt` (skip 1.5).
+
+**N.B.:** This should only apply if you're using versions older than UberASMTool
+2.0.
