@@ -19,11 +19,11 @@ The UberASM also comes with a list of settings presets
   from the original `GFX28.bin`.
 - **standard:** Shows all the original elements of the status bar using graphics
   from the altered `GFX28.bin` included in the bundle. Time frequency is set to
-  a real time second and Yoshi coins don't disappear from the status bar when
-  reentering a level if all have been collected.
-- **kaizo:** Shows only the time if different from zero in Lunar Magic and time
-  frequency is set to a real time second. It requires the altered `GFX28.bin`
-  included in the bundle.
+  real time seconds and Yoshi coins don't disappear from the status bar when all
+  have been collected.
+- **kaizo:** Shows the time only if it has been set different from zero in Lunar
+  Magic; time frequency is set to real time seconds. It requires the altered
+  `GFX28.bin` included in the bundle.
 
 ## 2. Per-level customization
 
@@ -55,7 +55,7 @@ the setting's description in `csb_asm/settings.asm`. To change a value we do
 ```asar
 ;  value            RAM address
 ;    v                   v
-LDA #01 : STA csb_ram_time_visibility
+LDA #$01 : STA csb_ram_time_visibility
 ```
 
 where `value` is any of the possible listed in the setting's description (always
@@ -206,20 +206,19 @@ changes are:
 
 1. Lower the clock tile (`$76`) by one pixel.
 2. Restyle the "MARIO" text so that the "M" can be used as a single tile.
-3. Restyle the "L" of "LUIGI".
-4. Replace the second and third part of "MARIO" (`$31`, `$32`) with empty and
+3. Replace the second and third part of "MARIO" (`$31`, `$32`) with empty and
    full arrow indicators for the speed meter.
-5. Replace the fourth part of "MARIO" (`$33`) with an empty coin that can be
+4. Replace the fourth part of "MARIO" (`$33`) with an empty coin that can be
    used to display missing dragon coins (instead of a blank space).
-6. Replace the fifth part of "MARIO" (`$34`) with a checkmark that can be used
+5. Replace the fifth part of "MARIO" (`$34`) with a checkmark that can be used
    to mark when all dragon coins have been collected.
-7. Replace the "L" of "LUIGI" (`$40`) with an alternative, standalone "L".
-8. Remove the rest of "LUIGI", now unused, for future or custom use.
-9. Replace the first part of the "TIME" text (`$3D`) with an alternative coin
+6. Restyle the "L" of "LUIGI".
+7. Remove the rest of "LUIGI", now unused, for future or custom use.
+8. Replace the first part of the "TIME" text (`$3D`) with an alternative coin
    that can be used in front of the coins counter.
-10. Replace the middle part of the "TIME" text (`$3E`) with a heart that can be
-    used in front of the lives counter.
-11. Replace the last part of the "TIME" text (`$3F`) with a star that can be
+9. Replace the middle part of the "TIME" text (`$3E`) with a heart that can be
+   used in front of the lives counter.
+10. Replace the last part of the "TIME" text (`$3F`) with a star that can be
     used in front of the bonus stars counter.
 
 Using the modified version is entirely **optional**.

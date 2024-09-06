@@ -42,10 +42,19 @@ main:
 
 ### (1.4) What if I already have a file for Game Mode 11 (GM11)?
 
-In this case, you have a couple of solutions. The first (and simplest) is to
-call CSB's routine for GM11 inside the already existing GM11 file, under the
-`init:` label. For instance, if you are using KevinM's Retry System, you can
-modify `retry_gm11.asm` to look like this
+If you are using UberASMTool 2.0 you can simply add multiple entries for the
+same game mode:
+
+```
+gamemode:
+11 other_gm11.asm ; <- This was already here
+11 csb_gm11.asm   ; <- Add this line
+```
+
+If you are using older versions of UberASMTool, you have a couple of solutions.
+The first (and simplest) is to call CSB's routine for GM11 inside the already
+existing GM11 file, under the `init:` label. For instance, if you are using
+KevinM's Retry System, you can modify `retry_gm11.asm` to look like this
 
 ```asar
 init:
