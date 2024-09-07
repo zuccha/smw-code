@@ -25,14 +25,6 @@ A collection of SMW resources.
 | [Kill Player on Button Press](./uberasm/kill_player_on_button_press)             | [v1.4.0](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fkill_player_on_button_press%2F1.4.0/kill_player_on_button_press-1.4.0.zip)             |
 | [Update Player Overworld Animation](./uberasm/update_player_overworld_animation) | [v1.0.1](https://github.com/zuccha/smw-code/releases/download/uberasm%2Fupdate_player_overworld_animation%2F1.0.1/update_player_overworld_animation-1.0.1.zip) |
 
-## Tools
-
-| Name                                                       | Download                                                                                                                    | Online                                                   |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [Byte Converter](./tools/byte_converter)                   | [v1.5.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_converter%2F1.5.0/byte_converter-1.5.0.zip)       | [Online](https://zuccha.io/pages/byte_converter.html)    |
-| [Byte Table Editor](./tools/byte_table_editor)             | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/tool%2Fbyte_table_editor%2F1.1.0/byte_table_editor-1.1.0.zip) | [Online](https://zuccha.io/pages/byte_table_editor.html) |
-| ~[Overworld Music Editor](./tools/overworld_music_editor)~ | Deprecated, use _Byte Table Editor_                                                                                         | -                                                        |
-
 ## Ports
 
 | Name                                                                                               | Download                                                                                                                                                                      |

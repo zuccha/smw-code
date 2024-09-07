@@ -30,7 +30,7 @@
 #   or in ".smw/config_release.sh").
 #
 #   Args:
-#     <type>      Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
+#     <type>      Resource type, one of: "block", "patch", "port", "sprite", "uberasm"
 #     <name>      Name of the resource
 #     <version>   Version, following semver convention
 #
@@ -117,7 +117,6 @@ case $TYPE in
   patch)   TYPE_DIR=patches ;;
   port)    TYPE_DIR=ports   ;;
   sprite)  TYPE_DIR=sprites ;;
-  tool)    TYPE_DIR=tools   ;;
   uberasm) TYPE_DIR=uberasm ;;
 esac
 
@@ -127,7 +126,6 @@ case $TYPE in
   patch)   TYPE_LABEL=Patch   ;;
   port)    TYPE_LABEL=Port    ;;
   sprite)  TYPE_LABEL=Sprite  ;;
-  tool)    TYPE_LABEL=Tool    ;;
   uberasm) TYPE_LABEL=UberASM ;;
 esac
 
