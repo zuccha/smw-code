@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0] - 2024-09-14
+
+### Breaking
+
+- Make sprite compatible with PIXI 1.42. It's no longer compatible with PIXI
+  1.40 or older.
+
 ## [1.2.0] - 2023-12-25
 
 ### Changed

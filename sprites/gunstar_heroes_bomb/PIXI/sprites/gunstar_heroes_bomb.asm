@@ -330,7 +330,7 @@ explode:
 ; @param $08: Motion. $00 = inner, clockwise; $01 = outer, counter-clockwise.
 spawn_explosion_blast:
     ; Spawn sprite
-    LDA.b #!blast_sprite+!ClusterOffset : XBA
+    LDA.b #!blast_sprite+!ClusterOffset
     %SpawnClusterGeneric()
 
     ; Set OAM properties
