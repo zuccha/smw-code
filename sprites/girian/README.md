@@ -93,3 +93,7 @@ You can change which palettes are used in the ASM files.
 
 When walking on slopes, the Girian/Woo can fall through vertically sometimes.
 Don't put it on a slope I guess ¯\\\_(ツ)\_/¯
+
+## Compatibility
+
+The sprite is compatible with PIXI 1.42.

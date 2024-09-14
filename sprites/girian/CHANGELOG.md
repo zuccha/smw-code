@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.0] - Unreleased
+
+### Breaking
+
+- Make Girian compatible with PIXI 1.42. It's no longer compatible with PIXI
+  1.40 or older.
+
 ## [1.0.0] - 2023-10-10
 
 ### Added
