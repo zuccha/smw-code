@@ -12,7 +12,7 @@ A collection of SMW resources.
 
 | Name                                                                         | Download                                                                                                                          |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [GIRIAN / WOO](./sprites/girian)                                             | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgirian%2F2.0.0/girian-2.0.0.zip)                           |
+| [Girian / Woo](./sprites/girian)                                             | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgirian%2F2.0.0/girian-2.0.0.zip)                           |
 | [Gunstar Heroes Bomb](./sprites/gunstar_heroes_bomb)                         | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgunstar_heroes_bomb%2F2.0.0/gunstar_heroes_bomb-2.0.0.zip) |
 | [Magikoopa Shooting Bowser Statue's Fireballs](./sprites/magikoopa_fireball) | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fmagikoopa_fireball%2F1.1.0/magikoopa_fireball-1.1.0.zip)   |
 | [Orbinaut](./sprites/orbinaut)                                               | [v1.1.1](https://github.com/zuccha/smw-code/releases/download/sprite%2Forbinaut%2F1.1.1/orbinaut-1.1.1.zip)                       |

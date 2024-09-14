@@ -1,4 +1,4 @@
-# GIRIAN / WOO
+# Girian / Woo
 
 Authors: Code by zuccha, graphics ripped by Blizzard Buffalo, requested by
 Blizzard Buffalo.
