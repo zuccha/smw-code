@@ -130,3 +130,7 @@ LDA #$F0 : STA !extra_byte_2,y       ; Explode after about 4 seconds
 LDA #$00 : STA !extra_byte_3,y       ; No initial X speed
 LDA #$00 : STA !extra_byte_4,y       ; No initial Y speed
 ```
+
+## Compatibility
+
+The sprite is compatible with PIXI 1.42.
