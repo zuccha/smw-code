@@ -767,13 +767,8 @@ spit:
 
     LDA.b #!spit_offset_y : STA $01     ;> Y offset
 
-    LDA !sprite_x_low,x : STA $02
-    LDA !sprite_x_high,x : STA $03
-    LDA !sprite_y_low,x : STA $04
-    LDA !sprite_y_high,x : STA $05
-
-    LDA.b #!fire_sprite+!ClusterOffset : XBA
-    %SpawnClusterGeneric()
+    LDA.b #!fire_sprite+!ClusterOffset
+    %SpawnCluster()
     BCS .return
 
     %load_type() : LSR #2               ;\ 0 if no extra bit (Girian, fire)
@@ -787,12 +782,12 @@ spit:
 
     STZ $01                             ;> Prepare X offset high byte to 0 for 16-bit load
     REP #$20
-    LDA $02                             ;\ Delta X =
+    LDA $04                             ;\ Delta X =
     CLC : ADC $00                       ;| (girian pos x + spit offset x) -
     SEC : SBC $94                       ;| (player pos x + half player width)
     CLC : ADC.w #$0008                  ;|
     STA $00                             ;/
-    LDA $04                             ;\ Delta Y =
+    LDA $06                             ;\ Delta Y =
     CLC : ADC.w #!spit_offset_y         ;| (girian pos y + spit offset y) -
     SEC : SBC $96                       ;| (player pos y - half player height)
     SEC : SBC.w #$0008                  ;| Not adjusted for big Mario, but who
