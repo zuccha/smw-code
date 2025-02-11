@@ -25,11 +25,10 @@
 ; Configuration (behavior)
 ;-------------------------------------------------------------------------------
 
-phase_durations:
-    db $46 ; Idle
-    db $28 ; Load jump
-    db $28 ; Jump (should be 0, since it lasts indefinitely until the frog lands)
-    db $14 ; Land (the frog crouches after landing)
+; Phase durations, in frames.
+!phase_rest_duration = $46 ; Idle, waiting to jump
+!phase_load_duration = $28 ; Preparing to jump (the frog crouches before landing)
+!phase_land_duration = $14 ; Landing (the frog crouches after landing)
 
 
 ;-------------------------------------------------------------------------------
@@ -72,9 +71,6 @@ gfx_dead: db $08, $0A, $28, $2A
 !phase_jump = 2
 !phase_land = 3
 !phase_dead = 4
-
-; Which phase comes next, indexed by current phase.
-next_phases: db 1, 2, 3, 0, 4
 
 ; Timer keeping track of how many frames need to pass before the sprite can
 ; transition to the next phase.
@@ -130,7 +126,7 @@ gfx_by_phase:
 ; Sprite initialization.
 init:
     LDA.b #!phase_rest : STA !phase,x : TAY
-    LDA phase_durations,y : STA !phase_cooldown
+    LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     LDA #$00 : STA !is_fragile,x
     LDA #$00 : STA !has_eaten_key,x
     LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
@@ -226,51 +222,82 @@ update:
     LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
     BEQ .interact                       ;/ frog cannot jump
 
-.check_phase
-    LDA !phase,x                         ;\
-    CMP.b #!phase_jump : BEQ .jump_phase ;| Handle phases with special behaviors
-    CMP.b #!phase_dead : BEQ .interact   ;| (not based on cooldown)
-    BRA .other_phases                    ;/
-
-.jump_phase
-    LDA !sprite_blocked_status,x        ;\ If touching ground, then it's done
-    AND #$04 : BNE .go_to_next_phase    ;| jumping, otherwise keep jumping and
-    BRA .interact                       ;/ process interaction
-
-.other_phases
-    LDA !phase_cooldown,x               ;\ If cooldown is 0
-    BEQ .go_to_next_phase               ;/ Then go to the next phase
-    DEC !phase_cooldown,x               ;\ Else reduce cooldown...
-    BRA .interact                       ;/ ...and process interaction
-
-.go_to_next_phase
-    LDY !phase,x                        ;\
-    LDA next_phases,y : STA !phase,x    ;|
-    TAY                                 ;| Update phase and reset cooldown
-    LDA phase_durations,y               ;|
-    STA !phase_cooldown,x               ;/
-
-    CPY.b #!phase_jump : BEQ .start_jumping
-    CPY.b #!phase_land : BEQ .start_landing
-    BRA .interact
-
-.start_jumping
-    LDA !jump_speed_x,x                 ;\
-    LDY !direction,x : BEQ +            ;|
-    EOR #$FF : INC A                    ;| Set jump speeds, inverting X if frog
-+   STA !sprite_speed_x,x               ;| is going left (Y is always upwards)
-    LDA !jump_speed_y,x                 ;|
-    STA !sprite_speed_y,x               ;/
-    BRA .interact
-
-.start_landing
-    STZ !sprite_speed_x,x               ;\
-    LDA !direction,x : EOR #$01         ;| Stop momentum and invert direction
-    STA !direction,x                    ;/
+.update_by_phase
+    LDA !phase,x : ASL : TAX            ;\ Update sprite based on which phase it
+    JSR (update_by_phase,x)             ;/ is currently
 
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
     JSL $01802A|!bank                   ;> Update position
 
 .return
+    RTS
+
+; Update switch.
+update_by_phase:
+    dw update_rest, update_load, update_jump, update_land, update_dead
+
+; Update rest.
+update_rest:
+    LDX !sprite_index
+
+    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    DEC !phase_cooldown,x : RTS
+
+.go_to_next_phase
+    LDA.b #!phase_load : STA !phase,x
+    LDA.b #!phase_load_duration : STA !phase_cooldown,x
+    RTS
+
+; Update load.
+update_load:
+    LDX !sprite_index
+
+    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    DEC !phase_cooldown,x : RTS
+
+.go_to_next_phase
+    LDA.b #!phase_jump : STA !phase,x
+
+    LDA !jump_speed_x,x                 ;\
+    LDY !direction,x : BEQ +            ;|
+    EOR #$FF : INC A                    ;| Set jump speeds, inverting X if frog
++   STA !sprite_speed_x,x               ;| is going left (Y is always upwards)
+    LDA !jump_speed_y,x                 ;|
+    STA !sprite_speed_y,x               ;/
+
+    RTS
+
+; Update jump.
+update_jump:
+    LDX !sprite_index
+
+    LDA !sprite_blocked_status,x        ;\ If touching ground, then it's done
+    AND #$04 : BNE .go_to_next_phase    ;| jumping, otherwise keep jumping and
+    RTS                                 ;/ continue
+
+.go_to_next_phase
+    LDA.b #!phase_land : STA !phase,x
+    LDA.b #!phase_land_duration : STA !phase_cooldown,x
+
+    STZ !sprite_speed_x,x               ;\
+    LDA !direction,x : EOR #$01         ;| Stop momentum and invert direction
+    STA !direction,x                    ;/
+
+    RTS
+
+; Update land.
+update_land:
+    LDX !sprite_index
+
+    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    DEC !phase_cooldown,x : RTS
+
+.go_to_next_phase
+    LDA.b #!phase_rest : STA !phase,x
+    LDA.b #!phase_rest_duration : STA !phase_cooldown,x
+    RTS
+
+; Update dead.
+update_dead:
     RTS
