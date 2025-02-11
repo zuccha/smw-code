@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0] - 2025-02-09
+
+### Changed
+
+- Rename `trigger_bonus_stars_limit_reached`, `trigger_coins_limit_reached`,
+  and `trigger_time_run_out` to `on_bonus_stars_limit_reached`,
+  `on_coins_limit_reached`, and `on_time_run_out` respectively.
+
+### Fixed
+
+- Correct default values in settings' descriptions.
+- Write correct description for `toggle_status_bar.asm` block.
+
 ## [0.4.0] - 2024-09-06
 
 ### Added

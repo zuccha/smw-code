@@ -42,14 +42,14 @@ coins:
 ; Check amount of coins.
 ; - If amount > limit && add_life_when_coins_limit_reached == 1
 ;   -> Then add a life
-; - If amount > limit &&  reset_coins_when_coins_limit_reached == 1
+; - If amount > limit && reset_coins_when_coins_limit_reached == 1
 ;   -> Then remove `limit` coins from amount (remove the coin required to "pay"
 ;      for the extra life)
 ;   -> Else set the amount to `limit`, so that it doesn't exceed it
 check_coins:
     ; Increase coin count if necessary.
     LDA $13CC|!addr : BEQ + ; If there is a "coin increase"
-    DEC $13CC|!addr         ; Then decrease it.
+    DEC $13CC|!addr         ; Then decrease it
     LDA ram_coins_limit     ; Load coins limit
     CMP $0DBF|!addr : BEQ + ; If coins count != coins limit
     INC $0DBF|!addr         ; Then increase coins count by 1

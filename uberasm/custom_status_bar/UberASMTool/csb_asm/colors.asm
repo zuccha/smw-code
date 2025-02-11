@@ -14,7 +14,8 @@
 ; Let's see an example. By default, in `settings.asm`, group 1's slots are
 ; defined as:
 ;
-;   !group1_slots = $0F11, $0F2C, $0F0C, $0F27
+;   group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
+;   .end
 ;
 ; This means the slots start at RAM addresses $0F11, $0F2C, $0F0C, and $0F27
 ; respectively. In other words, they start at coordinates (26,02), (26,03),

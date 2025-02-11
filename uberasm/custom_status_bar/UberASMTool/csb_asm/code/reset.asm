@@ -8,7 +8,7 @@ macro reset_ram_byte(name)
     LDA.b #!<name> : STA ram_<name>
 endmacro
 
-; Load bytes from settings' tabke and write them into RAM.
+; Load bytes from settings' table and write them into RAM.
 ; A table named <name>_table of size <size> must exist!
 ; @param <name>: Setting name.
 ; @param <size>: Size of the table.

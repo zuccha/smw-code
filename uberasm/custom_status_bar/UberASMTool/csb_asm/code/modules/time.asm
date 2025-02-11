@@ -29,7 +29,7 @@ time:
 .visibility2
     LDA $0F30|!addr : CMP #$FF : BEQ .visibility1 ; Draw if timer's timer is $FF (timer reached 0)
     %is_time_zero() : BEQ .visibility0            ; Don't draw if timer is 0 (timer was always 0)
-                                                  ; Else draw (time is not 0)
+                                                  ; Else draw (timer is not 0)
 
 .visibility1
     JSR check_time
@@ -73,7 +73,7 @@ check_time:
 -   DEC $0F31|!addr,x : BPL +                       ; If digit was 0
     LDA #$09 : STA $0F31|!addr,x : DEX : BPL -      ; Set it to 9 and go to next
 +   LDA $0F31|!addr : BNE +                         ; If the hundreds' digit is 0...
-    LDA $0F32|!addr : AND $0F33|!addr               ; ...and tens and units...
+    LDA $0F32|!addr : AND $0F33|!addr               ; ...and tens and ones...
     CMP #$09 : BNE +                                ; ...are 9s (timer is 099)
     LDA #$FF : STA $1DF9|!addr                      ; Then speed up the music
 +   %is_time_zero() : BNE .return                   ; If timer is 0
