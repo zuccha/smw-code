@@ -3,7 +3,7 @@
 ;===============================================================================
 
 ; Prepare RAM addresses for usage in the code.
-; The patch requires 34 bytes of free contiguous RAM. Its position can be
+; The patch requires 40 bytes of free contiguous RAM. Its position can be
 ; configured down below.
 
 
@@ -13,7 +13,7 @@
 
 ; This patch requires 40 bytes of free contiguous RAM to store settings that can
 ; be changed dynamically (mostly used for per-level customization).
-; RAM starts at the address indicated here. Unless you have some conflics with
+; RAM starts at the address indicated here. Unless you have some conflicts with
 ; other custom code, you won't need to change it.
 ; * Values: Any address in free space.
 ; * Default: $7FB700 ($40A700 for SA-1)
@@ -35,10 +35,10 @@
 ; Example usage in UberASMTool:
 ;   STA #$00 : LDA csb_ram_coins_visibility
 
-; Example usage in outside UberASMTool (e.g., GPS):
-;   STA #$00 : LDA csb_ram_coins_visibility
+; Example usage outside UberASMTool (e.g., GPS):
+;   STA #$00 : LDA ram_coins_visibility
 ; or
-;   STA #$00 : LDA !csb_ram_coins_visibility
+;   STA #$00 : LDA !ram_coins_visibility
 
 ; If you want to use the addresses for blocks or sprites, copy the contents of,
 ; or include, this file in your code.

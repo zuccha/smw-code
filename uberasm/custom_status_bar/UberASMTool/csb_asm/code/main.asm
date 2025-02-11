@@ -80,7 +80,7 @@ main:
 .hidden
     LDA #$FC                    ;\
     LDX #!total_tiles_count-1   ;| Clear each tile of the status bar tilemap
--   STA $0EF9|!addr,x           ;|
+-   STA $0EF9|!addr,x           ;| Needed to clear tiles if hidden during level
     DEX : BPL -                 ;/
     RTL
 

@@ -42,11 +42,10 @@ endmacro
 ; Check Visibility
 ;-------------------------------------------------------------------------------
 
-; Check visibility flags for an element that supports values 0 and 1.
+; Check visibility flags for an element that supports values 0, 1, and 2.
 ; This will retrieve the level's setting first (if level settings are enabled)
-; and check on that. If the level setting is 11, it falls back to the global
-; setting. Depending on the setting's value, the macro will jump to different
-; labels.
+; and check on that. Depending on the setting's value, the macro will jump to
+; different labels.
 ; @param <item>: The item you want to check visibility for. Must be one of:
 ;   bonus_stars, coins, lives, time, power_up, dragon_coins, score
 ; @branch .visibility0: Jump here if the setting is not 1 or 2.

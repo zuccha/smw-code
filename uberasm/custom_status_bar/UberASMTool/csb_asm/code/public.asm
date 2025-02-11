@@ -2,7 +2,7 @@
 ; PUBLIC
 ;===============================================================================
 
-; List of name that will be usable in all UberASMTool's code. Routines and
+; List of names that will be usable in all UberASMTool's code. Routines and
 ; labels that are not public are prefixed with "internal".
 ; N.B.: This file turns off the namespace.
 

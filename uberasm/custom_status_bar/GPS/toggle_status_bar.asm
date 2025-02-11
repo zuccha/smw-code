@@ -1,13 +1,9 @@
 ;===============================================================================
-; SHOP ITEM FROM BELOW
+; TOGGLE STATUS BAR
 ;===============================================================================
 
-; A block that allows you to buy items for the item box, with a cost of your
-; choosing.
-
+; A block that allows you to toggle the status bar's visibility.
 ; The block activates when the player hits it from below.
-; To buy the item, you need to have enough funds.
-; You cannot buy items that you already have in the item box.
 
 ; This block should act as 130 (or anything solid).
 

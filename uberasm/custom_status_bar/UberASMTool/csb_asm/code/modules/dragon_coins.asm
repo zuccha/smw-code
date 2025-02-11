@@ -23,7 +23,6 @@ are_dragon_coins_collected:
     RTS
 
 ; Draw the custom graphics for when all dragon coins are collected.
-; @param Y (16-bit): Slot position
 ; $param $00 (8-bit): The amount of collected coins.
 ; @return C: 1 if the custom graphics have been drawn, 0 otherwise.
 draw_dragon_coins_custom_collected_graphics:
@@ -47,7 +46,6 @@ custom_dragon_coins_collected_graphics_table:
 ;-------------------------------------------------------------------------------
 
 ; Draw collected dragon coins on status bar.
-; @param A (16-bit): Slot position.
 ; @return C: 1 if the indicator has been drawn, 0 otherwise.
 dragon_coins:
     %check_visibility(dragon_coins)
