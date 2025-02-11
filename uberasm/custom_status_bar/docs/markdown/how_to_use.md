@@ -169,11 +169,11 @@ and coins' indicators to a "!" when they reach the limit. To do so, add to the
 already defined routines in `csb_asm/callbacks.asm`
 
 ```asar
-trigger_bonus_stars_limit_reached:
+on_bonus_stars_limit_reached:
     LDA #$28 : STA ram_bonus_stars_symbol ; $28 is the "!" tile in GFX28
     RTS
 
-trigger_coins_limit_reached:
+on_coins_limit_reached:
     LDA #$28 : STA ram_coins_symbol       ; $28 is the "!" tile in GFX28
     RTS
 ```
@@ -186,7 +186,7 @@ You can also define behaviors that are not related to the status bar, for
 example we can hurt the player when the time runs out:
 
 ```asar
-trigger_time_run_out:
+on_time_run_out:
     JSL $00F5B7|!bank
     RTS
 ```

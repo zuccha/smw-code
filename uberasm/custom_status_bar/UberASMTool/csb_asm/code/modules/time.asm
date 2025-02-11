@@ -77,7 +77,7 @@ check_time:
     CMP #$09 : BNE +                                ; ...are 9s (timer is 099)
     LDA #$FF : STA $1DF9|!addr                      ; Then speed up the music
 +   %is_time_zero() : BNE .return                   ; If timer is 0
-    JSR trigger_time_run_out                        ; Then trigger custom behavior
+    JSR on_time_run_out                             ; Then trigger custom behavior
     LDA ram_kill_player_when_time_runs_out : BEQ +  ; If should kill player
     JSL $00F606|!bank                               ; Then kill player
 +   LDA #$FF : STA $0F30|!addr                      ; Set timer's timer to $FF marking time over

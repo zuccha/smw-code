@@ -19,30 +19,30 @@
 
 
 ;-------------------------------------------------------------------------------
-; Trigger Bonus Starts Limit Reached
+; On Bonus Starts Limit Reached
 ;-------------------------------------------------------------------------------
 
 ; Called when the amount of collected bonus stars equals !bonus_stars_limit.
-trigger_bonus_stars_limit_reached:
+on_bonus_stars_limit_reached:
     ; Add your code here.
     RTS
 
 
 ;-------------------------------------------------------------------------------
-; Trigger Coins Limit Reached
+; On Coins Limit Reached
 ;-------------------------------------------------------------------------------
 
 ; Called when the amount of collected coins equals !coins_limit.
-trigger_coins_limit_reached:
+on_coins_limit_reached:
     ; Add your code here.
     RTS
 
 
 ;-------------------------------------------------------------------------------
-; Trigger Time Run Out
+; On Time Run Out
 ;-------------------------------------------------------------------------------
 
 ; Called when the time reaches zero.
-trigger_time_run_out:
+on_time_run_out:
     ; Add your code here.
     RTS
