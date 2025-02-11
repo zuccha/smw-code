@@ -1,5 +1,5 @@
 ;===============================================================================
-; SETTINGS
+; SETTINGS (Standard)
 ;===============================================================================
 
 ; Settings for controlling the visibility and behaviors of elements on the
@@ -19,6 +19,8 @@
 ; N.B.: It's `csb_ram_coins_visibility`, not `!csb_ram_coins_visibility` with an
 ; exclamation mark.
 ; N/A means "Not Available".
+
+; N.B.: This preset requires the modified version of GFX28.bin.
 
 
 ;-------------------------------------------------------------------------------
@@ -60,10 +62,8 @@
 ; Symbol in front of the bonus stars counter.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $64 (star)
+; * Default: $3F (star)
 ; * RAM: csb_ram_bonus_stars_symbol
-; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3F (star, alternative).
 !bonus_stars_symbol = $3F
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
@@ -121,10 +121,8 @@
 ; Symbol in front of the coins counter.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $2E (coin)
+; * Default: $3D (coin)
 ; * RAM: csb_ram_coins_symbol
-; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3D (coin, alternative).
 !coins_symbol = $3D
 
 ; Whether the bonus stars amount is always checked, even if the indicator is not
@@ -181,10 +179,8 @@
 ; Symbol in front of the lives counter.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $26 (x)
+; * Default: $3E (heart)
 ; * RAM: csb_ram_lives_symbol
-; If you are using the modified GFX28 bundled with this patch, you can also use
-; $3E (heart).
 !lives_symbol = $3E
 
 
@@ -206,8 +202,6 @@
 ; * Values: $00-$7F/$FC
 ; * Default: $76 (clock)
 ; * RAM: csb_ram_time_symbol
-; If you are using the modified GFX28 bundled with this patch, the clock graphic
-; has been lowered by 1 px, which is much better ;).
 !time_symbol = $76
 
 ; Whether the time is always checked, even if the indicator is not shown in the
@@ -232,10 +226,8 @@
 ; Frequency for decreasing the timer. The timer will decrease every
 ; !time_frequency frames.
 ; * Values: $00-$FE
-; * Default: $28 (vanilla)
+; * Default: $3C (real second)
 ; * RAM: csb_ram_time_frequency
-; You can set this value to $3C (60) to make the timer decrease every second (if
-; the game runs at 60 FPS).
 ; N.B.: Don't use $FF as it is a reserved value (why would you use that anyway).
 !time_frequency = $3C
 
@@ -249,7 +241,7 @@
 ;     0 = Hidden
 ;     1 = Visible
 ;     2 = Visible if not all coins have been collected (vanilla)
-; * Default: 2
+; * Default: 1
 ; * RAM: csb_ram_dragon_coins_visibility
 !dragon_coins_visibility = 1
 
@@ -263,10 +255,8 @@
 ; Symbol for missing dragon coins.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $FC (empty)
+; * Default: $4A (empty coin)
 ; * RAM: csb_ram_dragon_coins_missing_symbol
-; If you are using the modified GFX28 bundled with this patch, you can also use
-; $4A (empty coin).
 !dragon_coins_missing_symbol = $4A
 
 ; Show custom graphics if all dragon coins have been collected. The graphics
@@ -327,17 +317,15 @@
 ; Symbol for empty speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $31 (coin)
+; * Default: $3A (empty arrow)
 ; * RAM: csb_ram_speed_meter_empty_symbol
-; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
 !speed_meter_empty_symbol = $3A
 
 ; Symbol for full speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $32 (coin)
+; * Default: $32 (full arrow)
 ; * RAM: csb_ram_speed_meter_full_symbol
-; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
 !speed_meter_full_symbol = $3B
 
 
@@ -356,19 +344,15 @@
 ; Symbol for Mario.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $FC (empty)
+; * Default: $30 (Mempty)
 ; * RAM: csb_ram_player_mario_symbol
-; If you are using the modified GFX28 bundled with this patch, the "M" of
-; "MARIO" has been restyled.
 !player_mario_symbol = $30
 
 ; Symbol for Luigi.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $FC (empty)
+; * Default: $40 (L)
 ; * RAM: csb_ram_player_luigi_symbol
-; If you are using the modified GFX28 bundled with this patch, the "L" of
-; "LUIGI" has been restyled.
 !player_luigi_symbol = $40
 
 ; Position of the player indicator in the status bar.
@@ -379,7 +363,7 @@
 ; default, all seven tiles are set to gold. The palette is configured the same
 ; way for all slots in the "colors.asm".
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
-; * Default: $0EFA, $0F15
+; * Default: $0EF9|!addr
 ; * RAM: N/A
 !player_slot = $0EF9|!addr
 
@@ -415,7 +399,7 @@
 ; Order in which group 1 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
 ; * Values: bonus_stars, coins, lives, time
-; * Default: lives, bonus_stars, time, coins
+; * Default: dw lives, bonus_stars, time, coins
 ; * RAM: N/A
 group_1_items: dw lives, bonus_stars, time, coins
 .end

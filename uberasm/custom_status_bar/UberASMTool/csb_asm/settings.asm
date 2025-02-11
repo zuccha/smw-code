@@ -1,5 +1,5 @@
 ;===============================================================================
-; SETTINGS
+; SETTINGS (Vanilla)
 ;===============================================================================
 
 ; Settings for controlling the visibility and behaviors of elements on the
@@ -327,7 +327,7 @@
 ; Symbol for empty speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $31 (coin)
+; * Default: $3A (empty arrow)
 ; * RAM: csb_ram_speed_meter_empty_symbol
 ; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
 !speed_meter_empty_symbol = $3A
@@ -335,10 +335,10 @@
 ; Symbol for full speed indicator.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $32 (coin)
+; * Default: $32 (full arrow)
 ; * RAM: csb_ram_speed_meter_full_symbol
 ; N.B.: You'll have to use the modified "GFX28" for this tile, or draw your own.
-!speed_meter_full_symbol = $3B
+!speed_meter_full_symbol = $32
 
 
 ;-------------------------------------------------------------------------------
@@ -356,7 +356,7 @@
 ; Symbol for Mario.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $FC (empty)
+; * Default: $30 (M)
 ; * RAM: csb_ram_player_mario_symbol
 ; If you are using the modified GFX28 bundled with this patch, the "M" of
 ; "MARIO" has been restyled.
@@ -365,7 +365,7 @@
 ; Symbol for Luigi.
 ; The value is the position of the 8x8 tile in "GFX28".
 ; * Values: $00-$7F/$FC
-; * Default: $FC (empty)
+; * Default: $40 (L)
 ; * RAM: csb_ram_player_luigi_symbol
 ; If you are using the modified GFX28 bundled with this patch, the "L" of
 ; "LUIGI" has been restyled.
@@ -379,7 +379,7 @@
 ; default, all seven tiles are set to gold. The palette is configured the same
 ; way for all slots in the "colors.asm".
 ; * Values: $0EF9-$0F0E/$0F15-$0F29
-; * Default: $0EFA, $0F15
+; * Default: $0EF9|!addr
 ; * RAM: N/A
 !player_slot = $0EF9|!addr
 
@@ -446,7 +446,7 @@ group_1_slots: dw $0F11|!addr, $0F2C|!addr, $0F0C|!addr, $0F27|!addr
 ; Order in which group 2 elements fill available slots. Reorder the elements to
 ; change their priority (leftmost elements have the highest priority).
 ; * Values: dragon_coins, score, speed_meter
-; * Default: score, dragon_coins
+; * Default: dw score, dragon_coins
 ; * RAM: N/A
 group_2_items: dw score, dragon_coins
 .end
