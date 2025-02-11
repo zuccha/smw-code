@@ -16,12 +16,20 @@
 ; - `I`: 0 = don't invert direction, 1 = invert direction (relevant only if not
 ;   stationary).
 
+; Extra Byte 2: Jump X speed. Should alway be a positive value ($00-$7F).
+
+; Extra Byte 3: Jump Y speed. Should alway be a positive value ($00-$7F).
+
 
 ;-------------------------------------------------------------------------------
-; Configuration (defines)
+; Configuration (behavior)
 ;-------------------------------------------------------------------------------
 
-; TODO
+phase_durations:
+    db $46 ; Idle
+    db $28 ; Load jump
+    db $28 ; Jump (should be 0, since it lasts indefinitely until the frog lands)
+    db $14 ; Land (the frog crouches after landing)
 
 
 ;-------------------------------------------------------------------------------
@@ -37,8 +45,8 @@
 ; Tile are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22
 gfx_bend: db $04, $06, $24, $26
-gfx_leap: db $08, $0A, $28, $2A
-gfx_dead: db $0C, $0E, $2C, $2E
+gfx_leap: db $0C, $0E, $2C, $2E
+gfx_dead: db $08, $0A, $28, $2A
 
 ; Color palettes to use for the different variants of the frog.
 ; Each variant has its base color palette, and the color palette for when the
@@ -65,6 +73,13 @@ gfx_dead: db $0C, $0E, $2C, $2E
 !phase_land = 3
 !phase_dead = 4
 
+; Which phase comes next, indexed by current phase.
+next_phases: db 1, 2, 3, 0, 4
+
+; Timer keeping track of how many frames need to pass before the sprite can
+; transition to the next phase.
+!phase_cooldown = !sprite_misc_1626
+
 ; Sprite direction. 0 = right, 1 = left.
 !direction = !sprite_misc_157c
 
@@ -83,6 +98,12 @@ gfx_dead: db $0C, $0E, $2C, $2E
 ; its arms are slightly below.
 !y_offset = $04
 
+; Jump X speed.
+!jump_speed_x = !extra_byte_2
+
+; Jump Y speed.
+!jump_speed_y = !extra_byte_3
+
 ; Aliases for OAM addresses.
 !oam_pos_x = $0300|!addr
 !oam_pos_y = $0301|!addr
@@ -94,7 +115,7 @@ gfx_dead: db $0C, $0E, $2C, $2E
 !base_oam_props = %00100000|!gfx_page
 
 ; Which graphics to use for each phase.
-pose_by_phase:
+gfx_by_phase:
     dw gfx_rest ; Rest
     dw gfx_bend ; Load
     dw gfx_leap ; Jump
@@ -108,10 +129,12 @@ pose_by_phase:
 
 ; Sprite initialization.
 init:
-    LDA.b #$!phase_rest : STA !phase
-    LDA #$00 : STA !is_fragile
-    LDA #$00 : STA !has_eaten_key
+    LDA.b #!phase_rest : STA !phase,x : TAY
+    LDA phase_durations,y : STA !phase_cooldown
+    LDA #$00 : STA !is_fragile,x
+    LDA #$00 : STA !has_eaten_key,x
     LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
+    LDA !jump_speed_y,x : EOR #$FF : INC A : STA !jump_speed_y,x
     RTL
 
 
@@ -137,14 +160,14 @@ render:
 
     PHY                                 ;\
     LDA !phase,x : ASL : TAY            ;| Load the address of the correct
-    LDA pose_by_phase,y : STA $04       ;| graphics table into $04-$05 for
-    LDA pose_by_phase+1,y : STA $05     ;| later use
+    LDA gfx_by_phase,y : STA $04        ;| graphics table into $04-$05 for
+    LDA gfx_by_phase+1,y : STA $05      ;| later use
     PLY                                 ;/
 
     LDA !direction,x : STA $02          ;> Save direction before X is corrupted
 
     LDA !is_fragile,x : ASL             ;\
-    CLC : ADC !has_eaten_key,x          ;| Offset to get correct palette (is_fragile * 2 + has_eaten_key)
+    CLC : ADC !has_eaten_key,x          ;| Offset to get correct palette
     TAX                                 ;/
 
     LDA.b #!base_oam_props              ;\ Preload properties
@@ -197,11 +220,57 @@ render:
 ; Update sprite behavior.
 update:
     LDA !14C8,x : CMP #$08 : BEQ + : RTS ;> Return if status is not normal
-+   LDA $9D : BEQ + : RTS               ;> Return if sprites are blocked
-+
++   LDA $9D : BEQ .check_jump : RTS      ;> Return if sprites are blocked
 
-    ; Interaction
+.check_jump
+    LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
+    BEQ .interact                       ;/ frog cannot jump
+
+.check_phase
+    LDA !phase,x                         ;\
+    CMP.b #!phase_jump : BEQ .jump_phase ;| Handle phases with special behaviors
+    CMP.b #!phase_dead : BEQ .interact   ;| (not based on cooldown)
+    BRA .other_phases                    ;/
+
+.jump_phase
+    LDA !sprite_blocked_status,x        ;\ If touching ground, then it's done
+    AND #$04 : BNE .go_to_next_phase    ;| jumping, otherwise keep jumping and
+    BRA .interact                       ;/ process interaction
+
+.other_phases
+    LDA !phase_cooldown,x               ;\ If cooldown is 0
+    BEQ .go_to_next_phase               ;/ Then go to the next phase
+    DEC !phase_cooldown,x               ;\ Else reduce cooldown...
+    BRA .interact                       ;/ ...and process interaction
+
+.go_to_next_phase
+    LDY !phase,x                        ;\
+    LDA next_phases,y : STA !phase,x    ;|
+    TAY                                 ;| Update phase and reset cooldown
+    LDA phase_durations,y               ;|
+    STA !phase_cooldown,x               ;/
+
+    CPY.b #!phase_jump : BEQ .start_jumping
+    CPY.b #!phase_land : BEQ .start_landing
+    BRA .interact
+
+.start_jumping
+    LDA !jump_speed_x,x                 ;\
+    LDY !direction,x : BEQ +            ;|
+    EOR #$FF : INC A                    ;| Set jump speeds, inverting X if frog
++   STA !sprite_speed_x,x               ;| is going left (Y is always upwards)
+    LDA !jump_speed_y,x                 ;|
+    STA !sprite_speed_y,x               ;/
+    BRA .interact
+
+.start_landing
+    STZ !sprite_speed_x,x               ;\
+    LDA !direction,x : EOR #$01         ;| Stop momentum and invert direction
+    STA !direction,x                    ;/
+
+.interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
     JSL $01802A|!bank                   ;> Update position
 
+.return
     RTS
