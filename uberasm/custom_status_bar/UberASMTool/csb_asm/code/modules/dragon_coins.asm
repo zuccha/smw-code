@@ -59,7 +59,7 @@ dragon_coins:
     ; been collected in a previous attempt (are_dragon_coins_collected -> Z = 0),
     ; then the indicator will not be drawn at all.
     LDA $1422|!addr : STA $00      ; If coins:
-    CMP #$05 : BCS .skip           ;   >= 5, then don't draw coins (draw an empty indicator)
+    CMP #$05 : BCS .draw_empty     ;   >= 5, then don't draw coins (draw an empty indicator)
     CMP #$00 : BNE .draw           ;   != 0, then draw them
     JSR are_dragon_coins_collected ; If all have been collected in a previous attempt
     BNE .visibility0               ; Then don't show the indicator
@@ -76,7 +76,7 @@ dragon_coins:
 .visibility0
     CLC : RTS
 
-.skip
+.draw_empty
     ; Draw custom collected graphics if necessary.
     JSR draw_dragon_coins_custom_collected_graphics : BCS .return
     ; Draw empty spaces to erase the indicator.
