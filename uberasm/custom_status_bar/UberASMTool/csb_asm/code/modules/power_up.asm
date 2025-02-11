@@ -33,7 +33,7 @@ power_up:
     LDA #$30 : ORA $00 : STA $0203|!addr,y          ; ...palette
     LDX $0DC2|!addr : LDA.l power_up_tile_table,x   ; ...tile
     STA $0202|!addr,y                               ;
-    TYA : LSR : LSR : TAY                           ; Divide power up sprite by 4...
+    TYA : LSR #2 : TAY                              ; Divide power up sprite by 4...
     LDA #$02 : STA $0420|!addr,y                    ; ...and set it's size to $02
 
 .return

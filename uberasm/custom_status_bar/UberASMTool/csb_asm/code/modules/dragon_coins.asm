@@ -17,7 +17,7 @@
 ;   https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1F2F&context=
 ; @return Z: 0 if all coins have been collected, 1 otherwise.
 are_dragon_coins_collected:
-    LDA $13BF|!addr : LSR : LSR : LSR : TAY
+    LDA $13BF|!addr : LSR #3 : TAY
     LDA $13BF|!addr : AND #$07 : TAX
     LDA $1F2F|!addr,y : AND $0DA8A6,x
     RTS
