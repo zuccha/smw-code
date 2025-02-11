@@ -41,7 +41,7 @@ bonus_stars:
 ; Logic:
 ; - If amount > limit && start_bonus_game_when_bonus_stars_limit_reached == 1
 ;   -> Then start bonus game after the level finishes
-; - If amount > limit &&  reset_bonus_stars_when_bonus_stars_limit_reached == 1
+; - If amount > limit && reset_bonus_stars_when_bonus_stars_limit_reached == 1
 ;   -> Then remove `limit` bonus stars from amount (remove the stars required to
 ;      "pay" the entrance to the bonus game)
 ;   -> Else set the amount to `limit`, so that it doesn't exceed it
@@ -54,7 +54,7 @@ check_bonus_stars:
     CMP ram_bonus_stars_limit : BCC +
 
     ; Limit reached.
-    PHX : JSR trigger_bonus_stars_limit_reached : PLX
+    PHX : JSR on_bonus_stars_limit_reached : PLX
 
     ; Start a bonus game if enabled.
     LDA ram_start_bonus_game_when_bonus_stars_limit_reached : BEQ ++
