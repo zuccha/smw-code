@@ -70,6 +70,14 @@ gfx_dead: db $08, $0A, $28, $2A
 !palette_frail      = 4
 !palette_frail_key  = 2
 
+; Different sound effects.
+; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
+; Do not add `|!addr` to the bank, it will be added automatically later.
+!jump_sfx      = $13
+!jump_sfx_bank = $1DF9
+!land_sfx      = $01
+!land_sfx_bank = $1DF9
+
 
 ;-------------------------------------------------------------------------------
 ; Defines (don't touch)
@@ -145,6 +153,13 @@ gfx_by_phase:
 ; @return Z 1 if it should invert direction, 0 otherwise.
 macro should_invert_direction()
     LDA !extra_byte_1,x : AND #$01
+endmacro
+
+; Play a sound effect. If the sound effect is zero, then nothing is played.
+; @param <sfx> Name of the sound effect, corresponding `!<sfx>_sfx` and
+; `!<sfx>_sfx_bank` defines must exist.
+macro play_sfx(sfx)
+    if !<sfx>_sfx != 0 : LDA #!<sfx>_sfx : STA !<sfx>_sfx_bank|!addr
 endmacro
 
 
@@ -250,9 +265,9 @@ update:
     LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
     BEQ .interact                       ;/ frog cannot jump
 
-.update_by_phase
+.handle_phase
     LDA !phase,x : ASL : TAX            ;\ Update sprite based on which phase it
-    JSR (update_by_phase,x)             ;/ is currently in
+    JSR (handle_phase,x)                ;/ is currently in
 
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
@@ -261,30 +276,35 @@ update:
 .return
     RTS
 
+
+;-------------------------------------------------------------------------------
+; Handle Phases
+;-------------------------------------------------------------------------------
+
 ; Update switch.
-update_by_phase:
-    dw update_rest, update_load, update_jump, update_land, update_dead
+handle_phase:
+    dw handle_rest, handle_load, handle_jump, handle_land, handle_dead
 
 ; Resting frog.
-update_rest:
+handle_rest:
     LDX !sprite_index
 
-    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    LDA !phase_cooldown,x : BEQ .start_jumping
     DEC !phase_cooldown,x : RTS
 
-.go_to_next_phase
+.start_jumping
     LDA.b #!phase_load : STA !phase,x
     LDA.b #!phase_load_duration : STA !phase_cooldown,x
     RTS
 
 ; Loading a jump.
-update_load:
+handle_load:
     LDX !sprite_index
 
-    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    LDA !phase_cooldown,x : BEQ .jump
     DEC !phase_cooldown,x : RTS
 
-.go_to_next_phase
+.jump
     LDA.b #!phase_jump : STA !phase,x
 
     STZ !bounce_count,x                 ;> Reset number of bounces
@@ -297,17 +317,19 @@ update_load:
     EOR #$FF : INC A                    ;|
     STA !sprite_speed_y,x               ;/
 
+    %play_sfx(jump)
+
     RTS
 
 ; Jumping.
-update_jump:
+handle_jump:
     LDX !sprite_index
 
     LDA !sprite_blocked_status,x        ;\ If touching ground, then it's done
-    AND #$04 : BNE .go_to_next_phase    ;| jumping, otherwise keep jumping and
+    AND #$04 : BNE .land                ;| jumping, otherwise keep jumping and
     RTS                                 ;/ continue
 
-.go_to_next_phase
+.land
     LDA.b #!phase_land : STA !phase,x
     LDA.b #!phase_land_duration : STA !phase_cooldown,x
 
@@ -323,10 +345,12 @@ update_jump:
     STA !direction,x                    ;| forth, then invert direction
 +   INC !bounce_count,x                 ;/
 
+    %play_sfx(land)
+
     RTS
 
 ; Landing a jump.
-update_land:
+handle_land:
     LDX !sprite_index
 
     LDA !phase_cooldown,x : BEQ .go_to_next_phase
@@ -351,5 +375,5 @@ update_land:
     RTS
 
 ; Frog is dead.
-update_dead:
+handle_dead:
     RTS
