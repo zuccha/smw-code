@@ -56,6 +56,17 @@
 ; jump.
 !damping_y = 2
 
+; List of sprites that if they get in contact with the frog, the frog dies
+; (Mario can still stand on it). Add how many as you wish.
+; The format is $0cnn:
+;   - 0: Always 0.
+;   - c: 0 = regular sprite, 1 = custom sprite
+;   - nn: Sprite number.
+deadly_sprites:
+    dw $0013, $0014, $001D, $0020, $002E, $003A
+    dw $003B, $003C, $0067, $00A4, $00B4
+.end
+
 
 ;-------------------------------------------------------------------------------
 ; Configuration (appearance)
@@ -69,15 +80,16 @@
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22 ; Idle
-gfx_bend: db $04, $06, $24, $26 ; Preparing jump/landing
+gfx_load: db $04, $06, $24, $26 ; Preparing jump
 gfx_leap: db $0C, $0E, $2C, $2E ; Leaping
+gfx_land: db $04, $06, $24, $26 ; Landing
 gfx_dead: db $08, $0A, $28, $2A ; Dead
 
 ; Define width and height (in pixels) of the sprite for each phase. These are
 ; used to determine the collision box of the sprite with Mario.
-; In order: idle, preparing jump/landing, leaping, dead.
-!widths = $13, $13, $13, $11
-!heights = $10, $0D, $0D, $12
+; In order: idle, preparing jump, leaping, landing, dead.
+!widths = $13, $13, $11, $13, $13
+!heights = $10, $0D, $12, $0D, $0D
 
 ; The Y offset (in pixels) needed to make the sprite slightly overlap with the
 ; ground, making it look like its belly is touching the ground, while its arms
@@ -156,9 +168,9 @@ gfx_dead: db $08, $0A, $28, $2A ; Dead
 ; Which graphics to use for each phase.
 gfx_by_phase:
     dw gfx_rest ; Rest
-    dw gfx_bend ; Load
+    dw gfx_load ; Load
     dw gfx_leap ; Jump
-    dw gfx_bend ; Land
+    dw gfx_land ; Land
     dw gfx_dead ; Dead
 
 
@@ -186,15 +198,15 @@ function cox(value) = (32-value)/2
 function coy(value) = 32-value+!offset_y
 
 ; Define widths and x_offsets tables for calculating the sprite's clipping.
-macro define_widths(rest, load, jump, dead)
-widths:    db <rest>, <load>, <jump>, <dead>
-x_offsets: db cox(<rest>), cox(<load>), cox(<jump>), cox(<dead>)
+macro define_widths(rest, load, jump, land, dead)
+widths:    db <rest>, <load>, <jump>, <land>, <dead>
+x_offsets: db cox(<rest>), cox(<load>), cox(<jump>), cox(<land>), cox(<dead>)
 endmacro
 
 ; Define heights and y_offsets tables for calculating the sprite's clipping.
-macro define_heights(rest, load, jump, dead)
-heights:   db <rest>, <load>, <jump>, <dead>
-y_offsets: db coy(<rest>), coy(<load>), coy(<jump>), coy(<dead>)
+macro define_heights(rest, load, jump, land, dead)
+heights:   db <rest>, <load>, <jump>, <land>, <dead>
+y_offsets: db coy(<rest>), coy(<load>), coy(<jump>), cox(<land>), coy(<dead>)
 endmacro
 
 ; Generate clipping tables.
@@ -308,6 +320,7 @@ update:
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
     JSR interact_with_player
+    JSR interact_with_sprites
     JSL $01802A|!bank                   ;\ Update position and keep track by how
     LDA $1491|!addr : STA !x_movement,x ;/ many pixels the sprite moved
 
@@ -418,6 +431,7 @@ handle_land:
 
 ; Frog is dead.
 handle_dead:
+    LDX !sprite_index
     RTS
 
 
@@ -464,3 +478,49 @@ interact_with_player:
 
 .return
     RTS
+
+
+;-------------------------------------------------------------------------------
+; Interact with Sprites
+;-------------------------------------------------------------------------------
+
+; Process interaction with other sprites.
+; @params $04/$0A Clipping X position (low/high).
+; @params $05/$0B Clipping Y position (low/high).
+; @params $06/$07 Clipping width and height.
+interact_with_sprites:
+    LDY #!SprSize                               ;> Sprite index
+-   STY $00 : CPX $00 : BEQ .next               ;> Skip comparison with itself
+    LDA !sprite_status,y : CMP #$08 : BNE .next ;> Skip non-active sprites
+    LDA !1686,y : AND #$08 : BNE .next          ;> Skip sprites with no interaction
+    TYX : JSL $03B6E5|!bank : LDX !sprite_index ;\ Skip if no collision
+    JSL $03B72B|!bank : BCC .next               ;/ (other sprite is clipping B)
+    JSR is_deadly_sprite : BCS .kill
+.next
+    DEY : BPL -                                 ;> Go to next sprite
+    RTS                                         ;> No contact
+
+.kill
+    LDA #!phase_dead : STA !phase,x
+    RTS
+
+; Check if a sprite is deadly.
+; @param Y Sprite index.
+; @return C 1 if deadly, 0 otherwise.
+is_deadly_sprite:
+    TYX : LDA !extra_bits,x                     ;\ $00 = 0 regular sprite
+    AND #$08 : LSR #3 : STA $00                 ;/ $00 = 1 custom sprite
+    LDY.b #deadly_sprites_end-deadly_sprites-2  ;\
+-   BMI .not_deadly                             ;| Iterate over deadly sprites
+    LDA $00 : EOR deadly_sprites+1,y : BNE +    ;| If the sprite number matches
+    LDA !new_sprite_num,x                       ;| and they are of the same type,
+    CMP deadly_sprites,y : BEQ .deadly          ;| then it is deadly
++   DEY #2 : BRA -                              ;/
+
+.not_deadly
+    TXY : LDX !sprite_index
+    CLC : RTS
+
+.deadly
+    TXY : LDX !sprite_index
+    SEC : RTS
