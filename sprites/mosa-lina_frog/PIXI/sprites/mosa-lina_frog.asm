@@ -28,8 +28,22 @@
 ; Phase durations, in frames.
 !phase_rest_duration = $46 ; Idle, waiting to jump
 !phase_load_duration = $28 ; Preparing to jump (the frog crouches before landing)
-!phase_land_duration = $14 ; Landing (the frog crouches after landing)
+!phase_land_duration = $04 ; Landing (the frog crouches after landing)
 
+; Minimum amount of bounces the frog should do after landing. The frog will keep
+; bouncing if its X speed is nonzero.
+!min_bounces = 2
+
+; `!damping_x` controls how fast the X speed will decrease after a jump.
+; Every time the frog touches the ground after landing, its X speed will be
+; halved `!damping_x` times.
+!damping_x = 3
+
+; `!damping_y` controls how much the frog will bounce in the air after any
+; landing. When the frog bounces, its Y speed will be the jump Y speed (set via
+; Extra Byte 2) halved `!damping_y` times for each time the frog landed after a
+; jump.
+!damping_y = 2
 
 ;-------------------------------------------------------------------------------
 ; Configuration (graphics)
@@ -48,7 +62,7 @@ gfx_leap: db $0C, $0E, $2C, $2E
 gfx_dead: db $08, $0A, $28, $2A
 
 ; Color palettes to use for the different variants of the frog.
-; Each variant has its base color palette, and the color palette for when the
+; Each variant has its base color palette and the color palette for when the
 ; frog has eaten a key.
 ; Valid values are any of 0-7.
 !palette_normal     = 5
@@ -78,6 +92,9 @@ gfx_dead: db $08, $0A, $28, $2A
 
 ; Sprite direction. 0 = right, 1 = left.
 !direction = !sprite_misc_157c
+
+; Bounce count, how many times the frog landed after a jump/bounce.
+!bounce_count = !sprite_misc_1510
 
 ; Whether the frog is fragile (1) or not (0).
 !is_fragile = !sprite_misc_154c
@@ -130,7 +147,6 @@ init:
     LDA #$00 : STA !is_fragile,x
     LDA #$00 : STA !has_eaten_key,x
     LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
-    LDA !jump_speed_y,x : EOR #$FF : INC A : STA !jump_speed_y,x
     RTL
 
 
@@ -259,11 +275,14 @@ update_load:
 .go_to_next_phase
     LDA.b #!phase_jump : STA !phase,x
 
+    STZ !bounce_count,x                 ;> Reset number of bounces
+
     LDA !jump_speed_x,x                 ;\
     LDY !direction,x : BEQ +            ;|
     EOR #$FF : INC A                    ;| Set jump speeds, inverting X if frog
-+   STA !sprite_speed_x,x               ;| is going left (Y is always upwards)
-    LDA !jump_speed_y,x                 ;|
++   STA !sprite_speed_x,x               ;| is going left (Y is always upwards,
+    LDA !jump_speed_y,x                 ;| so we turn the value negative)
+    EOR #$FF : INC A                    ;|
     STA !sprite_speed_y,x               ;/
 
     RTS
@@ -280,9 +299,16 @@ update_jump:
     LDA.b #!phase_land : STA !phase,x
     LDA.b #!phase_land_duration : STA !phase_cooldown,x
 
-    STZ !sprite_speed_x,x               ;\
-    LDA !direction,x : EOR #$01         ;| Stop momentum and invert direction
-    STA !direction,x                    ;/
+    LDA !sprite_speed_x,x : BPL +       ;\
+    EOR #$FF : INC : LSR.b #!damping_x  ;| Slow down sprite by a factor,
+    EOR #$FF : INC : BRA ++             ;| if the value is negative, we need to
++   LSR.b #!damping_x                   ;| make it positive before dividing
+++  STA !sprite_speed_x,x               ;/
+
+    LDA !bounce_count,x : BNE +         ;\
+    LDA !direction,x : EOR #$01         ;| If it's the first landing after the
+    STA !direction,x                    ;| jump, invert direction
++   INC !bounce_count,x                 ;/
 
     RTS
 
@@ -294,6 +320,19 @@ update_land:
     DEC !phase_cooldown,x : RTS
 
 .go_to_next_phase
+    LDA !bounce_count,x : CMP.b #!min_bounces : BCC .keep_bouncing
+    LDA !sprite_speed_x,x : BEQ .stop_bouncing
+
+.keep_bouncing
+    LDA.b #!phase_jump : STA !phase,x
+    LDA !jump_speed_y,x                 ;\
+    LDY !bounce_count,x : DEY           ;| For every time we already bounced,
+-   LSR.b #!damping_y : DEY : BPL -     ;| divide the Y jump speed by 8, then
+    EOR #$FF : INC A                    ;| make it negative
+    STA !sprite_speed_y,x               ;/
+    RTS
+
+.stop_bouncing
     LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     RTS
