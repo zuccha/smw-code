@@ -11,10 +11,10 @@
 
 ; Extra bit: Initial direction. 0 = right, 1 = left.
 
-; Extra Byte 1: The frog's behavior. The format is %IS:
-; - `S`: 0 = stationary, 1 = moves left or right.
-; - `I`: 0 = don't invert direction, 1 = invert direction (relevant only if not
-;   stationary).
+; Extra Byte 1: The frog's behavior. The format is %-------i:
+; - `i`: Controls whether the frog inverts directions after landing.
+;       0 = don't invert direction
+;       1 = invert direction
 
 ; Extra Byte 2: Jump X speed. Should alway be a positive value ($00-$7F).
 
@@ -46,7 +46,7 @@
 !damping_y = 2
 
 ;-------------------------------------------------------------------------------
-; Configuration (graphics)
+; Configuration (appearance)
 ;-------------------------------------------------------------------------------
 
 ; Which graphics page to use.
@@ -55,7 +55,7 @@
 !gfx_page = 1
 
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
-; Tile are in this order: top-left, top-right, bottom-left, bottom-right.
+; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22
 gfx_bend: db $04, $06, $24, $26
 gfx_leap: db $0C, $0E, $2C, $2E
@@ -96,8 +96,8 @@ gfx_dead: db $08, $0A, $28, $2A
 ; Bounce count, how many times the frog landed after a jump/bounce.
 !bounce_count = !sprite_misc_1510
 
-; Whether the frog is fragile (1) or not (0).
-!is_fragile = !sprite_misc_154c
+; Whether the frog is frail (1) or not (0).
+!is_frail = !sprite_misc_154c
 
 ; Whether the frog has eaten a key (1) or not (0).
 !has_eaten_key = !sprite_misc_160e
@@ -137,16 +137,28 @@ gfx_by_phase:
 
 
 ;-------------------------------------------------------------------------------
+; Macros
+;-------------------------------------------------------------------------------
+
+; Check whether the frog should invert directions after the first landing.
+; @param X The sprite index.
+; @return Z 1 if it should invert direction, 0 otherwise.
+macro should_invert_direction()
+    LDA !extra_byte_1,x : AND #$01
+endmacro
+
+
+;-------------------------------------------------------------------------------
 ; Init
 ;-------------------------------------------------------------------------------
 
 ; Sprite initialization.
 init:
-    LDA.b #!phase_rest : STA !phase,x : TAY
+    LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
-    LDA #$00 : STA !is_fragile,x
-    LDA #$00 : STA !has_eaten_key,x
     LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
+    LDA #$00 : STA !is_frail,x
+    LDA #$00 : STA !has_eaten_key,x
     RTL
 
 
@@ -178,7 +190,7 @@ render:
 
     LDA !direction,x : STA $02          ;> Save direction before X is corrupted
 
-    LDA !is_fragile,x : ASL             ;\
+    LDA !is_frail,x : ASL               ;\
     CLC : ADC !has_eaten_key,x          ;| Offset to get correct palette
     TAX                                 ;/
 
@@ -190,12 +202,12 @@ render:
 
 -   PHX                                 ;> X tracks which quarter we are drawing
 
-    LDA $00 : CLC : ADC .pos_x_offset,x ;\ X position
+    LDA $00 : CLC : ADC .pos_offset_x,x ;\ X position
     PHY : LDY $02                       ;| The offset is based on the quarter
-    CLC : ADC .x_offset,y : PLY         ;| and on the direction (required to
-    STA !oam_pos_x,y                    ;/ center the sprite)
+    CLC : ADC .direction_offset_x,y     ;| and on the direction (required to
+    PLY : STA !oam_pos_x,y              ;/ center the sprite)
 
-    LDA $01 : CLC : ADC .pos_y_offset,x ;\ Y position
+    LDA $01 : CLC : ADC .pos_offset_y,x ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
 
     LDA $02 : BNE +                     ;\ Tile
@@ -220,9 +232,9 @@ render:
 .palettes:
     db !palette_normal<<1, !palette_normal_key<<1
     db !palette_frail<<1,  !palette_frail_key<<1
-.pos_x_offset: db $00, $10, $00, $10
-.pos_y_offset: db $00+!y_offset, $00+!y_offset, $10+!y_offset, $10+!y_offset
-.x_offset: db -!x_offset, !x_offset
+.pos_offset_x: db $00, $10, $00, $10
+.pos_offset_y: db $00+!y_offset, $00+!y_offset, $10+!y_offset, $10+!y_offset
+.direction_offset_x: db -!x_offset, !x_offset
 
 
 ;-------------------------------------------------------------------------------
@@ -240,7 +252,7 @@ update:
 
 .update_by_phase
     LDA !phase,x : ASL : TAX            ;\ Update sprite based on which phase it
-    JSR (update_by_phase,x)             ;/ is currently
+    JSR (update_by_phase,x)             ;/ is currently in
 
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
@@ -253,7 +265,7 @@ update:
 update_by_phase:
     dw update_rest, update_load, update_jump, update_land, update_dead
 
-; Update rest.
+; Resting frog.
 update_rest:
     LDX !sprite_index
 
@@ -265,7 +277,7 @@ update_rest:
     LDA.b #!phase_load_duration : STA !phase_cooldown,x
     RTS
 
-; Update load.
+; Loading a jump.
 update_load:
     LDX !sprite_index
 
@@ -287,7 +299,7 @@ update_load:
 
     RTS
 
-; Update jump.
+; Jumping.
 update_jump:
     LDX !sprite_index
 
@@ -306,13 +318,14 @@ update_jump:
 ++  STA !sprite_speed_x,x               ;/
 
     LDA !bounce_count,x : BNE +         ;\
-    LDA !direction,x : EOR #$01         ;| If it's the first landing after the
-    STA !direction,x                    ;| jump, invert direction
+    %should_invert_direction() : BEQ +  ;| If it's the first landing after the
+    LDA !direction,x : EOR #$01         ;| jump and it should bounce back and
+    STA !direction,x                    ;| forth, then invert direction
 +   INC !bounce_count,x                 ;/
 
     RTS
 
-; Update land.
+; Landing a jump.
 update_land:
     LDX !sprite_index
 
@@ -337,6 +350,6 @@ update_land:
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     RTS
 
-; Update dead.
+; Frog is dead.
 update_dead:
     RTS
