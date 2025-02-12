@@ -40,7 +40,7 @@
     "Don't interact with objects": false
   },
   "$190F": {
-    "Make platform passable from below": false,
+    "Make platform passable from below": true,
     "Don't erase when goal passed": false,
     "Can't be killed by sliding": false,
     "Takes 5 fireballs to kill": false,

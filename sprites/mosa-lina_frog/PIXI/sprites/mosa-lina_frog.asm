@@ -6,7 +6,7 @@
 
 ; TODO:
 ; - Reset phase if sprite is falling (and not jumping).
-; - Act as a platform for Mario.
+; - Make platform effect less janky.
 ; - Die when touching specific blocks.
 ; - Die when touching specific sprites.
 ; - Mega-die when hit by a thrown sprite.
@@ -25,7 +25,7 @@
 ; Extra Byte 1: The frog's behavior. The format is %-------i:
 ; - `i`: Controls whether the frog inverts directions after landing.
 ;       0 = don't invert direction
-;       1 = invert direction
+;       1 = invert direction (jump back and forth)
 
 ; Extra Byte 2: Jump X speed. Should alway be a positive value ($00-$7F).
 
@@ -38,7 +38,7 @@
 
 ; Phase durations, in frames.
 !phase_rest_duration = $46 ; Idle, waiting to jump
-!phase_load_duration = $28 ; Preparing to jump (the frog crouches before landing)
+!phase_load_duration = $28 ; Preparing to jump (the frog crouches before jumping)
 !phase_land_duration = $04 ; Landing (the frog crouches after landing)
 
 ; Minimum amount of bounces the frog should do after landing. The frog will keep
@@ -56,6 +56,7 @@
 ; jump.
 !damping_y = 2
 
+
 ;-------------------------------------------------------------------------------
 ; Configuration (appearance)
 ;-------------------------------------------------------------------------------
@@ -67,10 +68,21 @@
 
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
-gfx_rest: db $00, $02, $20, $22
-gfx_bend: db $04, $06, $24, $26
-gfx_leap: db $0C, $0E, $2C, $2E
-gfx_dead: db $08, $0A, $28, $2A
+gfx_rest: db $00, $02, $20, $22 ; Idle
+gfx_bend: db $04, $06, $24, $26 ; Preparing jump/landing
+gfx_leap: db $0C, $0E, $2C, $2E ; Leaping
+gfx_dead: db $08, $0A, $28, $2A ; Dead
+
+; Define width and height (in pixels) of the sprite for each phase. These are
+; used to determine the collision box of the sprite with Mario.
+; In order: idle, preparing jump/landing, leaping, dead.
+!widths = $13, $13, $13, $11
+!heights = $10, $0D, $0D, $12
+
+; The Y offset (in pixels) needed to make the sprite slightly overlap with the
+; ground, making it look like its belly is touching the ground, while its arms
+; are slightly below.
+!offset_y = $04
 
 ; Color palettes to use for the different variants of the frog.
 ; Each variant has its base color palette and the color palette for when the
@@ -84,9 +96,9 @@ gfx_dead: db $08, $0A, $28, $2A
 ; Different sound effects.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 ; Do not add `|!addr` to the bank, it will be added automatically later.
-!jump_sfx      = $13
+!jump_sfx      = $13    ; Played when the frog first jumps in the air (not when bouncing)
 !jump_sfx_bank = $1DF9
-!land_sfx      = $01
+!land_sfx      = $01    ; Player when the frog lands (also after a bounce)
 !land_sfx_bank = $1DF9
 
 
@@ -121,20 +133,15 @@ gfx_dead: db $08, $0A, $28, $2A
 ; Whether the frog has eaten a key (1) or not (0).
 !has_eaten_key = !sprite_misc_160e
 
-; The X offset (from the center) is needed to center the sprite, since it uses
-; 32 pixels, but it's effectively only 24 pixels wide.
-!x_offset = $04
-
-; The Y offset (from the center) is needed to make the sprite slightly overlaps
-; with the grounds, making it look like its belly is touching the ground, while
-; its arms are slightly below.
-!y_offset = $04
-
 ; Jump X speed.
 !jump_speed_x = !extra_byte_2
 
 ; Jump Y speed.
 !jump_speed_y = !extra_byte_3
+
+; Track the number of pixels the frog moved horizontally during the current
+; frame, used to move Mario when he's riding the sprite.
+!x_movement = !sprite_misc_1528
 
 ; Aliases for OAM addresses.
 !oam_pos_x = $0300|!addr
@@ -156,7 +163,7 @@ gfx_by_phase:
 
 
 ;-------------------------------------------------------------------------------
-; Macros
+; Macros & Functions
 ;-------------------------------------------------------------------------------
 
 ; Check whether the frog should invert directions after the first landing.
@@ -172,6 +179,27 @@ endmacro
 macro play_sfx(sfx)
     if !<sfx>_sfx != 0 : LDA #!<sfx>_sfx : STA !<sfx>_sfx_bank|!addr
 endmacro
+
+; Utilities to calculate the offset of the collision box of the sprite relative
+; to its top-left corner.
+function cox(value) = (32-value)/2
+function coy(value) = 32-value+!offset_y
+
+; Define widths and x_offsets tables for calculating the sprite's clipping.
+macro define_widths(rest, load, jump, dead)
+widths:    db <rest>, <load>, <jump>, <dead>
+x_offsets: db cox(<rest>), cox(<load>), cox(<jump>), cox(<dead>)
+endmacro
+
+; Define heights and y_offsets tables for calculating the sprite's clipping.
+macro define_heights(rest, load, jump, dead)
+heights:   db <rest>, <load>, <jump>, <dead>
+y_offsets: db coy(<rest>), coy(<load>), coy(<jump>), coy(<dead>)
+endmacro
+
+; Generate clipping tables.
+%define_widths(!widths)
+%define_heights(!heights)
 
 
 ;-------------------------------------------------------------------------------
@@ -214,10 +242,10 @@ render:
     LDA gfx_by_phase+1,y : STA $05      ;| later use
     PLY                                 ;/
 
-    LDA !direction,x : STA $02          ;> Save direction before X is corrupted
+    LDA !direction,x : STA $02          ;> Save direction before X is overridden
 
     LDA !is_frail,x : ASL               ;\
-    CLC : ADC !has_eaten_key,x          ;| Offset to get correct palette
+    CLC : ADC !has_eaten_key,x          ;| Offset to get the correct palette
     TAX                                 ;/
 
     LDA.b #!base_oam_props              ;\ Preload properties
@@ -229,9 +257,7 @@ render:
 -   PHX                                 ;> X tracks which quarter we are drawing
 
     LDA $00 : CLC : ADC .pos_offset_x,x ;\ X position
-    PHY : LDY $02                       ;| The offset is based on the quarter
-    CLC : ADC .direction_offset_x,y     ;| and on the direction (required to
-    PLY : STA !oam_pos_x,y              ;/ center the sprite)
+    STA !oam_pos_x,y                    ;/ The offset is based on the quarter
 
     LDA $01 : CLC : ADC .pos_offset_y,x ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
@@ -259,8 +285,7 @@ render:
     db !palette_normal<<1, !palette_normal_key<<1
     db !palette_frail<<1,  !palette_frail_key<<1
 .pos_offset_x: db $00, $10, $00, $10
-.pos_offset_y: db $00+!y_offset, $00+!y_offset, $10+!y_offset, $10+!y_offset
-.direction_offset_x: db -!x_offset, !x_offset
+.pos_offset_y: db $00+!offset_y, $00+!offset_y, $10+!offset_y, $10+!offset_y
 
 
 ;-------------------------------------------------------------------------------
@@ -282,7 +307,9 @@ update:
 
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
-    JSL $01802A|!bank                   ;> Update position
+    JSR interact_with_player
+    JSL $01802A|!bank                   ;\ Update position and keep track by how
+    LDA $1491|!addr : STA !x_movement,x ;/ many pixels the sprite moved
 
 .return
     RTS
@@ -379,8 +406,8 @@ handle_land:
     LDA.b #!phase_jump : STA !phase,x
     LDA !jump_speed_y,x                 ;\
     LDY !bounce_count,x : DEY           ;| For every time we already bounced,
--   LSR.b #!damping_y : DEY : BPL -     ;| divide the Y jump speed by 8, then
-    EOR #$FF : INC A                    ;| make it negative
+-   LSR.b #!damping_y : DEY : BPL -     ;| divide the Y jump speed by a factor,
+    EOR #$FF : INC A                    ;| then make it negative
     STA !sprite_speed_y,x               ;/
     RTS
 
@@ -391,4 +418,49 @@ handle_land:
 
 ; Frog is dead.
 handle_dead:
+    RTS
+
+
+;-------------------------------------------------------------------------------
+; Interact with Player
+;-------------------------------------------------------------------------------
+
+; Process interaction with player.
+interact_with_player:
+    LDY !phase,x
+
+    LDA !sprite_x_low,x : CLC : ADC.b x_offsets,y : STA $04
+    LDA !sprite_x_high,x : ADC #$00 : STA $0A
+
+    LDA !sprite_y_low,x : CLC : ADC.b y_offsets,y : STA $05
+    LDA !sprite_y_high,x : ADC #$00 : STA $0B
+
+    LDA widths,y : STA $06
+    LDA heights,y : STA $07
+
+    JSL $03B664|!bank                   ;> Get player clipping
+    JSL $03B72B|!bank : BCC .return     ;> Check for interaction
+
+    ; Adapted version of $01B457
+    LDA $05 : SEC : SBC $1C : STA $00   ;\ Check if Mario is on the top part of
+    LDA $80 : CLC : ADC #$18            ;| the frog (within the top 24 pixels)
+    CMP $00 : BPL .return               ;/
+    LDA $7D : BMI .return               ;> If Mario is moving upwards, return
+    LDA $77 : AND #$08 : BNE .return    ;> If Mario is blocked upwards, return
+    LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
+    LDA #$01 : STA $1471|!addr          ;/ it as standing on top of a sprite
+    LDA #$1F                            ;\
+    LDY $187A|!addr : BEQ +             ;|
+    LDA #$2F                            ;| Set Mario's Y position on top of the
++   STA $01                             ;| sprite, accounting for Yoshi
+    LDA $05 : SEC : SBC $01 : STA $96   ;|
+    LDA $0B : SBC #$00 : STA $97        ;/
+    LDA $77 : AND #$03 : BNE .return    ;\
+    LDY #$00                            ;|
+    LDA !1528,x : BPL +                 ;| Move Mario horizontally alongside the
+    DEY                                 ;| frog if he's not blocked horizontally
++   CLC : ADC $94 : STA $94             ;|
+    TYA : ADC $95 : STA $95             ;/
+
+.return
     RTS
