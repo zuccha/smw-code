@@ -4,6 +4,17 @@
 
 ; Frog enemy from the Mona Lisa game.
 
+; TODO:
+; - Reset phase if sprite is falling (and not jumping).
+; - Act as a platform for Mario.
+; - Die when touching specific blocks.
+; - Die when touching specific sprites.
+; - Mega-die when hit by a thrown sprite.
+; - Mega-die when hit with star power.
+; - Become encumbered when eating specific sprites.
+; - Become golden when eating a key.
+; - Spit out key when dying.
+
 
 ;-------------------------------------------------------------------------------
 ; Configuration (extra bytes)
@@ -325,9 +336,12 @@ handle_load:
 handle_jump:
     LDX !sprite_index
 
-    LDA !sprite_blocked_status,x        ;\ If touching ground, then it's done
-    AND #$04 : BNE .land                ;| jumping, otherwise keep jumping and
-    RTS                                 ;/ continue
+    LDA !sprite_blocked_status,x        ;> Check if sprite is blocked in any direction
+    BIT #$11 : BEQ +                    ;\ If it's blocked horizontally,
+    STZ !sprite_speed_x,x               ;/ then stop horizontal momentum
++   BIT #$08 : BEQ +                    ;\ If it's blocked on top,
+    STZ !sprite_speed_y,x               ;/ then stop ascending
++   AND #$04 : BEQ .return              ;\ If touching ground, then it should land
 
 .land
     LDA.b #!phase_land : STA !phase,x
@@ -347,6 +361,7 @@ handle_jump:
 
     %play_sfx(land)
 
+.return
     RTS
 
 ; Landing a jump.
