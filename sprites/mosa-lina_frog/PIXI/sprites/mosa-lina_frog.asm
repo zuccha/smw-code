@@ -8,7 +8,6 @@
 ; - Reset phase if sprite is falling (and not jumping).
 ; - Make platform effect less janky.
 ; - Die when touching specific blocks.
-; - Mega-die when hit by a thrown sprite.
 ; - Become encumbered when eating specific sprites.
 ; - Become golden when eating a key.
 ; - Spit out key when dying.
@@ -56,9 +55,8 @@
 
 ; List of sprites that if they get in contact with the frog, the frog dies
 ; (Mario can still stand on it). Add how many as you wish.
-; The format is $0cnn:
-;   - 0: Always 0.
-;   - c: 0 = regular sprite, 1 = custom sprite
+; The format is $-cnn:
+;   - c: 0 = regular sprite, 1 = custom sprite.
 ;   - nn: Sprite number.
 deadly_sprites:
     dw $0013, $0014
@@ -517,24 +515,31 @@ interact_with_player:
 interact_with_sprites:
     LDY #!SprSize                               ;> Sprite index
 -   STY $00 : CPX $00 : BEQ .next               ;> Skip comparison with itself
-    LDA !sprite_status,y : CMP #$08 : BNE .next ;> Skip non-active sprites
+    LDA !sprite_status,y : CMP #$08 : BCC .next ;> Skip non-active sprites
     LDA !1686,y : AND #$08 : BNE .next          ;> Skip sprites with no interaction
     TYX : JSL $03B6E5|!bank : LDX !sprite_index ;\ Skip if no collision
     JSL $03B72B|!bank : BCC .next               ;/ (other sprite is clipping B)
-    JSR is_deadly_sprite : BCS .kill
+    LDA !sprite_status,y : CMP #$0A : BEQ .kill ;> Kill if hit by a thrown sprite
+    JSR is_sprite_deadly : BCS .soft_kill       ;> Kill if in contact with a deadly sprite
 .next
     DEY : BPL -                                 ;> Go to next sprite
     RTS                                         ;> No contact
 
+.soft_kill
+    LDA !phase,x : CMP.b #!phase_dead : BEQ +
+    LDA.b #!phase_dead : STA !phase,x           ;\ Kill, but keep frog on screen
+    %play_sfx(death)                            ;/ Mario can still ride it
++   RTS
+
 .kill
-    LDA #!phase_dead : STA !phase,x
-    %play_sfx(death)
+    LDA #!phase_dead : STA !phase,x             ;\ Kill frog and make it fall
+    %simulate_jsl($01A642, $01A7E3)             ;/ off screen
     RTS
 
 ; Check if a sprite is deadly.
 ; @param Y Sprite index.
 ; @return C 1 if deadly, 0 otherwise.
-is_deadly_sprite:
+is_sprite_deadly:
     TYX : LDA !extra_bits,x                     ;\ $00 = 0 regular sprite
     AND #$08 : LSR #3 : STA $00                 ;/ $00 = 1 custom sprite
     LDY.b #deadly_sprites_end-deadly_sprites-2  ;\
