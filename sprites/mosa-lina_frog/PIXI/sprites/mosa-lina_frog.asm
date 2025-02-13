@@ -2,7 +2,18 @@
 ; MOSA LINA - FROG
 ;===============================================================================
 
-; Frog enemy from the Mona Lisa game.
+; Frog from the Mona Lisa game.
+
+; The frog is a jumping sprite that can jump back and forth or in one direction.
+; Mario can ride the frog like a platform.
+; If the frog touches a deadly sprite (configured below) it dies (it no longer
+; jumps), but Mario can still walk on it.
+; If the frog touches a thrown sprite (e.g., shell), it dies for good, falling
+; off screen.
+; If the frog touches a tasty sprite (configured below) it eats it and becomes
+; slow (it jumps about half the way). Tasty sprites can be configured to stay in
+; the frog's mouth, it will spit them out when it dies. If the frog eats more
+; than one sprite, the last one eaten is the one that counts.
 
 ; TODO:
 ; - Reset phase if sprite is falling (and not jumping).
@@ -25,9 +36,9 @@
 ;       0 = don't invert direction
 ;       1 = invert direction (jump back and forth)
 
-; Extra Byte 2: Jump X speed. Should alway be a positive value ($00-$7F).
+; Extra Byte 2: Regular jump X speed. Alway positive ($00-$7F).
 
-; Extra Byte 3: Jump Y speed. Should alway be a positive value ($00-$7F).
+; Extra Byte 3: Regular jump Y speed. Alway positive ($00-$7F).
 
 
 ;-------------------------------------------------------------------------------
@@ -41,7 +52,7 @@
 
 ; Minimum amount of bounces the frog should do after landing. The frog will keep
 ; bouncing if its X speed is nonzero.
-!min_bounces = 2
+!min_bounces = 1
 
 ; `!damping_x` controls how fast the X speed will decrease after a jump.
 ; Every time the frog touches the ground after landing, its X speed will be
@@ -454,7 +465,7 @@ handle_land:
     DEC !phase_cooldown,x : RTS
 
 .go_to_next_phase
-    LDA !bounce_count,x : CMP.b #!min_bounces : BCC .keep_bouncing
+    LDA !bounce_count,x : CMP.b #!min_bounces+1 : BCC .keep_bouncing
     LDA !sprite_speed_x,x : BEQ .stop_bouncing
 
 .keep_bouncing
@@ -554,7 +565,14 @@ interact_with_sprites:
     LDA !new_sprite_num,x                       ;\
     LDX !sprite_index                           ;| Remember which sprite was eaten
     STA !eaten_sprite,x                         ;/
-    LDA $00                                     ;\ %---p---c | Transform the
+    LDA !has_eaten,x : BNE +                    ;\
+    LDA !jump_speed_x,x : LSR #2 : STA $01      ;|
+    LDA !jump_speed_x,x : SEC : SBC $01         ;| If it's the first time eating
+    STA !jump_speed_x,x                         ;| then reduce its jumping speed
+    LDA !jump_speed_y,x : LSR #2 : STA $01      ;| by 1/4: speed = speed - speed * 0.25
+    LDA !jump_speed_y,x : SEC : SBC $01         ;|
+    STA !jump_speed_y,x                         ;/
++   LDA $00                                     ;\ %---p---c | Transform the
     CLC : ROR A : ROR A                         ;| %c----p-- | info byte so that
     BIT #$04 : BEQ +                            ;| if p = 1  | it matches the
     ORA #$40                                    ;| %c1---1-- | format stored in
