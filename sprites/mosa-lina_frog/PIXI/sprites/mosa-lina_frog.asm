@@ -19,8 +19,6 @@
 ; - Reset phase if sprite is falling (and not jumping).
 ; - Make platform effect less janky.
 ; - Die when touching specific blocks.
-; - Become encumbered when eating specific sprites.
-; - Spit out preserved sprite when dying.
 ; - Don't hurt player on contact when riding Yoshi.
 ; - Make sprite behaver properly when spit by Yoshi.
 
@@ -29,12 +27,15 @@
 ; Configuration (extra bytes)
 ;-------------------------------------------------------------------------------
 
-; Extra bit: Initial direction. 0 = right, 1 = left.
+; Extra bit: Frog type. 0 = regular, 1 = frail.
 
-; Extra Byte 1: The frog's behavior. The format is %-------i:
+; Extra Byte 1: The frog's behavior. The format is %------di:
 ; - `i`: Controls whether the frog inverts directions after landing.
 ;       0 = don't invert direction
 ;       1 = invert direction (jump back and forth)
+; - `d`: Initial direction.
+;       0 = right
+;       1 = left
 
 ; Extra Byte 2: Regular jump X speed. Alway positive ($00-$7F).
 
@@ -67,22 +68,25 @@
 
 ; List of sprites that if they get in contact with the frog, the frog dies
 ; (Mario can still stand on it). Add how many as you wish.
-; N.B.: A sprite cannot be both deadly and tasty.
 ; The format is $-cnn:
 ;   - c: 0 = regular sprite, 1 = custom sprite.
 ;   - nn: Sprite number.
+; N.B.: A sprite cannot be both deadly and tasty.
 deadly_sprites:
     dw $0013, $0014
 .end
 
 ; List of sprites that if they get in contact with the frog, the frog will eat
 ; them, making them disappear and becoming slow. Add how many as you wish.
-; N.B.: A sprite cannot be both deadly and tasty.
 ; The format is $pcnn:
 ;   - p: 0 = swallow sprite, 1 = preserve sprite (it will be spit out if the
 ;     frog dies).
 ;   - c: 0 = regular sprite, 1 = custom sprite.
 ;   - nn: Sprite number.
+; N.B.: A sprite cannot be both deadly and tasty.
+; N.B.: When spitting a sprite, properties of the eaten sprite (extra bit, extra
+; bytes, etc.) won't be restored. This is particularly relevant for custom
+; sprites.
 tasty_sprites:
     dw $0074, $1080
 .end
@@ -163,9 +167,6 @@ gfx_dead: db $08, $0A, $28, $2A ; Dead
 ; Bounce count, how many times the frog landed after a jump/bounce.
 !bounce_count = !sprite_misc_1510
 
-; Whether the frog is frail (1) or not (0).
-!is_frail = !sprite_misc_154c
-
 ; Whether the frog has eaten a sprite or not. Format is %cp-----e:
 ;   - c: 1 = eaten a custom sprite, 0 = eaten a regular sprite. Should always be
 ;     0 if nothing has been eaten.
@@ -218,6 +219,14 @@ macro should_invert_direction()
     LDA !extra_byte_1,x : AND #$01
 endmacro
 
+; Check whether the frog is frail or not.
+; @param X The sprite index.
+; @return Z 1 if not frail, 0 otherwise.
+; @return A $04 if frail, $00 otherwise.
+macro is_frail()
+    LDA !extra_bits,x : AND #$04
+endmacro
+
 ; Play a sound effect. If the sound effect is zero, then nothing is played.
 ; @param <sfx> Name of the sound effect, corresponding `!<sfx>_sfx` and
 ; `!<sfx>_sfx_bank` defines must exist.
@@ -267,7 +276,7 @@ endmacro
 init:
     LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
-    LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
+    LDA !extra_byte_1,x : AND #$02 : LSR : STA !direction,x
     RTL
 
 
@@ -303,7 +312,7 @@ render:
     LDA gfx_by_phase+1,y : STA $05      ;| later use
     PLY                                 ;/
 
-    LDA !is_frail,x : ASL               ;\
+    %is_frail() : LSR                   ;\
     BIT !has_eaten,x : BVC +            ;| Offset to get the correct palette:
     INC                                 ;|   2 * frail + spit_eaten_sprite
 +   TAX                                 ;/
@@ -554,6 +563,7 @@ interact_with_sprites:
     TYX : JSL $03B6E5|!bank : LDX !sprite_index ;\ Skip if no collision
     JSL $03B72B|!bank : BCC .next               ;/ (other sprite is clipping B)
     LDA !sprite_status,y : CMP #$0A : BEQ .kill ;> Kill if hit by a thrown sprite
+    LDA !phase,x : CMP #!phase_dead : BEQ .next ;> Skip ahead if frog is already dead
     JSR is_sprite_deadly : BCS .soft_kill       ;> Kill if in contact with a deadly sprite
     JSR is_sprite_tasty : BCS .eat              ;> Eat if in contact with a tasty sprite
 .next
@@ -582,14 +592,16 @@ interact_with_sprites:
     RTS
 
 .soft_kill
-    LDA !phase,x : CMP.b #!phase_dead : BEQ +
-    LDA.b #!phase_dead : STA !phase,x           ;\ Kill, but keep frog on screen
-    %play_sfx(death)                            ;/ so Mario can still ride it
+    LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ Kill, but keep frog on screen
+    LDA.b #!phase_dead : STA !phase,x           ;/ so Mario can still ride it
+    JSR spit_eaten_sprite                       ;> Spit eaten sprite (if any)
+    %play_sfx(death)
 +   RTS
 
 .kill
     LDA #!phase_dead : STA !phase,x             ;\ Kill frog and make it fall
     %simulate_jsl($01A642, $01A7E3)             ;/ off screen
+    JSR spit_eaten_sprite                       ;> Spit eaten sprite (if any)
     RTS
 
 ; Check if a sprite is deadly.
@@ -639,3 +651,44 @@ is_sprite_tasty:
     LDA tasty_sprites+1,y : STA $00
     ; TXY : LDX !sprite_index                   ;> Don't restore X when eaten
     SEC : RTS
+
+
+;-------------------------------------------------------------------------------
+; Spit Eaten Sprite
+;-------------------------------------------------------------------------------
+
+; Check if the frog has eaten a sprite and spit it.
+; Don't use the %SpawnSprite() macro because it doesn't account for sprite
+; memory when allocating the sprite slot.
+; N.B.: When spitting a sprite, extra bit, extra bytes, and any other property
+; won't be restored.
+spit_eaten_sprite:
+    BIT !has_eaten,x : BVC .return              ;> Skip if there is no preserved sprite
+
+    JSL $02A9E4|!bank                           ;\ Look for a sprite empty slot
+    BMI .return                                 ;/ If none is found, don't spit
+
+    CLC : LDA !has_eaten,x : BPL + : SEC        ;> C = 0 for regular, C = 1 for custom
++   LDA !eaten_sprite,x : TYX : STA !sprite_num,x ;> Set sprite number
+    JSL $07F7D2|!bank                           ;> Reset sprite tables
+    BCC +                                       ;\
+    LDA !sprite_num,x : STA !new_sprite_num,x   ;| Custom sprite: set number,
+    JSL $0187A7|!bank                           ;| reset tables, set extra bit
+    LDA #$08 : STA !extra_bits,x                ;/
++   LDA #$01 : STA !sprite_status,x             ;> Make sprite alive
+
+    TXY : LDX !sprite_index
+
+    LDA !sprite_x_low,x : STA !sprite_x_low,y   ;\
+    LDA !sprite_x_high,x : STA !sprite_x_high,y ;| Same position as the frog
+    LDA !sprite_y_low,x : STA !sprite_y_low,y   ;| (not centered, but eh)
+    LDA !sprite_y_high,x : STA !sprite_y_high,y ;/
+
+    LDA #$10 : STA !sprite_speed_x,y            ;\ Give it some speed falling
+    LDA #$F0 : STA !sprite_speed_y,y            ;/ out of the mouth
+
+    LDA !has_eaten,x : ORA #~$40                ;\ Mark sprite as swallowed to
+    STA !has_eaten,x                            ;/ prevent multiple spits
+
+.return
+    RTS
