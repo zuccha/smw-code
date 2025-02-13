@@ -8,9 +8,7 @@
 ; - Reset phase if sprite is falling (and not jumping).
 ; - Make platform effect less janky.
 ; - Die when touching specific blocks.
-; - Die when touching specific sprites.
 ; - Mega-die when hit by a thrown sprite.
-; - Mega-die when hit with star power.
 ; - Become encumbered when eating specific sprites.
 ; - Become golden when eating a key.
 ; - Spit out key when dying.
@@ -63,8 +61,7 @@
 ;   - c: 0 = regular sprite, 1 = custom sprite
 ;   - nn: Sprite number.
 deadly_sprites:
-    dw $0013, $0014, $001D, $0020, $002E, $003A
-    dw $003B, $003C, $0067, $00A4, $00B4
+    dw $0013, $0014
 .end
 
 
@@ -108,10 +105,12 @@ gfx_dead: db $08, $0A, $28, $2A ; Dead
 ; Different sound effects.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 ; Do not add `|!addr` to the bank, it will be added automatically later.
-!jump_sfx      = $13    ; Played when the frog first jumps in the air (not when bouncing)
-!jump_sfx_bank = $1DF9
-!land_sfx      = $01    ; Player when the frog lands (also after a bounce)
-!land_sfx_bank = $1DF9
+!jump_sfx       = $13    ; Played when the frog first jumps in the air (not when bouncing)
+!jump_sfx_bank  = $1DF9
+!land_sfx       = $01    ; Player when the frog lands (also after a bounce)
+!land_sfx_bank  = $1DF9
+!death_sfx      = $07    ; Player when the frog dies (not falling off screen)
+!death_sfx_bank = $1DF9
 
 
 ;-------------------------------------------------------------------------------
@@ -192,6 +191,18 @@ macro play_sfx(sfx)
     if !<sfx>_sfx != 0 : LDA #!<sfx>_sfx : STA !<sfx>_sfx_bank|!addr
 endmacro
 
+; Jump to a subroutine that RTSs as if it RTLs.
+; @param <jml_addr> Address where you want execution to start.
+; @param <rtl_addr> Address of an RTL statement in the same bank as <jml_addr>.
+macro simulate_jsl(jml_addr, rtl_addr)
+    PHB
+    LDA.b #bank(<jml_addr>)|!bank8 : PHA : PLB
+    PHK : PEA.w (?+)-1
+    PEA.w <rtl_addr>-1
+    JML <jml_addr>|!bank
+?+  PLB
+endmacro
+
 ; Utilities to calculate the offset of the collision box of the sprite relative
 ; to its top-left corner.
 function cox(value) = (32-value)/2
@@ -248,13 +259,17 @@ main:
 render:
     %GetDrawInfo()
 
+    STZ $02 : LDA !sprite_status,x      ;\ Save whether frog is falling off
+    CMP #$02 : BNE +                    ;| screen before X is overridden
+    LDA #$01 : STA $02                  ;/
+
++   LDA !direction,x : STA $03          ;> Save direction before X is overridden
+
     PHY                                 ;\
     LDA !phase,x : ASL : TAY            ;| Load the address of the correct
     LDA gfx_by_phase,y : STA $04        ;| graphics table into $04-$05 for
     LDA gfx_by_phase+1,y : STA $05      ;| later use
     PLY                                 ;/
-
-    LDA !direction,x : STA $02          ;> Save direction before X is overridden
 
     LDA !is_frail,x : ASL               ;\
     CLC : ADC !has_eaten_key,x          ;| Offset to get the correct palette
@@ -262,7 +277,9 @@ render:
 
     LDA.b #!base_oam_props              ;\ Preload properties
     ORA .palettes,x                     ;| Palette depends on fragile and eaten key
-    LDX $02 : ORA .flip_x,x : STA $03   ;/ Flip X varies depending on the direction
+    LDX $03 : ORA .flip_x,x             ;| Flip X varies depending on the direction
+    LDX $02 : ORA .flip_y,x             ;| Flip Y varies depending on falling off screen
+    STA $06                             ;/ Save everything for later
 
     LDX #$03                            ;> Loop 4 times (sprite is split into 4 parts)
 
@@ -274,12 +291,14 @@ render:
     LDA $01 : CLC : ADC .pos_offset_y,x ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
 
-    LDA $02 : BNE +                     ;\ Tile
-    TXA : EOR #$01 : TAX : +            ;| Invert X horizontally depending on direction
-    PHY : TXY : LDA ($04),y : PLY       ;| Retrieve the tile from the preloaded table
-    STA !oam_tile,y                     ;/
+    LDA $03 : BNE +                     ;\ Invert X horizontally depending on
+    TXA : EOR #$01 : TAX                ;| direction
++   LDA $02 : BEQ +                     ;| Invert Y vertically depending on
+    TXA : EOR #$02 : TAX                ;| falling off screen
++   PHY : TXY : LDA ($04),y : PLY       ;| Retrieve the tile from the preloaded
+    STA !oam_tile,y                     ;/ table
 
-    LDA $03 : STA !oam_props,y          ;> Properties
+    LDA $06 : STA !oam_props,y          ;> Properties
 
     INY #4                              ;> Go to next OAM slot
 
@@ -293,6 +312,7 @@ render:
     RTS
 
 .flip_x: db $40, $00
+.flip_y: db $00, $80
 .palettes:
     db !palette_normal<<1, !palette_normal_key<<1
     db !palette_frail<<1,  !palette_frail_key<<1
@@ -455,6 +475,12 @@ interact_with_player:
     JSL $03B664|!bank                   ;> Get player clipping
     JSL $03B72B|!bank : BCC .return     ;> Check for interaction
 
+    LDA $1490|!addr : BEQ .alive        ;\ If making contact with star powered Mario
+    LDA #!phase_dead : STA !phase,x     ;| then mark the sprite as dead and use the
+    %simulate_jsl($01A847, $01A7E3)     ;/ original kill routine to actually kill it
+    RTS
+
+.alive
     ; Adapted version of $01B457
     LDA $05 : SEC : SBC $1C : STA $00   ;\ Check if Mario is on the top part of
     LDA $80 : CLC : ADC #$18            ;| the frog (within the top 24 pixels)
@@ -502,6 +528,7 @@ interact_with_sprites:
 
 .kill
     LDA #!phase_dead : STA !phase,x
+    %play_sfx(death)
     RTS
 
 ; Check if a sprite is deadly.

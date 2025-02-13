@@ -20,7 +20,7 @@
     "Don't interact with Layer 2": false
   },
   "$167A": {
-    "Don't disable cliping when starkilled": false,
+    "Don't disable cliping when starkilled": true,
     "Invincible to star/cape/fire/bounce blk.": false,
     "Process when off screen": false,
     "Don't change into shell when stunned": true,
@@ -33,7 +33,7 @@
     "Inedible": false,
     "Stay in Yoshi's mouth": true,
     "Weird ground behaviour": false,
-    "Don't interact with other sprites": true,
+    "Don't interact with other sprites": false,
     "Don't change direction if touched": false,
     "Don't turn into coin when goal passed": false,
     "Spawn a new sprite": false,
