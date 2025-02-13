@@ -9,8 +9,9 @@
 ; - Make platform effect less janky.
 ; - Die when touching specific blocks.
 ; - Become encumbered when eating specific sprites.
-; - Become golden when eating a key.
-; - Spit out key when dying.
+; - Spit out preserved sprite when dying.
+; - Don't hurt player on contact when riding Yoshi.
+; - Make sprite behaver properly when spit by Yoshi.
 
 
 ;-------------------------------------------------------------------------------
@@ -55,11 +56,24 @@
 
 ; List of sprites that if they get in contact with the frog, the frog dies
 ; (Mario can still stand on it). Add how many as you wish.
+; N.B.: A sprite cannot be both deadly and tasty.
 ; The format is $-cnn:
 ;   - c: 0 = regular sprite, 1 = custom sprite.
 ;   - nn: Sprite number.
 deadly_sprites:
     dw $0013, $0014
+.end
+
+; List of sprites that if they get in contact with the frog, the frog will eat
+; them, making them disappear and becoming slow. Add how many as you wish.
+; N.B.: A sprite cannot be both deadly and tasty.
+; The format is $pcnn:
+;   - p: 0 = swallow sprite, 1 = preserve sprite (it will be spit out if the
+;     frog dies).
+;   - c: 0 = regular sprite, 1 = custom sprite.
+;   - nn: Sprite number.
+tasty_sprites:
+    dw $0074, $1080
 .end
 
 
@@ -105,10 +119,12 @@ gfx_dead: db $08, $0A, $28, $2A ; Dead
 ; Do not add `|!addr` to the bank, it will be added automatically later.
 !jump_sfx       = $13    ; Played when the frog first jumps in the air (not when bouncing)
 !jump_sfx_bank  = $1DF9
-!land_sfx       = $01    ; Player when the frog lands (also after a bounce)
+!land_sfx       = $01    ; Played when the frog lands (also after a bounce)
 !land_sfx_bank  = $1DF9
-!death_sfx      = $07    ; Player when the frog dies (not falling off screen)
+!death_sfx      = $07    ; Played when the frog dies (not falling off screen)
 !death_sfx_bank = $1DF9
+!eat_sfx        = $06    ; Played when the frog eats a sprite
+!eat_sfx_bank   = $1DF9
 
 
 ;-------------------------------------------------------------------------------
@@ -139,8 +155,17 @@ gfx_dead: db $08, $0A, $28, $2A ; Dead
 ; Whether the frog is frail (1) or not (0).
 !is_frail = !sprite_misc_154c
 
-; Whether the frog has eaten a key (1) or not (0).
-!has_eaten_key = !sprite_misc_160e
+; Whether the frog has eaten a sprite or not. Format is %cp-----e:
+;   - c: 1 = eaten a custom sprite, 0 = eaten a regular sprite. Should always be
+;     0 if nothing has been eaten.
+;   - p: 1 = should preserve sprite and spit it when the frog dies, 0 = should
+;     not spit the eaten sprite when the frog dies. Should always be 0 if
+;     nothing has been eaten.
+;   - e: 1 = has eaten a sprite, 0 = has not eaten a sprite.
+!has_eaten = !sprite_misc_151c
+
+; Sprite number of the eaten sprite (relevant only if has_eaten[p] is 1).
+!eaten_sprite = !sprite_misc_160e
 
 ; Jump X speed.
 !jump_speed_x = !extra_byte_2
@@ -232,8 +257,6 @@ init:
     LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     LDA !extra_bits,x : AND #$04 : LSR #2 : STA !direction,x
-    LDA #$00 : STA !is_frail,x
-    LDA #$00 : STA !has_eaten_key,x
     RTL
 
 
@@ -270,8 +293,9 @@ render:
     PLY                                 ;/
 
     LDA !is_frail,x : ASL               ;\
-    CLC : ADC !has_eaten_key,x          ;| Offset to get the correct palette
-    TAX                                 ;/
+    BIT !has_eaten,x : BVC +            ;| Offset to get the correct palette:
+    INC                                 ;|   2 * frail + spit_eaten_sprite
++   TAX                                 ;/
 
     LDA.b #!base_oam_props              ;\ Preload properties
     ORA .palettes,x                     ;| Palette depends on fragile and eaten key
@@ -516,19 +540,33 @@ interact_with_sprites:
     LDY #!SprSize                               ;> Sprite index
 -   STY $00 : CPX $00 : BEQ .next               ;> Skip comparison with itself
     LDA !sprite_status,y : CMP #$08 : BCC .next ;> Skip non-active sprites
-    LDA !1686,y : AND #$08 : BNE .next          ;> Skip sprites with no interaction
     TYX : JSL $03B6E5|!bank : LDX !sprite_index ;\ Skip if no collision
     JSL $03B72B|!bank : BCC .next               ;/ (other sprite is clipping B)
     LDA !sprite_status,y : CMP #$0A : BEQ .kill ;> Kill if hit by a thrown sprite
     JSR is_sprite_deadly : BCS .soft_kill       ;> Kill if in contact with a deadly sprite
+    JSR is_sprite_tasty : BCS .eat              ;> Eat if in contact with a tasty sprite
 .next
     DEY : BPL -                                 ;> Go to next sprite
     RTS                                         ;> No contact
 
+.eat
+    STZ !sprite_status,x                        ;> Kill eaten sprite
+    LDA !new_sprite_num,x                       ;\
+    LDX !sprite_index                           ;| Remember which sprite was eaten
+    STA !eaten_sprite,x                         ;/
+    LDA $00                                     ;\ %---p---c | Transform the
+    CLC : ROR A : ROR A                         ;| %c----p-- | info byte so that
+    BIT #$04 : BEQ +                            ;| if p = 1  | it matches the
+    ORA #$40                                    ;| %c1---1-- | format stored in
+    AND #$C0                                    ;| %c1------ | `!has_eaten`
++   ORA #$01 : STA !has_eaten,x                 ;/ %cp-----1 |
+    %play_sfx(eat)
+    RTS
+
 .soft_kill
     LDA !phase,x : CMP.b #!phase_dead : BEQ +
     LDA.b #!phase_dead : STA !phase,x           ;\ Kill, but keep frog on screen
-    %play_sfx(death)                            ;/ Mario can still ride it
+    %play_sfx(death)                            ;/ so Mario can still ride it
 +   RTS
 
 .kill
@@ -555,4 +593,31 @@ is_sprite_deadly:
 
 .deadly
     TXY : LDX !sprite_index
+    SEC : RTS
+
+
+; Check if a sprite is tasty (it can be eaten).
+; @param Y Sprite index.
+; @return C 1 if tasty, 0 otherwise.
+; @return $00 If sprite is tasty, info about the sprite in the format %---p---c:
+;   - p: 0 = sprite should not be preserved, 1 = sprite should be preserved.
+;   - c: 0 = sprite is not custom, 1 = sprite is custom.
+is_sprite_tasty:
+    TYX : LDA !extra_bits,x                     ;\ $00 = 0 regular sprite
+    AND #$08 : LSR #3 : STA $00                 ;/ $00 = 1 custom sprite
+    LDY.b #tasty_sprites_end-tasty_sprites-2    ;\
+-   BMI .not_tasty                              ;| Iterate over tasty sprites
+    LDA tasty_sprites+1,y : AND #$01            ;| If the sprite number matches
+    EOR $00 : BNE +                             ;| and they are of the same type,
+    LDA !new_sprite_num,x                       ;| then it is tasty
+    CMP tasty_sprites,y : BEQ .tasty            ;|
++   DEY #2 : BRA -                              ;/
+
+.not_tasty
+    TXY : LDX !sprite_index
+    CLC : RTS
+
+.tasty
+    LDA tasty_sprites+1,y : STA $00
+    ; TXY : LDX !sprite_index                   ;> Don't restore X when eaten
     SEC : RTS
