@@ -14,13 +14,21 @@
 ; slow (it jumps about half the way). Tasty sprites can be configured to stay in
 ; the frog's mouth, it will spit them out when it dies. If the frog eats more
 ; than one sprite, the last one eaten is the one that counts.
+; The frog has a frail variant. frail frogs will be using a different color
+; palette and die to cape spin, Mario's fireballs, and spin jumps.
 
 ; TODO:
-; - Reset phase if sprite is falling (and not jumping).
-; - Make platform effect less janky.
-; - Die when touching specific blocks.
-; - Don't hurt player on contact when riding Yoshi.
-; - Make sprite behaver properly when spit by Yoshi.
+; - Feat: Die when touching specific blocks.
+; - Feat: Eat specific blocks.
+; - Fix: Reset phase if sprite is falling (and not jumping).
+; - Fix: Make platform effect less janky.
+; - Fix: Don't hurt player on contact when riding Yoshi.
+; - Fix: Make sprite behaver properly when spit by Yoshi.
+; - Fix: Spit eaten sprite when killed by fireballs.
+; - Fix: Use proper clipping for block interactions.
+; - Fix: Use proper clipping for cape interactions.
+; - Fix: Use proper clipping for fireballs interactions.
+; - Fix: Spawn cloud of smoke at the center of the sprite when killed.
 
 
 ;-------------------------------------------------------------------------------
@@ -212,6 +220,13 @@ gfx_by_phase:
 ; Macros & Functions
 ;-------------------------------------------------------------------------------
 
+; Mark frog as dead and spit eaten item.
+; @param X The sprite index.
+macro kill_frog()
+    LDA #!phase_dead : STA !phase,x
+    JSR spit_eaten_sprite
+endmacro
+
 ; Check whether the frog should invert directions after the first landing.
 ; @param X The sprite index.
 ; @return Z 1 if it should invert direction, 0 otherwise.
@@ -277,7 +292,11 @@ init:
     LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     LDA !extra_byte_1,x : AND #$02 : LSR : STA !direction,x
-    RTL
+    %is_frail() : BEQ +                 ;\
+    LDA !sprite_tweaker_166e,x          ;| If frail, make frog vulnerable to
+    AND #~$30                           ;| fireballs and cape
+    STA !sprite_tweaker_166e,x          ;/
++   RTL
 
 
 ;-------------------------------------------------------------------------------
@@ -368,8 +387,14 @@ render:
 
 ; Update sprite behavior.
 update:
-    LDA !14C8,x : CMP #$08 : BEQ + : RTS ;> Return if status is not normal
-+   LDA $9D : BEQ .check_jump : RTS      ;> Return if sprites are blocked
+    LDA !14C8,x : CMP #$08 : BCS + : RTS ;> Return if status is not normal
++   LDA $9D : BEQ .check_cape_hit : RTS  ;> Return if sprites are blocked
+
+.check_cape_hit
+    LDA !sprite_status,x                ;\
+    CMP #$09 : BNE .check_jump          ;| If hit by cape, mark frog as dead
+    LDA #$02 : STA !sprite_status,x     ;| and make it fall off screen
+    %kill_frog()                        ;/
 
 .check_jump
     LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
@@ -505,10 +530,10 @@ handle_dead:
 interact_with_player:
     LDY !phase,x
 
-    LDA !sprite_x_low,x : CLC : ADC.b x_offsets,y : STA $04
+    LDA !sprite_x_low,x : CLC : ADC x_offsets,y : STA $04
     LDA !sprite_x_high,x : ADC #$00 : STA $0A
 
-    LDA !sprite_y_low,x : CLC : ADC.b y_offsets,y : STA $05
+    LDA !sprite_y_low,x : CLC : ADC y_offsets,y : STA $05
     LDA !sprite_y_high,x : ADC #$00 : STA $0B
 
     LDA widths,y : STA $06
@@ -516,20 +541,36 @@ interact_with_player:
 
     JSL $03B664|!bank                   ;> Get player clipping
     JSL $03B72B|!bank : BCC .return     ;> Check for interaction
+    LDA $1490|!addr : BEQ .survive_1    ;> Check if Mario has star power
 
-    LDA $1490|!addr : BEQ .alive        ;\ If making contact with star powered Mario
-    LDA #!phase_dead : STA !phase,x     ;| then mark the sprite as dead and use the
-    %simulate_jsl($01A847, $01A7E3)     ;/ original kill routine to actually kill it
+.star_kill
+    %kill_frog()                        ;| Kill the frog and run the star kill
+    %Star()                             ;/ routine (points, status, etc.)
     RTS
 
-.alive
+.survive_1
     ; Adapted version of $01B457
     LDA $05 : SEC : SBC $1C : STA $00   ;\ Check if Mario is on the top part of
     LDA $80 : CLC : ADC #$18            ;| the frog (within the top 24 pixels)
     CMP $00 : BPL .return               ;/
     LDA $7D : BMI .return               ;> If Mario is moving upwards, return
     LDA $77 : AND #$08 : BNE .return    ;> If Mario is blocked upwards, return
-    LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
+    %is_frail() : BEQ .survive_2        ;\ If frog is frail and Mario spin jumps
+    LDA $140D|!addr : BEQ .survive_2    ;/ kill the frog, else it survives
+
+.spin_kill
+    %kill_frog()                        ;> Kill frog
+    LDA #$04 : STA !sprite_status,x     ;> Status = killed by smoke
+    LDA #$1F : STA !1540,x              ;> Set smoke duration timer
+    JSL $07FC3B|!bank                   ;> Span collision stars
+    LDA #$08 : STA $1DF9|!addr          ;> Play puff sound effect
+    STZ $140D|!addr                     ;> Interrupt spin jump
+
+.return
+    RTS
+
+.survive_2
++   LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
     LDA #$01 : STA $1471|!addr          ;/ it as standing on top of a sprite
     LDA #$1F                            ;\
     LDY $187A|!addr : BEQ +             ;|
@@ -543,8 +584,6 @@ interact_with_player:
     DEY                                 ;| frog if he's not blocked horizontally
 +   CLC : ADC $94 : STA $94             ;|
     TYA : ADC $95 : STA $95             ;/
-
-.return
     RTS
 
 
@@ -592,16 +631,14 @@ interact_with_sprites:
     RTS
 
 .soft_kill
-    LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ Kill, but keep frog on screen
-    LDA.b #!phase_dead : STA !phase,x           ;/ so Mario can still ride it
-    JSR spit_eaten_sprite                       ;> Spit eaten sprite (if any)
-    %play_sfx(death)
+    LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ If not already dead, kill the
+    %kill_frog()                                ;| the frog, but keep it on screen,
+    %play_sfx(death)                            ;/ so Mario can still ride it
 +   RTS
 
 .kill
-    LDA #!phase_dead : STA !phase,x             ;\ Kill frog and make it fall
+    %kill_frog()                                ;\ Kill frog and make it fall
     %simulate_jsl($01A642, $01A7E3)             ;/ off screen
-    JSR spit_eaten_sprite                       ;> Spit eaten sprite (if any)
     RTS
 
 ; Check if a sprite is deadly.
