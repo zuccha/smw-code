@@ -30,8 +30,6 @@
 ; - Frog in water
 ; - Frog in lava
 ; - Interaction with Mario behind net
-; - Interaction with Yoshi's fireball
-; - Interaction with Yoshi's stomp
 
 
 ;-------------------------------------------------------------------------------
@@ -401,7 +399,7 @@ update:
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
     JSR interact_with_player
     JSR interact_with_sprites
-    JSR interact_with_player_fireballs
+    JSR interact_with_fireballs
     JSL $01802A|!bank                   ;\ Update position and keep track by how
     LDA $1491|!addr : STA !x_movement,x ;/ many pixels the sprite moved
 
@@ -708,43 +706,46 @@ is_sprite_tasty:
 
 
 ;-------------------------------------------------------------------------------
-; Interact with Player Fireballs
+; Interact with Fireballs
 ;-------------------------------------------------------------------------------
 
-; Interact with fireballs shot by Fire Mario.
+; Interact with fireballs shot by Mario or by Yoshi.
 ; We need to redefine this routine because (1) the default routine that handles
 ; fireballs interaction doesn't use the custom clipping, (2) we need to spit the
 ; eaten sprite if the frog is frail.
-interact_with_player_fireballs:
+interact_with_fireballs:
     JSR get_frog_clipping_a
-    LDY #$00                                ;> Initial fireball index.
+    LDY.b #!ExtendedSize+2-1                ;> !ExtendedSize doesn't include Mario's fireballs, so we add 2
 .check_fireball
-    LDA !extended_num+8,y                   ;\ If not a fireball, check next
-    CMP #$05 : BNE .next                    ;/
-    LDA !extended_x_low+8,y                 ;\ Clipping X displacement, low
+    LDA !extended_num,y                     ;\
+    CMP #$05 : BEQ +                        ;| If not a fireball, check next
+    CMP #$11 : BNE .next                    ;/
++   LDA !extended_x_low,y                   ;\ Clipping X displacement, low
     SEC : SBC #$02 : STA $00                ;/
-    LDA !extended_x_high+8,y                ;\ Clipping X displacement, high
+    LDA !extended_x_high,y                  ;\ Clipping X displacement, high
     SBC #$00 : STA $08                      ;/
-    LDA !extended_y_low+8,y                 ;\ Clipping Y displacement, low
+    LDA !extended_y_low,y                   ;\ Clipping Y displacement, low
     SEC : SBC #$04 : STA $01                ;/
-    LDA !extended_y_high+8,y                ;\ Clipping X displacement, high
+    LDA !extended_y_high,y                  ;\ Clipping X displacement, high
     SBC #$00 : STA $09                      ;/
     LDA #$0C : STA $02                      ;> Clipping width
     LDA #$13 : STA $03                      ;> Clipping height
     JSL $03B72B|!bank : BCS .contact        ;> Check for collision
 .next
-    CPY #$00 : BNE .return                  ;\ If we are done processing the
-    INY : BRA .check_fireball               ;/ second fireball, then no contact
+    DEY : BPL .check_fireball               ;> Go to next
+    RTS
 
 .contact
-    LDA #$01 : STA !extended_num+8,y        ;> Turn fireball into smoke
-    LDA #$0F : STA !extended_timer+8,y      ;> Smoke duration timer
+    LDA !extended_num,y                     ;\ If not Mario's fireball (i.e.,
+    CMP #$05 : BNE +                        ;/ Yoshi's fireball)
+    LDA #$01 : STA !extended_num,y          ;> Turn fireball into smoke
+    LDA #$0F : STA !extended_timer,y        ;> Smoke duration timer
     LDA #$01 : STA $1DF9|!addr              ;/ Play sound effect
 
-    %is_frail() : BEQ .return
-    LDA !extended_x_low+8,y                 ;\
++   %is_frail() : BEQ .return
+    LDA !extended_x_low,y                   ;\
     SEC : SBC !sprite_x_low,x               ;|
-    LDA !extended_x_high+8,y                ;|
+    LDA !extended_x_high,y                  ;|
     SBC !sprite_x_high,x                    ;| SubHorzPos with extended sprite
     BPL +                                   ;|
     LDY #$01 : BRA ++                       ;|
