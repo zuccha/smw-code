@@ -21,7 +21,6 @@
 ; - Feat: Die when touching specific blocks.
 ; - Feat: Eat specific blocks.
 ; - Fix: Reset phase if sprite is falling (and not jumping).
-; - Fix: Make platform effect less janky.
 ; - Fix: Make sprite behave properly when eaten and spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
 
@@ -29,6 +28,7 @@
 ; - Frog on layer 2
 ; - Frog in water
 ; - Frog in lava
+; - Frog in vertical level
 ; - Interaction with Mario behind net
 
 
@@ -118,11 +118,14 @@ gfx_leap: db $4C, $4E, $6C, $6E ; Leaping
 gfx_land: db $40, $42, $60, $62 ; Landing
 gfx_dead: db $48, $4A, $68, $6A ; Dead
 
-; Define width and height (in pixels) of the sprite for each phase. These are
-; used to determine the collision box of the sprite with Mario.
-; In order: idle, preparing jump, leaping, landing, dead.
-!widths = $13, $13, $11, $13, $13
-!heights = $10, $0D, $12, $0D, $0D
+; Define clipping hitbox of the frog for each of its phases. Values are
+; specified in pixels.
+; In order: idle (I), preparing jump (P), jump/leap(J), landing (L), dead (D).
+;              I    P    J    L    D
+widths:    db $12, $12, $10, $12, $12
+heights:   db $10, $0C, $12, $0C, $0D
+x_offsets: db $07, $07, $08, $07, $07
+y_offsets: db $0C, $10, $04, $10, $0F
 
 ; The Y offset (in pixels) needed to make the sprite slightly overlap with the
 ; ground, making it look like its belly is touching the ground, while its arms
@@ -262,27 +265,6 @@ macro simulate_jsl(jml_addr, rtl_addr)
 ?+  PLB
 endmacro
 
-; Utilities to calculate the offset of the collision box of the sprite relative
-; to its top-left corner.
-function cox(value) = (32-value)/2
-function coy(value) = 32-value+!offset_y
-
-; Define widths and x_offsets tables for calculating the sprite's clipping.
-macro define_widths(rest, load, jump, land, dead)
-widths:    db <rest>, <load>, <jump>, <land>, <dead>
-x_offsets: db cox(<rest>), cox(<load>), cox(<jump>), cox(<land>), cox(<dead>)
-endmacro
-
-; Define heights and y_offsets tables for calculating the sprite's clipping.
-macro define_heights(rest, load, jump, land, dead)
-heights:   db <rest>, <load>, <jump>, <land>, <dead>
-y_offsets: db coy(<rest>), coy(<load>), coy(<jump>), cox(<land>), coy(<dead>)
-endmacro
-
-; Generate clipping tables.
-%define_widths(!widths)
-%define_heights(!heights)
-
 
 ;-------------------------------------------------------------------------------
 ; Init
@@ -397,6 +379,7 @@ update:
 
 .interact
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
+    JSR get_frog_clipping_a
     JSR interact_with_player
     JSR interact_with_sprites
     JSR interact_with_fireballs
@@ -460,7 +443,7 @@ handle_jump:
     STZ !sprite_speed_x,x               ;/ then stop horizontal momentum
 +   BIT #$08 : BEQ +                    ;\ If it's blocked on top,
     STZ !sprite_speed_y,x               ;/ then stop ascending
-+   AND #$04 : BEQ .return              ;\ If touching ground, then it should land
++   AND #$04 : BEQ .return              ;> If touching ground, then it should land
 
 .land
     LDA.b #!phase_land : STA !phase,x
@@ -519,9 +502,11 @@ handle_dead:
 ;-------------------------------------------------------------------------------
 
 ; Process interaction with player.
+; @param X Frog's sprite index.
+; @params $04/$0A Clipping X position (low/high).
+; @params $05/$0B Clipping Y position (low/high).
+; @params $06/$07 Clipping width and height.
 interact_with_player:
-    JSR get_frog_clipping_a
-
 .check_cape_spin
     %is_frail() : BEQ .check_normal     ;\
     LDA $19 : CMP #$02 : BNE .check_normal ;| Frog is frail, Mario has cape and
@@ -551,15 +536,14 @@ interact_with_player:
     LDA $1490|!addr : BEQ .survive_1    ;> Check if Mario has star power
 
 .star_kill
-    %SubHorzPos() : %kill_frog()        ;| Kill the frog and run the star kill
+    %SubHorzPos() : %kill_frog()        ;\ Kill the frog and run the star kill
     %Star()                             ;/ routine (points, status, etc.)
     RTS
 
 .survive_1
-    ; Adapted version of $01B457
-    LDA $05 : SEC : SBC $1C : STA $00   ;\ Check if Mario is on the top part of
-    LDA $80 : CLC : ADC #$18            ;| the frog (within the top 24 pixels)
-    CMP $00 : BPL .return               ;/
+    LDA #$06 : STA $07                  ;\
+    JSL $03B72B|!bank                   ;| Check for contact with the head of the frog
+    BCC .return                         ;/
     LDA $7D : BMI .return               ;> If Mario is moving upwards, return
     LDA $77 : AND #$08 : BNE .return    ;> If Mario is blocked upwards, return
     %is_frail() : BEQ .survive_2        ;\ If frog is frail and Mario spin jumps
@@ -582,16 +566,18 @@ interact_with_player:
     STZ $140D|!addr                     ;> Interrupt spin jump
 
 .return
+    LDY !phase,x                        ;\ Restore the clipping height of the
+    LDA heights,y : STA $07             ;/ frog
     RTS
 
 .survive_2
 +   LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
     LDA #$01 : STA $1471|!addr          ;/ it as standing on top of a sprite
-    LDA #$1F                            ;\
+    LDA #$1F-!offset_y                  ;\
     LDY $187A|!addr : BEQ +             ;|
-    LDA #$2F                            ;| Set Mario's Y position on top of the
-+   STA $01                             ;| sprite, accounting for Yoshi
-    LDA $05 : SEC : SBC $01 : STA $96   ;|
+    LDA #$2F-!offset_y                  ;| Set Mario's Y position on top of the
++   STA $0D                             ;| sprite, accounting for Yoshi
+    LDA $05 : SEC : SBC $0D : STA $96   ;|
     LDA $0B : SBC #$00 : STA $97        ;/
     LDA $77 : AND #$03 : BNE .return    ;\
     LDY #$00                            ;|
@@ -599,7 +585,7 @@ interact_with_player:
     DEY                                 ;| frog if he's not blocked horizontally
 +   CLC : ADC $94 : STA $94             ;|
     TYA : ADC $95 : STA $95             ;/
-    RTS
+    BRA .return
 
 
 ;-------------------------------------------------------------------------------
@@ -607,6 +593,7 @@ interact_with_player:
 ;-------------------------------------------------------------------------------
 
 ; Process interaction with other sprites.
+; @param X Frog's sprite index.
 ; @params $04/$0A Clipping X position (low/high).
 ; @params $05/$0B Clipping Y position (low/high).
 ; @params $06/$07 Clipping width and height.
@@ -713,6 +700,10 @@ is_sprite_tasty:
 ; We need to redefine this routine because (1) the default routine that handles
 ; fireballs interaction doesn't use the custom clipping, (2) we need to spit the
 ; eaten sprite if the frog is frail.
+; @param X Frog's sprite index.
+; @params $04/$0A Clipping X position (low/high).
+; @params $05/$0B Clipping Y position (low/high).
+; @params $06/$07 Clipping width and height.
 interact_with_fireballs:
     JSR get_frog_clipping_a
     LDY.b #!ExtendedSize+2-1                ;> !ExtendedSize doesn't include Mario's fireballs, so we add 2
