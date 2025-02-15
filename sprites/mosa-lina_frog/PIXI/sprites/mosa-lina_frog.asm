@@ -22,13 +22,11 @@
 ; - Feat: Eat specific blocks.
 ; - Fix: Reset phase if sprite is falling (and not jumping).
 ; - Fix: Make platform effect less janky.
-; - Fix: Don't hurt player on contact when riding Yoshi.
 ; - Fix: Make sprite behaver properly when spit by Yoshi.
-; - Fix: Spit eaten sprite when killed by fireballs.
 ; - Fix: Use proper clipping for block interactions.
 ; - Fix: Use proper clipping for cape interactions.
-; - Fix: Use proper clipping for fireballs interactions.
 ; - Fix: Spawn cloud of smoke at the center of the sprite when killed.
+; - FixL Spit sprite in direction opposed to killing object.
 
 
 ;-------------------------------------------------------------------------------
@@ -292,10 +290,6 @@ init:
     LDA.b #!phase_rest : STA !phase,x
     LDA.b #!phase_rest_duration : STA !phase_cooldown,x
     LDA !extra_byte_1,x : AND #$02 : LSR : STA !direction,x
-    %is_frail() : BEQ +                 ;\
-    LDA !sprite_tweaker_166e,x          ;| If frail, make frog vulnerable to
-    AND #~$30                           ;| fireballs and cape
-    STA !sprite_tweaker_166e,x          ;/
 +   RTL
 
 
@@ -387,12 +381,12 @@ render:
 
 ; Update sprite behavior.
 update:
-    LDA !14C8,x : CMP #$08 : BCS + : RTS ;> Return if status is not normal
-+   LDA $9D : BEQ .check_cape_hit : RTS  ;> Return if sprites are blocked
+    LDA !14C8,x : CMP #$08 : BCC .return ;> Return if frog is not alive
+    LDA $9D : BEQ .check_cape_hit       ;> Return if sprites are blocked
 
 .check_cape_hit
     LDA !sprite_status,x                ;\
-    CMP #$09 : BNE .check_jump          ;| If hit by cape, mark frog as dead
+    CMP #$09 : BCC .check_jump          ;| If hit by cape, mark frog as dead
     LDA #$02 : STA !sprite_status,x     ;| and make it fall off screen
     %kill_frog()                        ;/
 
@@ -408,6 +402,7 @@ update:
     LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
     JSR interact_with_player
     JSR interact_with_sprites
+    JSR interact_with_player_fireballs
     JSL $01802A|!bank                   ;\ Update position and keep track by how
     LDA $1491|!addr : STA !x_movement,x ;/ many pixels the sprite moved
 
@@ -528,19 +523,24 @@ handle_dead:
 
 ; Process interaction with player.
 interact_with_player:
-    LDY !phase,x
-
-    LDA !sprite_x_low,x : CLC : ADC x_offsets,y : STA $04
-    LDA !sprite_x_high,x : ADC #$00 : STA $0A
-
-    LDA !sprite_y_low,x : CLC : ADC y_offsets,y : STA $05
-    LDA !sprite_y_high,x : ADC #$00 : STA $0B
-
-    LDA widths,y : STA $06
-    LDA heights,y : STA $07
-
+    JSR get_frog_clipping_a
     JSL $03B664|!bank                   ;> Get player clipping
-    JSL $03B72B|!bank : BCC .return     ;> Check for interaction
+    JSL $03B72B|!bank                   ;\ Check for interaction
+    BCS .check_cape_spin                ;/
+    RTS
+
+.check_cape_spin
+    %is_frail() : BEQ .check_star       ;\ If frog is frail, Mario has cape and
+    LDA $19 : CMP #$02 : BNE .check_star ;| he's spinning or spin jumping,
+    LDA $14A6|!addr : ORA $140D|!addr   ;| then kill frog
+    BEQ .check_star                     ;/
+
+.cape_spin_kill
+    %kill_frog()                        ;\ Kill frog and make it fall
+    %simulate_jsl($01A642, $01A7E3)     ;/ off screen
+    RTS
+
+.check_star
     LDA $1490|!addr : BEQ .survive_1    ;> Check if Mario has star power
 
 .star_kill
@@ -688,6 +688,71 @@ is_sprite_tasty:
     LDA tasty_sprites+1,y : STA $00
     ; TXY : LDX !sprite_index                   ;> Don't restore X when eaten
     SEC : RTS
+
+
+;-------------------------------------------------------------------------------
+; Interact with Player Fireballs
+;-------------------------------------------------------------------------------
+
+; Interact with fireballs shot by Fire Mario.
+; We need to redefine this routine because (1) the default routine that handles
+; fireballs interaction doesn't use the custom clipping, (2) we need to spit the
+; eaten sprite if the frog is frail.
+interact_with_player_fireballs:
+    JSR get_frog_clipping_a
+    LDY #$00                                ;> Initial fireball index.
+.check_fireball
+    LDA !extended_num+8,y                   ;\ If not a fireball, check next
+    CMP #$05 : BNE .next                    ;/
+    LDA !extended_x_low+8,y                 ;\ Clipping X displacement, low
+    SEC : SBC #$02 : STA $00                ;/
+    LDA !extended_x_high+8,y                ;\ Clipping X displacement, high
+    SBC #$00 : STA $08                      ;/
+    LDA !extended_y_low+8,y                 ;\ Clipping Y displacement, low
+    SEC : SBC #$04 : STA $01                ;/
+    LDA !extended_y_high+8,y                ;\ Clipping X displacement, high
+    SBC #$00 : STA $09                      ;/
+    LDA #$0C : STA $02                      ;> Clipping width
+    LDA #$13 : STA $03                      ;> Clipping height
+    JSL $03B72B|!bank : BCS .contact        ;> Check for collision
+.next
+    CPY #$00 : BNE .return                  ;\ If we are done processing the
+    INY : BRA .check_fireball               ;/ second fireball, then no contact
+
+.contact
+    LDA #$01 : STA !extended_num+8,y        ;> Turn fireball into smoke
+    LDA #$0F : STA !extended_timer+8,y      ;> Smoke duration timer
+    LDA #$01 : STA $1DF9|!addr              ;/ Play sound effect
+
+    %is_frail() : BEQ .return
+    %kill_frog()
+    LDA #$03 : STA $1DF9|!addr              ;> Play sound effect
+    LDA #$21 : STA !sprite_num,x            ;\
+    LDA #$08 : STA !sprite_status,x         ;| Turn frog into a coin
+    JSL $07F7D2|!bank                       ;/
+    LDA #$D0 : STA !sprite_speed_y,x        ;> Set some vertical speed
+    %SubHorzPos() : TYA                     ;\ Face direction opposite of Mario
+    EOR #$01 : STA !sprite_misc_157c,x      ;/
+
+.return
+    RTS
+
+
+;-------------------------------------------------------------------------------
+; Get Frog Clipping A
+;-------------------------------------------------------------------------------
+
+; Get the frog's clipping for collision detection.
+; @param X The frog sprite index.
+get_frog_clipping_a:
+    LDY !phase,x
+    LDA !sprite_x_low,x : CLC : ADC x_offsets,y : STA $04
+    LDA !sprite_x_high,x : ADC #$00 : STA $0A
+    LDA !sprite_y_low,x : CLC : ADC y_offsets,y : STA $05
+    LDA !sprite_y_high,x : ADC #$00 : STA $0B
+    LDA widths,y : STA $06
+    LDA heights,y : STA $07
+    RTS
 
 
 ;-------------------------------------------------------------------------------

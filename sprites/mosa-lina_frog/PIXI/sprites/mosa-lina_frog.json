@@ -7,7 +7,7 @@
     "Disappears in cloud of smoke": false
   },
   "$1662": {
-    "Sprite Clipping": 46,
+    "Sprite Clipping": 47,
     "Use shell as death frame": false,
     "Fall straight down when killed": false
   },
@@ -21,7 +21,7 @@
   },
   "$167A": {
     "Don't disable cliping when starkilled": true,
-    "Invincible to star/cape/fire/bounce blk.": false,
+    "Invincible to star/cape/fire/bounce blk.": true,
     "Process when off screen": false,
     "Don't change into shell when stunned": true,
     "Can't be kicked like shell": true,
