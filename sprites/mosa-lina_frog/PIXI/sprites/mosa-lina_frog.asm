@@ -22,9 +22,16 @@
 ; - Feat: Eat specific blocks.
 ; - Fix: Reset phase if sprite is falling (and not jumping).
 ; - Fix: Make platform effect less janky.
-; - Fix: Make sprite behave properly when spit by Yoshi.
+; - Fix: Make sprite behave properly when eaten and spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
-; - Fix: Use proper clipping for cape interactions ($13EA).
+
+; TO TEST:
+; - Frog on layer 2
+; - Frog in water
+; - Frog in lava
+; - Interaction with Mario behind net
+; - Interaction with Yoshi's fireball
+; - Interaction with Yoshi's stomp
 
 
 ;-------------------------------------------------------------------------------
@@ -516,20 +523,30 @@ handle_dead:
 ; Process interaction with player.
 interact_with_player:
     JSR get_frog_clipping_a
-    JSL $03B664|!bank                   ;> Get player clipping
-    JSL $03B72B|!bank                   ;\ Check for interaction
-    BCS .check_cape_spin                ;/
-    RTS
 
 .check_cape_spin
-    %is_frail() : BEQ .check_star       ;\ If frog is frail, Mario has cape and
-    LDA $19 : CMP #$02 : BNE .check_star ;| he's spinning or spin jumping,
-    LDA $14A6|!addr : ORA $140D|!addr   ;| then kill frog
-    BEQ .check_star                     ;/
+    %is_frail() : BEQ .check_normal     ;\
+    LDA $19 : CMP #$02 : BNE .check_normal ;| Frog is frail, Mario has cape and
+    LDA $14A6|!addr : ORA $140D|!addr   ;| he's spinning or spin jumping
+    BEQ .check_normal                   ;/
+    LDA $13E9|!addr : SEC : SBC #$02 : STA $00 ;\
+    LDA $13EA|!addr : SBC #$00 : STA $08;|
+    LDA $13EB|!addr : STA $01           ;| Get cape clipping
+    LDA $13EC|!addr : STA $09           ;|
+    LDA #$14 : STA $02                  ;|
+    LDA #$10 : STA $03                  ;/
+    JSL $03B72B|!bank                   ;\ Check for interaction
+    BCC .check_normal                   ;/
 
 .cape_spin_kill
     %SubHorzPos() : %kill_frog()        ;\ Kill frog and make it fall
     %simulate_jsl($01A642, $01A7E3)     ;/ off screen
+    RTS
+
+.check_normal
+    JSL $03B664|!bank                   ;> Get player clipping
+    JSL $03B72B|!bank                   ;\ Check for interaction
+    BCS .check_star                     ;/
     RTS
 
 .check_star
