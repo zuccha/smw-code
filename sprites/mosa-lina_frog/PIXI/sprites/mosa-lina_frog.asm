@@ -25,7 +25,6 @@
 ; - Fix: Make sprite behaver properly when spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
 ; - Fix: Use proper clipping for cape interactions.
-; - Fix: Spawn cloud of smoke at the center of the sprite when killed.
 ; - FixL Spit sprite in direction opposed to killing object.
 
 
@@ -562,6 +561,14 @@ interact_with_player:
     %kill_frog()                        ;> Kill frog
     LDA #$04 : STA !sprite_status,x     ;> Status = killed by smoke
     LDA #$1F : STA !1540,x              ;> Set smoke duration timer
+    LDA !sprite_x_low,x : CLC : ADC #$08;\
+    STA !sprite_x_low,x                 ;|
+    LDA !sprite_x_high,x : ADC #$00     ;|
+    STA !sprite_x_high,x                ;| Move sprite 8 pixels right and down
+    LDA !sprite_y_low,x : CLC : ADC #$08;| so that the smoke will be centered
+    STA !sprite_y_low,x                 ;| (the frog is 32x32, the smoke 16x16)
+    LDA !sprite_y_high,x : ADC #$00     ;|
+    STA !sprite_y_high,x                ;/
     JSL $07FC3B|!bank                   ;> Span collision stars
     LDA #$08 : STA $1DF9|!addr          ;> Play puff sound effect
     STZ $140D|!addr                     ;> Interrupt spin jump
