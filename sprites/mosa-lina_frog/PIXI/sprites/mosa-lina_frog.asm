@@ -381,13 +381,7 @@ render:
 ; Update sprite behavior.
 update:
     LDA !14C8,x : CMP #$08 : BCC .return ;> Return if frog is not alive
-    LDA $9D : BEQ .check_cape_hit       ;> Return if sprites are blocked
-
-.check_cape_hit
-    LDA !sprite_status,x                ;\
-    CMP #$09 : BCC .check_jump          ;| If hit by cape, mark frog as dead
-    LDA #$02 : STA !sprite_status,x     ;| and make it fall off screen
-    %kill_frog()                        ;/
+    LDA $9D : BEQ .check_jump            ;> Return if sprites are blocked
 
 .check_jump
     LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
@@ -535,7 +529,7 @@ interact_with_player:
     BEQ .check_star                     ;/
 
 .cape_spin_kill
-    %kill_frog()                        ;\ Kill frog and make it fall
+    %SubHorzPos() : %kill_frog()        ;\ Kill frog and make it fall
     %simulate_jsl($01A642, $01A7E3)     ;/ off screen
     RTS
 
@@ -543,7 +537,7 @@ interact_with_player:
     LDA $1490|!addr : BEQ .survive_1    ;> Check if Mario has star power
 
 .star_kill
-    %kill_frog()                        ;| Kill the frog and run the star kill
+    %SubHorzPos() : %kill_frog()        ;| Kill the frog and run the star kill
     %Star()                             ;/ routine (points, status, etc.)
     RTS
 
@@ -558,7 +552,7 @@ interact_with_player:
     LDA $140D|!addr : BEQ .survive_2    ;/ kill the frog, else it survives
 
 .spin_kill
-    %kill_frog()                        ;> Kill frog
+    %SubHorzPos() : %kill_frog()        ;> Kill frog
     LDA #$04 : STA !sprite_status,x     ;> Status = killed by smoke
     LDA #$1F : STA !1540,x              ;> Set smoke duration timer
     LDA !sprite_x_low,x : CLC : ADC #$08;\
@@ -639,12 +633,12 @@ interact_with_sprites:
 
 .soft_kill
     LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ If not already dead, kill the
-    %kill_frog()                                ;| the frog, but keep it on screen,
+    JSR sub_horz_pos_sprite : %kill_frog()      ;| the frog, but keep it on screen,
     %play_sfx(death)                            ;/ so Mario can still ride it
 +   RTS
 
 .kill
-    %kill_frog()                                ;\ Kill frog and make it fall
+    JSR sub_horz_pos_sprite : %kill_frog()      ;\ Kill frog and make it fall
     %simulate_jsl($01A642, $01A7E3)             ;/ off screen
     RTS
 
@@ -732,7 +726,14 @@ interact_with_player_fireballs:
     LDA #$01 : STA $1DF9|!addr              ;/ Play sound effect
 
     %is_frail() : BEQ .return
-    %kill_frog()
+    LDA !extended_x_low+8,y                 ;\
+    SEC : SBC !sprite_x_low,x               ;|
+    LDA !extended_x_high+8,y                ;|
+    SBC !sprite_x_high,x                    ;| SubHorzPos with extended sprite
+    BPL +                                   ;|
+    LDY #$01 : BRA ++                       ;|
++   LDY #$00                                ;/
+++  %kill_frog()
     LDA #$03 : STA $1DF9|!addr              ;> Play sound effect
     LDA #$21 : STA !sprite_num,x            ;\
     LDA #$08 : STA !sprite_status,x         ;| Turn frog into a coin
@@ -740,6 +741,52 @@ interact_with_player_fireballs:
     LDA #$D0 : STA !sprite_speed_y,x        ;> Set some vertical speed
     %SubHorzPos() : TYA                     ;\ Face direction opposite of Mario
     EOR #$01 : STA !sprite_misc_157c,x      ;/
+
+.return
+    RTS
+
+
+;-------------------------------------------------------------------------------
+; Spit Eaten Sprite
+;-------------------------------------------------------------------------------
+
+; Check if the frog has eaten a sprite and spit it.
+; Don't use the %SpawnSprite() macro because it doesn't account for sprite
+; memory when allocating the sprite slot.
+; N.B.: When spitting a sprite, extra bit, extra bytes, and any other property
+; won't be restored.
+; @param X The frog sprite index.
+; @param Y 1 if the sprite should be spat on the right, 0 on the left.
+spit_eaten_sprite:
+    TYA : XBA                                   ;> Preserve spit direction
+    BIT !has_eaten,x : BVC .return              ;> Skip if there is no preserved sprite
+
+    JSL $02A9E4|!bank                           ;\ Look for a sprite empty slot
+    BMI .return                                 ;/ If none is found, don't spit
+
+    CLC : LDA !has_eaten,x : BPL + : SEC        ;> C = 0 for regular, C = 1 for custom
++   LDA !eaten_sprite,x : TYX : STA !sprite_num,x ;> Set sprite number
+    JSL $07F7D2|!bank                           ;> Reset sprite tables
+    BCC +                                       ;\
+    LDA !sprite_num,x : STA !new_sprite_num,x   ;| Custom sprite: set number,
+    JSL $0187A7|!bank                           ;| reset tables, set extra bit
+    LDA #$08 : STA !extra_bits,x                ;/
++   LDA #$01 : STA !sprite_status,x             ;> Make sprite alive
+
+    TXY : LDX !sprite_index
+
+    LDA !sprite_x_low,x : STA !sprite_x_low,y   ;\
+    LDA !sprite_x_high,x : STA !sprite_x_high,y ;| Same position as the frog
+    LDA !sprite_y_low,x : STA !sprite_y_low,y   ;| (not centered, but eh)
+    LDA !sprite_y_high,x : STA !sprite_y_high,y ;/
+
+    XBA : BEQ +                                 ;\
+    LDA #$10 : STA !sprite_speed_x,y : BRA ++   ;| Spit sprite with some speed
++   LDA #$F0 : STA !sprite_speed_x,y            ;| depending on killing source
+++  LDA #$F0 : STA !sprite_speed_y,y            ;/
+
+    LDA !has_eaten,x : ORA #~$40                ;\ Mark sprite as swallowed to
+    STA !has_eaten,x                            ;/ prevent multiple spits
 
 .return
     RTS
@@ -763,41 +810,18 @@ get_frog_clipping_a:
 
 
 ;-------------------------------------------------------------------------------
-; Spit Eaten Sprite
+; Sub Horz Pos Sprite
 ;-------------------------------------------------------------------------------
 
-; Check if the frog has eaten a sprite and spit it.
-; Don't use the %SpawnSprite() macro because it doesn't account for sprite
-; memory when allocating the sprite slot.
-; N.B.: When spitting a sprite, extra bit, extra bytes, and any other property
-; won't be restored.
-spit_eaten_sprite:
-    BIT !has_eaten,x : BVC .return              ;> Skip if there is no preserved sprite
-
-    JSL $02A9E4|!bank                           ;\ Look for a sprite empty slot
-    BMI .return                                 ;/ If none is found, don't spit
-
-    CLC : LDA !has_eaten,x : BPL + : SEC        ;> C = 0 for regular, C = 1 for custom
-+   LDA !eaten_sprite,x : TYX : STA !sprite_num,x ;> Set sprite number
-    JSL $07F7D2|!bank                           ;> Reset sprite tables
-    BCC +                                       ;\
-    LDA !sprite_num,x : STA !new_sprite_num,x   ;| Custom sprite: set number,
-    JSL $0187A7|!bank                           ;| reset tables, set extra bit
-    LDA #$08 : STA !extra_bits,x                ;/
-+   LDA #$01 : STA !sprite_status,x             ;> Make sprite alive
-
-    TXY : LDX !sprite_index
-
-    LDA !sprite_x_low,x : STA !sprite_x_low,y   ;\
-    LDA !sprite_x_high,x : STA !sprite_x_high,y ;| Same position as the frog
-    LDA !sprite_y_low,x : STA !sprite_y_low,y   ;| (not centered, but eh)
-    LDA !sprite_y_high,x : STA !sprite_y_high,y ;/
-
-    LDA #$10 : STA !sprite_speed_x,y            ;\ Give it some speed falling
-    LDA #$F0 : STA !sprite_speed_y,y            ;/ out of the mouth
-
-    LDA !has_eaten,x : ORA #~$40                ;\ Mark sprite as swallowed to
-    STA !has_eaten,x                            ;/ prevent multiple spits
-
-.return
-    RTS
+; Check whether sprite Y is on right or left of sprite X.
+; @param X Frog sprite index.
+; @param Y Other sprite index.
+; @return Y 1 if the other sprite (Y) is on the left of the frog (X), else 0.
+sub_horz_pos_sprite:
+    LDA !sprite_x_low,y : SEC : SBC !sprite_x_low,x
+    LDA !sprite_x_high,y : SBC !sprite_x_high,x
+    BPL .right
+.left
+    LDY #$01 : RTS
+.right
+    LDY #$00 : RTS
