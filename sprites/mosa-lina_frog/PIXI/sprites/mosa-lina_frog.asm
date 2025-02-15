@@ -22,10 +22,9 @@
 ; - Feat: Eat specific blocks.
 ; - Fix: Reset phase if sprite is falling (and not jumping).
 ; - Fix: Make platform effect less janky.
-; - Fix: Make sprite behaver properly when spit by Yoshi.
+; - Fix: Make sprite behave properly when spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
-; - Fix: Use proper clipping for cape interactions.
-; - FixL Spit sprite in direction opposed to killing object.
+; - Fix: Use proper clipping for cape interactions ($13EA).
 
 
 ;-------------------------------------------------------------------------------
@@ -785,8 +784,7 @@ spit_eaten_sprite:
 +   LDA #$F0 : STA !sprite_speed_x,y            ;| depending on killing source
 ++  LDA #$F0 : STA !sprite_speed_y,y            ;/
 
-    LDA !has_eaten,x : ORA #~$40                ;\ Mark sprite as swallowed to
-    STA !has_eaten,x                            ;/ prevent multiple spits
+    STZ !has_eaten,x                            ;> Frog no longer has eaten sprite
 
 .return
     RTS
