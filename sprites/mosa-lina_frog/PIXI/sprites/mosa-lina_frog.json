@@ -66,16 +66,6 @@
       "Tiles": [
         {
           "X offset": 0,
-          "Y offset": 0,
-          "map16 tile": 278
-        },
-        {
-          "X offset": 16,
-          "Y offset": 0,
-          "map16 tile": 278
-        },
-        {
-          "X offset": 0,
           "Y offset": 16,
           "map16 tile": 152
         },
@@ -83,6 +73,31 @@
           "X offset": 16,
           "Y offset": 16,
           "map16 tile": 153
+        },
+        {
+          "X offset": 0,
+          "Y offset": 16,
+          "map16 tile": 398
+        },
+        {
+          "X offset": 16,
+          "Y offset": 16,
+          "map16 tile": 399
+        },
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 382
+        },
+        {
+          "X offset": 16,
+          "Y offset": 0,
+          "map16 tile": 383
+        },
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 268
         }
       ],
       "GFXInfo": {},
@@ -96,16 +111,6 @@
       "ExtraBit": true,
       "Tiles": [
         {
-          "X offset": 0,
-          "Y offset": 0,
-          "map16 tile": 1
-        },
-        {
-          "X offset": 16,
-          "Y offset": 0,
-          "map16 tile": 1
-        },
-        {
           "X offset": 16,
           "Y offset": 16,
           "map16 tile": 97
@@ -114,6 +119,31 @@
           "X offset": 0,
           "Y offset": 16,
           "map16 tile": 311
+        },
+        {
+          "X offset": 0,
+          "Y offset": 16,
+          "map16 tile": 398
+        },
+        {
+          "X offset": 16,
+          "Y offset": 0,
+          "map16 tile": 383
+        },
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 382
+        },
+        {
+          "X offset": 16,
+          "Y offset": 16,
+          "map16 tile": 399
+        },
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 269
         }
       ],
       "GFXInfo": {},

@@ -115,10 +115,10 @@ tasty_sprites:
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22 ; Idle
-gfx_load: db $04, $06, $24, $26 ; Preparing jump
-gfx_leap: db $0C, $0E, $2C, $2E ; Leaping
-gfx_land: db $04, $06, $24, $26 ; Landing
-gfx_dead: db $08, $0A, $28, $2A ; Dead
+gfx_load: db $40, $42, $60, $62 ; Preparing jump
+gfx_leap: db $4C, $4E, $6C, $6E ; Leaping
+gfx_land: db $40, $42, $60, $62 ; Landing
+gfx_dead: db $48, $4A, $68, $6A ; Dead
 
 ; Define width and height (in pixels) of the sprite for each phase. These are
 ; used to determine the collision box of the sprite with Mario.
