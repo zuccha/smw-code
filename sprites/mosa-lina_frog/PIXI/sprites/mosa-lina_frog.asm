@@ -20,7 +20,6 @@
 ; TODO:
 ; - Feat: Die when touching specific blocks.
 ; - Feat: Eat specific blocks.
-; - Fix: Reset phase if sprite is falling (and not jumping).
 ; - Fix: Make sprite behave properly when eaten and spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
 
@@ -272,10 +271,19 @@ endmacro
 
 ; Sprite initialization.
 init:
-    LDA.b #!phase_rest : STA !phase,x
-    LDA.b #!phase_rest_duration : STA !phase_cooldown,x
-    LDA !extra_byte_1,x : AND #$02 : LSR : STA !direction,x
-+   RTL
+    LDA.b #!phase_rest : STA !phase,x       ;\
+    LDA.b #!phase_rest_duration             ;| Initialize phase
+    STA !phase_cooldown,x                   ;/
+
+    LDA !extra_byte_1,x                     ;\
+    AND #$02 : LSR                          ;| Initialize direction
+    STA !direction,x                        ;/
+
+    LDA #$40 : STA !sprite_speed_y,x        ;\ Mark as grounded initially so
+    LDA !sprite_blocked_status,x : ORA #$04 ;| that it doesn't make the bounce
+    STA !sprite_blocked_status,x            ;/ when spawning
+
+    RTL
 
 
 ;-------------------------------------------------------------------------------
@@ -366,25 +374,30 @@ render:
 
 ; Update sprite behavior.
 update:
-    LDA !14C8,x : CMP #$08 : BCC .return ;> Return if frog is not alive
-    LDA $9D : BEQ .check_jump            ;> Return if sprites are blocked
+    LDA !14C8,x : CMP #$08 : BNE .return    ;> Return if frog is not alive
+    LDA $9D : BNE .return                   ;> Return if sprites are blocked
 
-.check_jump
-    LDA !jump_speed_y,x                 ;\ Changing phase doesn't matter if the
-    BEQ .interact                       ;/ frog cannot jump
+.check_fall
+    LDA !sprite_blocked_status,x            ;\
+    AND #$04 : BNE .handle_phase            ;| If frog is not jumping, but it's
+    LDA !phase,x                            ;| not grounded, then pretend as if
+    CMP.b #!phase_jump : BEQ .handle_phase  ;| it was jumping (probably it's)
+    LDA.b #!phase_jump : STA !phase,x       ;| falling)
+    STZ !bounce_count,x                     ;/
 
 .handle_phase
-    LDA !phase,x : ASL : TAX            ;\ Update sprite based on which phase it
-    JSR (handle_phase,x)                ;/ is currently in
+    LDA !phase,x : ASL : TAX                ;\ Update sprite based on which
+    JSR (handle_phase,x)                    ;/ phase it is currently in
 
 .interact
-    LDA #$00 : %SubOffScreen()          ;> Kill sprite if offscreen
+    LDA #$00 : %SubOffScreen()              ;> Kill sprite if offscreen
     JSR get_frog_clipping_a
     JSR interact_with_player
     JSR interact_with_sprites
     JSR interact_with_fireballs
-    JSL $01802A|!bank                   ;\ Update position and keep track by how
-    LDA $1491|!addr : STA !x_movement,x ;/ many pixels the sprite moved
+
+    JSL $01802A|!bank                       ;\ Update position and keep track by
+    LDA $1491|!addr : STA !x_movement,x     ;/ how many pixels the sprite moved
 
 .return
     RTS
@@ -402,12 +415,19 @@ handle_phase:
 handle_rest:
     LDX !sprite_index
 
+.check_jump
+    LDA !jump_speed_y,x                 ;\ Never jump if Y jump speed is 0
+    BEQ .return                         ;/
+
+.check_cooldown
     LDA !phase_cooldown,x : BEQ .start_jumping
     DEC !phase_cooldown,x : RTS
 
 .start_jumping
     LDA.b #!phase_load : STA !phase,x
     LDA.b #!phase_load_duration : STA !phase_cooldown,x
+
+.return
     RTS
 
 ; Loading a jump.
@@ -419,7 +439,6 @@ handle_load:
 
 .jump
     LDA.b #!phase_jump : STA !phase,x
-
     STZ !bounce_count,x                 ;> Reset number of bounces
 
     LDA !jump_speed_x,x                 ;\
