@@ -541,23 +541,21 @@ interact_with_player:
     BCC .check_normal                   ;/
 
 .cape_spin_kill
-    %SubHorzPos() : %kill_frog()        ;\ Kill frog and make it fall
-    %simulate_jsl($01A642, $01A7E3)     ;/ off screen
+.slide_kill
+.star_kill
+    %SubHorzPos() : %kill_frog()        ;\ Kill frog, make it fall off screen,
+    %Star()                             ;/ give points, spawn collision star, etc.
     RTS
 
 .check_normal
     JSL $03B664|!bank                   ;> Get player clipping
     JSL $03B72B|!bank                   ;\ Check for interaction
-    BCS .check_star                     ;/
+    BCS .check_star_or_slide            ;/
     RTS
 
-.check_star
-    LDA $1490|!addr : BEQ .survive_1    ;> Check if Mario has star power
-
-.star_kill
-    %SubHorzPos() : %kill_frog()        ;\ Kill the frog and run the star kill
-    %Star()                             ;/ routine (points, status, etc.)
-    RTS
+.check_star_or_slide
+    LDA $1490|!addr : BNE .star_kill    ;> Check if Mario has star power
+    LDA $13ED|!addr : BNE .slide_kill   ;> Check if Mario is sliding down a slope
 
 .survive_1
     LDA #$06 : STA $07                  ;\
