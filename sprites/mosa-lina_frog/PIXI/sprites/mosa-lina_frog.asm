@@ -8,8 +8,8 @@
 ; Mario can ride the frog like a platform.
 ; If the frog touches a deadly sprite (configured below) it dies (it no longer
 ; jumps), but Mario can still walk on it.
-; If the frog touches a thrown sprite (e.g., shell), it dies for good, falling
-; off screen.
+; If the frog touches a thrown sprite (e.g., shell) or if Mario touches it while
+; having star power or sliding down a slope, it dies for good falling offscreen.
 ; If the frog touches a tasty sprite (configured below) it eats it and becomes
 ; slow (it jumps about half the way). Tasty sprites can be configured to stay in
 ; the frog's mouth, it will spit them out when it dies. If the frog eats more
@@ -20,15 +20,7 @@
 ; TODO:
 ; - Feat: Die when touching specific blocks.
 ; - Feat: Eat specific blocks.
-; - Fix: Make sprite behave properly when eaten and spit by Yoshi.
 ; - Fix: Use proper clipping for block interactions.
-
-; TO TEST:
-; - Frog on layer 2
-; - Frog in water
-; - Frog in lava
-; - Frog in vertical level
-; - Interaction with Mario behind net
 
 
 ;-------------------------------------------------------------------------------
@@ -374,8 +366,13 @@ render:
 
 ; Update sprite behavior.
 update:
-    LDA !14C8,x : CMP #$08 : BNE .return    ;> Return if frog is not alive
     LDA $9D : BNE .return                   ;> Return if sprites are blocked
+    LDA !sprite_status,x : CMP #$08         ;\ If status is 8 the frog is alive,
+    BCC .return                             ;| if it's 9 or A it has been spat
+    BEQ .check_fall                         ;/ by Yoshi
+
+.spat_by_yoshi
+    LDA #$08 : STA !sprite_status,x
 
 .check_fall
     LDA !sprite_blocked_status,x            ;\
