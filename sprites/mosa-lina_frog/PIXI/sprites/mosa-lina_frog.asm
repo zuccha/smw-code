@@ -15,7 +15,8 @@
 ; the frog's mouth, it will spit them out when it dies. If the frog eats more
 ; than one sprite, the last one eaten is the one that counts.
 ; The frog has a frail variant. frail frogs will be using a different color
-; palette and die to cape spin, Mario's fireballs, and spin jumps.
+; palette and die to cape spin, Mario's fireballs, and spin jumps. Also, frail
+; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
 
 ; TODO:
 ; - Feat: Die when touching specific blocks.
@@ -275,7 +276,12 @@ init:
     LDA !sprite_blocked_status,x : ORA #$04 ;| that it doesn't make the bounce
     STA !sprite_blocked_status,x            ;/ when spawning
 
-    RTL
+    %is_frail() : BEQ +                     ;\
+    LDA !sprite_tweaker_1686,x              ;| If the sprite is frail, it is
+    AND #~$02                               ;| instantly swallowed by Yoshi.
+    STA !sprite_tweaker_1686,x              ;/
+
++   RTL
 
 
 ;-------------------------------------------------------------------------------
