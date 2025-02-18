@@ -111,13 +111,19 @@ gfx_land: db $40, $42, $60, $62 ; Landing
 gfx_dead: db $48, $4A, $68, $6A ; Dead
 
 ; Define clipping hitbox of the frog for each of its phases. Values are
-; specified in pixels.
+; specified in pixels. The X and Y offsets are relative to the top-left corner
+; of the 32x32 pixels bounding box of the sprite.
 ; In order: idle (I), preparing jump (P), jump/leap(J), landing (L), dead (D).
 ;              I    P    J    L    D
 widths:    db $12, $12, $10, $12, $12
 heights:   db $10, $0C, $12, $0C, $0D
 x_offsets: db $07, $07, $08, $07, $07
 y_offsets: db $0C, $10, $04, $10, $0F
+
+; Height of the "head" of the sprite. If Mario is within the head of the sprite,
+; he will be clipped to be on top of it. Needed to stabilize Mario while on top
+; of a jumping frog.
+!head_height = $06
 
 ; The Y offset (in pixels) needed to make the sprite slightly overlap with the
 ; ground, making it look like its belly is touching the ground, while its arms
@@ -126,12 +132,12 @@ y_offsets: db $0C, $10, $04, $10, $0F
 
 ; Color palettes to use for the different variants of the frog.
 ; Each variant has its base color palette and the color palette for when the
-; frog has eaten a key.
+; frog has eaten a sprite and holding it in its mouth.
 ; Valid values are any of 0-7.
 !palette_normal     = 5
-!palette_normal_key = 2
+!palette_normal_eat = 2
 !palette_frail      = 4
-!palette_frail_key  = 2
+!palette_frail_eat  = 2
 
 ; Different sound effects.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
@@ -257,6 +263,12 @@ macro simulate_jsl(jml_addr, rtl_addr)
 ?+  PLB
 endmacro
 
+; Draw a byte in the status bar.
+macro debug_byte(addr)
+    PHA : AND #$0F : STA <addr>+1|!addr
+    PLA : LSR #$04 : STA <addr>|!addr
+endmacro
+
 
 ;-------------------------------------------------------------------------------
 ; Init
@@ -360,8 +372,8 @@ render:
 .flip_x: db $40, $00
 .flip_y: db $00, $80
 .palettes:
-    db !palette_normal<<1, !palette_normal_key<<1
-    db !palette_frail<<1,  !palette_frail_key<<1
+    db !palette_normal<<1, !palette_normal_eat<<1
+    db !palette_frail<<1,  !palette_frail_eat<<1
 .pos_offset_x: db $00, $10, $00, $10
 .pos_offset_y: db $00+!offset_y, $00+!offset_y, $10+!offset_y, $10+!offset_y
 
@@ -561,7 +573,7 @@ interact_with_player:
     LDA $13ED|!addr : BNE .slide_kill   ;> Check if Mario is sliding down a slope
 
 .survive_1
-    LDA #$06 : STA $07                  ;\
+    LDA.b #!head_height : STA $07       ;\
     JSL $03B72B|!bank                   ;| Check for contact with the head of the frog
     BCC .return                         ;/
     LDA $7D : BMI .return               ;> If Mario is moving upwards, return

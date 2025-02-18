@@ -49,7 +49,7 @@
     "Don't turn into a coin with silver POW": false,
     "Don't get stuck in walls (carryable sprites)": false
   },
-  "AsmFile": "mosa-lina_frog.asm",
+  "AsmFile": "mosa_lina-frog.asm",
   "ActLike": 54,
   "Type": 1,
   "Extra Property Byte 1": 0,
