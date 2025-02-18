@@ -29,13 +29,13 @@
 
 ; Extra bit: Frog type. 0 = regular, 1 = frail.
 
-; Extra Byte 1: The frog's behavior. The format is %------di:
-; - `i`: Controls whether the frog inverts directions after landing.
-;       0 = don't invert direction
-;       1 = invert direction (jump back and forth)
+; Extra Byte 1: The frog's behavior. The format is %------id:
 ; - `d`: Initial direction.
 ;       0 = right
 ;       1 = left
+; - `i`: Controls whether the frog inverts directions after landing.
+;       0 = don't invert direction
+;       1 = invert direction (jump back and forth)
 
 ; Extra Byte 2: Regular jump X speed. Alway positive ($00-$7F).
 
@@ -226,7 +226,7 @@ endmacro
 ; @param X The sprite index.
 ; @return Z 1 if it should invert direction, 0 otherwise.
 macro should_invert_direction()
-    LDA !extra_byte_1,x : AND #$01
+    LDA !extra_byte_1,x : AND #$02
 endmacro
 
 ; Check whether the frog is frail or not.
@@ -268,7 +268,7 @@ init:
     STA !phase_cooldown,x                   ;/
 
     LDA !extra_byte_1,x                     ;\
-    AND #$02 : LSR                          ;| Initialize direction
+    AND #$01                                ;| Initialize direction
     STA !direction,x                        ;/
 
     LDA #$40 : STA !sprite_speed_y,x        ;\ Mark as grounded initially so
