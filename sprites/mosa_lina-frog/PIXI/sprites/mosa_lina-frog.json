@@ -1,13 +1,13 @@
 {
   "$1656": {
-    "Object Clipping": 7,
+    "Object Clipping": 8,
     "Can be jumped on": true,
     "Dies when jumped on": false,
     "Hop in/kick shell": false,
     "Disappears in cloud of smoke": false
   },
   "$1662": {
-    "Sprite Clipping": 47,
+    "Sprite Clipping": 34,
     "Use shell as death frame": false,
     "Fall straight down when killed": false
   },
@@ -47,7 +47,7 @@
     "Can be jumped on with upwards Y speed": false,
     "Death frame two tiles high": true,
     "Don't turn into a coin with silver POW": false,
-    "Don't get stuck in walls (carryable sprites)": false
+    "Don't get stuck in walls (carryable sprites)": true
   },
   "AsmFile": "mosa_lina-frog.asm",
   "ActLike": 54,
@@ -76,28 +76,8 @@
         },
         {
           "X offset": 0,
-          "Y offset": 16,
-          "map16 tile": 398
-        },
-        {
-          "X offset": 16,
-          "Y offset": 16,
-          "map16 tile": 399
-        },
-        {
-          "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 382
-        },
-        {
-          "X offset": 16,
-          "Y offset": 0,
-          "map16 tile": 383
-        },
-        {
-          "X offset": 0,
-          "Y offset": 0,
-          "map16 tile": 268
+          "map16 tile": 112
         }
       ],
       "GFXInfo": {},
@@ -107,7 +87,7 @@
     {
       "X": 0,
       "Y": 0,
-      "Description": "Frail frog from Mosa Lina.",
+      "Description": "Frail frog version of the normal frog from Mosa Lina.",
       "ExtraBit": true,
       "Tiles": [
         {
@@ -122,28 +102,8 @@
         },
         {
           "X offset": 0,
-          "Y offset": 16,
-          "map16 tile": 398
-        },
-        {
-          "X offset": 16,
           "Y offset": 0,
-          "map16 tile": 383
-        },
-        {
-          "X offset": 0,
-          "Y offset": 0,
-          "map16 tile": 382
-        },
-        {
-          "X offset": 16,
-          "Y offset": 16,
-          "map16 tile": 399
-        },
-        {
-          "X offset": 0,
-          "Y offset": 0,
-          "map16 tile": 269
+          "map16 tile": 113
         }
       ],
       "GFXInfo": {},

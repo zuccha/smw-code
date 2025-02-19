@@ -19,9 +19,13 @@
 ; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
 
 ; TODO:
-; - Feat: Die when touching specific blocks.
+; - Feat: Kill frog when touching specific blocks.
 ; - Feat: Eat specific blocks.
-; - Fix: Use proper clipping for block interactions.
+; - Feat: Add visual indicator for slow frog.
+; - Feat: Add setting to enable/disable interaction with fireballs.
+; - Fix: Use proper head collision.
+; - Fix: Make frog have the same falling speed as Mario.
+; - Fix: Sliding glitch.
 
 
 ;-------------------------------------------------------------------------------
@@ -110,25 +114,23 @@ gfx_leap: db $4C, $4E, $6C, $6E ; Leaping
 gfx_land: db $40, $42, $60, $62 ; Landing
 gfx_dead: db $48, $4A, $68, $6A ; Dead
 
-; Define clipping hitbox of the frog for each of its phases. Values are
-; specified in pixels. The X and Y offsets are relative to the top-left corner
-; of the 32x32 pixels bounding box of the sprite.
+; The frog is drawn in a 32x32 pixels space, but has an hitbox of 16x16 pixels,
+; which should represent the body of the frog. The hitbox is centered with
+; respect to the 32x32 drawing space, but the graphics for a particular phase
+; (e.g., jump) might not have the body at the center. `gfx_x_offsets` and
+; `gfx_y_offsets` can be used to correct the position of the graphics, allowing
+; to center the body of the frog and align it with the hitbox.
+; Offsets are specified in pixels relative to the center of the 32x32 drawing
+; space.
 ; In order: idle (I), preparing jump (P), jump/leap(J), landing (L), dead (D).
-;              I    P    J    L    D
-widths:    db $12, $12, $10, $12, $12
-heights:   db $10, $0C, $12, $0C, $0D
-x_offsets: db $07, $07, $08, $07, $07
-y_offsets: db $0C, $10, $04, $10, $0F
+;                  I    P    J    L    D
+gfx_x_offsets: db $00, $00, $00, $00, $00
+gfx_y_offsets: db $00, $00, $04, $00, $00
 
 ; Height of the "head" of the sprite. If Mario is within the head of the sprite,
 ; he will be clipped to be on top of it. Needed to stabilize Mario while on top
 ; of a jumping frog.
 !head_height = $06
-
-; The Y offset (in pixels) needed to make the sprite slightly overlap with the
-; ground, making it look like its belly is touching the ground, while its arms
-; are slightly below.
-!offset_y = $04
 
 ; Color palettes to use for the different variants of the frog.
 ; Each variant has its base color palette and the color palette for when the
@@ -289,8 +291,8 @@ init:
     STA !sprite_blocked_status,x            ;/ spawning
 
     %is_frail() : BEQ +                     ;\
-    LDA !sprite_tweaker_1686,x              ;| If the sprite is frail, it is
-    AND #~$02                               ;| instantly swallowed by Yoshi
+    LDA !sprite_tweaker_1686,x              ;| If the sprite is frail, it will be
+    AND #~$02                               ;| instantly swallowed by Yoshi if eaten
     STA !sprite_tweaker_1686,x              ;/
 
 +   RTL
@@ -312,9 +314,14 @@ main:
 ; Render
 ;-------------------------------------------------------------------------------
 
-; Draw sprite on screen.
+; Draw sprite on screen. The routine uses scratch RAM as follows:
+;   - $00: Position X.
+;   - $01: Position Y.
+;   - $02: 0 = frog is alive, 1 = frog is falling offscreen.
+;   - $03: Frog's direction.
+;   - $04-$05: Address to the table containing tile numbers for the current phase.
+;   - $06: OAM properties.
 render:
-    %GetDrawInfo()
 
     STZ $02 : LDA !sprite_status,x      ;\ Save whether frog is falling off
     CMP #$02 : BNE +                    ;| screen before X is overridden
@@ -322,31 +329,37 @@ render:
 
 +   LDA !direction,x : STA $03          ;> Save direction before X is overridden
 
-    PHY                                 ;\
-    LDA !phase,x : ASL : TAY            ;| Load the address of the correct
+    LDA !phase,x : ASL : TAY            ;\ Load the address of the correct
     LDA gfx_by_phase,y : STA $04        ;| graphics table into $04-$05 for
-    LDA gfx_by_phase+1,y : STA $05      ;| later use
-    PLY                                 ;/
+    LDA gfx_by_phase+1,y : STA $05      ;/ later use
 
     %is_frail() : LSR                   ;\
     BIT !has_eaten,x : BVC +            ;| Offset to get the correct palette:
     INC                                 ;|   2 * frail + spit_eaten_sprite
-+   TAX                                 ;/
++   TAY                                 ;/
 
     LDA.b #!base_oam_props              ;\ Preload properties
-    ORA .palettes,x                     ;| Palette depends on fragile and eaten key
-    LDX $03 : ORA .flip_x,x             ;| Flip X varies depending on the direction
-    LDX $02 : ORA .flip_y,x             ;| Flip Y varies depending on falling off screen
+    ORA .palettes,y                     ;| Palette depends on fragile and eaten key
+    LDY $03 : ORA .flip_x,y             ;| Flip X varies depending on the direction
+    LDY $02 : ORA .flip_y,y             ;| Flip Y varies depending on falling off screen
     STA $06                             ;/ Save everything for later
+
+    %GetDrawInfo()
+
+    LDA !phase,x : TAX                  ;\
+    LDA $00 : CLC : ADC gfx_x_offsets,x ;| Add offsets to the graphics to align
+    STA $00                             ;| the body of the frog with its hitbox
+    LDA $01 : CLC : ADC gfx_y_offsets,x ;| (e.g., jump graphics)
+    STA $01                             ;/
 
     LDX #$03                            ;> Loop 4 times (sprite is split into 4 parts)
 
 -   PHX                                 ;> X tracks which quarter we are drawing
 
-    LDA $00 : CLC : ADC .pos_offset_x,x ;\ X position
+    LDA $00 : CLC : ADC .x_offsets,x    ;\ X position
     STA !oam_pos_x,y                    ;/ The offset is based on the quarter
 
-    LDA $01 : CLC : ADC .pos_offset_y,x ;\ Y position
+    LDA $01 : CLC : ADC .y_offsets,x    ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
 
     LDA $03 : BNE +                     ;\ Invert X horizontally depending on
@@ -374,8 +387,8 @@ render:
 .palettes:
     db !palette_normal<<1, !palette_normal_eat<<1
     db !palette_frail<<1,  !palette_frail_eat<<1
-.pos_offset_x: db $00, $10, $00, $10
-.pos_offset_y: db $00+!offset_y, $00+!offset_y, $10+!offset_y, $10+!offset_y
+.x_offsets: db $F8, $08, $F8, $08
+.y_offsets: db $F8, $F8, $08, $08
 
 
 ;-------------------------------------------------------------------------------
@@ -406,7 +419,7 @@ update:
 
 .interact
     LDA #$00 : %SubOffScreen()              ;> Kill sprite if offscreen
-    JSR get_frog_clipping_a
+    JSL $03B69F|!bank                       ;> Frog clipping
     JSR interact_with_player
     JSR interact_with_sprites
     JSR interact_with_fireballs
@@ -585,29 +598,20 @@ interact_with_player:
     %SubHorzPos() : %kill_frog()        ;> Kill frog
     LDA #$04 : STA !sprite_status,x     ;> Status = killed by smoke
     LDA #$1F : STA !1540,x              ;> Set smoke duration timer
-    LDA !sprite_x_low,x : CLC : ADC #$08;\
-    STA !sprite_x_low,x                 ;|
-    LDA !sprite_x_high,x : ADC #$00     ;|
-    STA !sprite_x_high,x                ;| Move sprite 8 pixels right and down
-    LDA !sprite_y_low,x : CLC : ADC #$08;| so that the smoke will be centered
-    STA !sprite_y_low,x                 ;| (the frog is 32x32, the smoke 16x16)
-    LDA !sprite_y_high,x : ADC #$00     ;|
-    STA !sprite_y_high,x                ;/
     JSL $07FC3B|!bank                   ;> Span collision stars
     LDA #$08 : STA $1DF9|!addr          ;> Play puff sound effect
     STZ $140D|!addr                     ;> Interrupt spin jump
 
 .return
-    LDY !phase,x                        ;\ Restore the clipping height of the
-    LDA heights,y : STA $07             ;/ frog
+    LDA #$10 : STA $07                  ;> Restore clipping height of the frog
     RTS
 
 .survive_2
 +   LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
     LDA #$01 : STA $1471|!addr          ;/ it as standing on top of a sprite
-    LDA #$1F-!offset_y                  ;\
+    LDA #$1F                            ;\
     LDY $187A|!addr : BEQ +             ;|
-    LDA #$2F-!offset_y                  ;| Set Mario's Y position on top of the
+    LDA #$2F                            ;| Set Mario's Y position on top of the
 +   STA $0D                             ;| sprite, accounting for Yoshi
     LDA $05 : SEC : SBC $0D : STA $96   ;|
     LDA $0B : SBC #$00 : STA $97        ;/
@@ -737,7 +741,6 @@ is_sprite_tasty:
 ; @params $05/$0B Clipping Y position (low/high).
 ; @params $06/$07 Clipping width and height.
 interact_with_fireballs:
-    JSR get_frog_clipping_a
     LDY.b #!ExtendedSize+2-1                ;> !ExtendedSize doesn't include Mario's fireballs, so we add 2
 .check_fireball
     LDA !extended_num,y                     ;\
@@ -828,23 +831,6 @@ spit_eaten_sprite:
     STZ !has_eaten,x                            ;> Frog no longer has eaten sprite
 
 .return
-    RTS
-
-
-;-------------------------------------------------------------------------------
-; Get Frog Clipping A
-;-------------------------------------------------------------------------------
-
-; Get the frog's clipping for collision detection.
-; @param X The frog sprite index.
-get_frog_clipping_a:
-    LDY !phase,x
-    LDA !sprite_x_low,x : CLC : ADC x_offsets,y : STA $04
-    LDA !sprite_x_high,x : ADC #$00 : STA $0A
-    LDA !sprite_y_low,x : CLC : ADC y_offsets,y : STA $05
-    LDA !sprite_y_high,x : ADC #$00 : STA $0B
-    LDA widths,y : STA $06
-    LDA heights,y : STA $07
     RTS
 
 
