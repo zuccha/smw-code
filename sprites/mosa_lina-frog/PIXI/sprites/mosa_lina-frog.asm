@@ -285,12 +285,12 @@ init:
     STA !direction,x                        ;/
 
     LDA #$40 : STA !sprite_speed_y,x        ;\ Mark as grounded initially so
-    LDA !sprite_blocked_status,x : ORA #$04 ;| that it doesn't make the bounce
-    STA !sprite_blocked_status,x            ;/ when spawning
+    LDA !sprite_blocked_status,x : ORA #$04 ;| that it doesn't bounce when
+    STA !sprite_blocked_status,x            ;/ spawning
 
     %is_frail() : BEQ +                     ;\
     LDA !sprite_tweaker_1686,x              ;| If the sprite is frail, it is
-    AND #~$02                               ;| instantly swallowed by Yoshi.
+    AND #~$02                               ;| instantly swallowed by Yoshi
     STA !sprite_tweaker_1686,x              ;/
 
 +   RTL
