@@ -23,8 +23,6 @@
 ; - Feat: Eat specific blocks.
 ; - Feat: Add visual indicator for slow frog.
 ; - Feat: Add setting to enable/disable interaction with fireballs.
-; - Fix: Use proper head collision.
-; - Fix: Make frog have the same falling speed as Mario.
 ; - Fix: Sliding glitch.
 
 
@@ -555,18 +553,18 @@ handle_dead:
 ; @params $06/$07 Clipping width and height.
 interact_with_player:
 .check_cape_spin
-    %is_frail() : BEQ .check_normal     ;\
-    LDA $19 : CMP #$02 : BNE .check_normal ;| Frog is frail, Mario has cape and
-    LDA $14A6|!addr : ORA $140D|!addr   ;| he's spinning or spin jumping
-    BEQ .check_normal                   ;/
-    LDA $13E9|!addr : SEC : SBC #$02 : STA $00 ;\
-    LDA $13EA|!addr : SBC #$00 : STA $08;|
-    LDA $13EB|!addr : STA $01           ;| Get cape clipping
-    LDA $13EC|!addr : STA $09           ;|
-    LDA #$14 : STA $02                  ;|
-    LDA #$10 : STA $03                  ;/
-    JSL $03B72B|!bank                   ;\ Check for interaction
-    BCC .check_normal                   ;/
+    %is_frail() : BEQ .check_normal             ;\
+    LDA $19 : CMP #$02 : BNE .check_normal      ;| Frog is frail, Mario has cape
+    LDA $14A6|!addr : ORA $140D|!addr           ;| and he's spinning/spin jumping
+    BEQ .check_normal                           ;/
+    LDA $13E9|!addr : SEC : SBC #$02 : STA $00  ;\
+    LDA $13EA|!addr : SBC #$00 : STA $08        ;|
+    LDA $13EB|!addr : STA $01                   ;| Get cape clipping
+    LDA $13EC|!addr : STA $09                   ;|
+    LDA #$14 : STA $02                          ;|
+    LDA #$10 : STA $03                          ;/
+    JSL $03B72B|!bank                           ;\ Check for interaction
+    BCC .check_normal                           ;/
 
 .cape_spin_kill
 .slide_kill
@@ -586,11 +584,12 @@ interact_with_player:
     LDA $13ED|!addr : BNE .slide_kill   ;> Check if Mario is sliding down a slope
 
 .survive_1
-    LDA.b #!head_height : STA $07       ;\
-    JSL $03B72B|!bank                   ;| Check for contact with the head of the frog
-    BCC .return                         ;/
     LDA $7D : BMI .return               ;> If Mario is moving upwards, return
     LDA $77 : AND #$08 : BNE .return    ;> If Mario is blocked upwards, return
+    LDA $05 : SEC : SBC #$14            ;\
+    CMP $D3                             ;| Check if Mario is on top of the frog,
+    LDA $0B : SBC $D4                   ;| with a small margin of error
+    BMI .return                         ;/
     %is_frail() : BEQ .survive_2        ;\ If frog is frail and Mario spin jumps
     LDA $140D|!addr : BEQ .survive_2    ;/ kill the frog, else it survives
 
@@ -603,12 +602,13 @@ interact_with_player:
     STZ $140D|!addr                     ;> Interrupt spin jump
 
 .return
-    LDA #$10 : STA $07                  ;> Restore clipping height of the frog
     RTS
 
 .survive_2
-+   LDA #$10 : STA $7D                  ;\ Set Mario's vertical speed and mark
-    LDA #$01 : STA $1471|!addr          ;/ it as standing on top of a sprite
+    LDA #$01 : STA $1471|!addr          ;> Mario is standing on top of a sprite
+    LDA !sprite_speed_y,x : BPL +       ;\ If the frog is falling, set Mario's Y speed equal
+    LDA #$10                            ;| to the frog's speed to ensure he doesn't fall off
++   STA $7D                             ;/ Otherwise give him some upward momentum
     LDA #$1F                            ;\
     LDY $187A|!addr : BEQ +             ;|
     LDA #$2F                            ;| Set Mario's Y position on top of the
@@ -617,11 +617,11 @@ interact_with_player:
     LDA $0B : SBC #$00 : STA $97        ;/
     LDA $77 : AND #$03 : BNE .return    ;\
     LDY #$00                            ;|
-    LDA !1528,x : BPL +                 ;| Move Mario horizontally alongside the
+    LDA !x_movement,x : BPL +           ;| Move Mario horizontally alongside the
     DEY                                 ;| frog if he's not blocked horizontally
 +   CLC : ADC $94 : STA $94             ;|
     TYA : ADC $95 : STA $95             ;/
-    BRA .return
+    RTS
 
 
 ;-------------------------------------------------------------------------------
