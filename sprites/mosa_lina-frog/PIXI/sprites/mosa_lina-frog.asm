@@ -647,6 +647,17 @@ interact_with_sprites:
     DEY : BPL -                                 ;> Go to next sprite
     RTS                                         ;> No contact
 
+.soft_kill
+    LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ If not already dead, kill the
+    JSR sub_horz_pos_sprite : %kill_frog()      ;| the frog, but keep it on screen,
+    %play_sfx(death)                            ;/ so Mario can still ride it
++   RTS
+
+.kill
+    JSR sub_horz_pos_sprite : %kill_frog()      ;\ Kill frog and make it fall
+    %simulate_jsl($01A642, $01A7E3)             ;/ off screen
+    RTS
+
 .eat
     STZ !sprite_status,x                        ;> Kill eaten sprite
     LDA !new_sprite_num,x                       ;\
@@ -666,17 +677,6 @@ interact_with_sprites:
     AND #$C0                                    ;| %c1------ | `!has_eaten`
 +   ORA #$01 : STA !has_eaten,x                 ;/ %cp-----1 |
     %play_sfx(eat)
-    RTS
-
-.soft_kill
-    LDA !phase,x : CMP.b #!phase_dead : BEQ +   ;\ If not already dead, kill the
-    JSR sub_horz_pos_sprite : %kill_frog()      ;| the frog, but keep it on screen,
-    %play_sfx(death)                            ;/ so Mario can still ride it
-+   RTS
-
-.kill
-    JSR sub_horz_pos_sprite : %kill_frog()      ;\ Kill frog and make it fall
-    %simulate_jsl($01A642, $01A7E3)             ;/ off screen
     RTS
 
 ; Check if a sprite is deadly.
@@ -741,6 +741,8 @@ is_sprite_tasty:
 ; @params $05/$0B Clipping Y position (low/high).
 ; @params $06/$07 Clipping width and height.
 interact_with_fireballs:
+    LDA #$0C : STA $02                      ;> Clipping width
+    LDA #$13 : STA $03                      ;> Clipping height
     LDY.b #!ExtendedSize+2-1                ;> !ExtendedSize doesn't include Mario's fireballs, so we add 2
 .check_fireball
     LDA !extended_num,y                     ;\
@@ -754,8 +756,6 @@ interact_with_fireballs:
     SEC : SBC #$04 : STA $01                ;/
     LDA !extended_y_high,y                  ;\ Clipping X displacement, high
     SBC #$00 : STA $09                      ;/
-    LDA #$0C : STA $02                      ;> Clipping width
-    LDA #$13 : STA $03                      ;> Clipping height
     JSL $03B72B|!bank : BCS .contact        ;> Check for collision
 .next
     DEY : BPL .check_fireball               ;> Go to next
