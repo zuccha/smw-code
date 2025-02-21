@@ -65,11 +65,6 @@
       "ExtraBit": false,
       "Tiles": [
         {
-          "X offset": 0,
-          "Y offset": 16,
-          "map16 tile": 152
-        },
-        {
           "X offset": 16,
           "Y offset": 16,
           "map16 tile": 153
@@ -77,7 +72,7 @@
         {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 112
+          "map16 tile": 82
         }
       ],
       "GFXInfo": {},
@@ -91,19 +86,9 @@
       "ExtraBit": true,
       "Tiles": [
         {
-          "X offset": 16,
-          "Y offset": 16,
-          "map16 tile": 97
-        },
-        {
-          "X offset": 0,
-          "Y offset": 16,
-          "map16 tile": 311
-        },
-        {
           "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 113
+          "map16 tile": 83
         }
       ],
       "GFXInfo": {},

@@ -107,9 +107,9 @@ tasty_sprites:
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22 ; Idle
-gfx_load: db $40, $42, $60, $62 ; Preparing jump
+gfx_load: db $06, $08, $26, $28 ; Preparing jump
 gfx_leap: db $4C, $4E, $6C, $6E ; Leaping
-gfx_land: db $40, $42, $60, $62 ; Landing
+gfx_land: db $06, $08, $26, $28 ; Landing
 gfx_dead: db $48, $4A, $68, $6A ; Dead
 
 ; The frog is drawn in a 32x32 pixels space, but has an hitbox of 16x16 pixels,
