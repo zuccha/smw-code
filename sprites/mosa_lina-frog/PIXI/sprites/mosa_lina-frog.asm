@@ -173,6 +173,17 @@ gfx_y_offsets: db $00, $00, $04, $00, $00
 ; Sprite direction. 0 = right, 1 = left.
 !direction = !sprite_misc_157c
 
+; Actions to perform. when one of the bits is set, the corresponding action will
+; be performed and the bit reset. Useful to perform actions from outside the
+; sprite's file without duplicating code (e.g., from tasty block sprites).
+; Format: %ed------
+;   - e: Eat a block. The frog will become slow.
+;   - d: The frog dies. Spit a sprite if one has been eaten, in the direction of
+;     the frog.
+!action = !sprite_misc_1534
+!action_eat = $80
+!action_die = $40
+
 ; Bounce count, how many times the frog landed after a jump/bounce.
 !bounce_count = !sprite_misc_1510
 
@@ -223,6 +234,7 @@ gfx_by_phase:
 
 ; Mark frog as dead and spit eaten item.
 ; @param X The sprite index.
+; @param Y 1 if the sprite should be spat on the right, 0 on the left.
 macro kill_frog()
     LDA #!phase_dead : STA !phase,x
     JSR spit_eaten_sprite
@@ -403,15 +415,19 @@ update:
 
 .check_fall
     LDA !sprite_blocked_status,x            ;\
-    AND #$04 : BNE .handle_phase            ;| If frog is not jumping, but it's
-    LDA !phase,x                            ;| not grounded, then pretend as if
-    CMP.b #!phase_jump : BEQ .handle_phase  ;| it was jumping (probably it's)
-    LDA.b #!phase_jump : STA !phase,x       ;| falling)
+    AND #$04 : BNE .handle_phase            ;|
+    LDA !phase,x                            ;| If the frog is in the air, not
+    CMP.b #!phase_jump : BEQ .handle_phase  ;| jumping, and not dead, then it
+    CMP.b #!phase_dead : BEQ .handle_phase  ;| should be falling (jumping)
+    LDA.b #!phase_jump : STA !phase,x       ;|
     STZ !bounce_count,x                     ;/
 
 .handle_phase
     LDA !phase,x : ASL : TAX                ;\ Update sprite based on which
     JSR (handle_phase,x)                    ;/ phase it is currently in
+
+.preform_actions
+    JSR perform_actions
 
 .interact
     LDA #$00 : %SubOffScreen()              ;> Kill sprite if offscreen
@@ -538,7 +554,35 @@ handle_land:
 ; Frog is dead.
 handle_dead:
     LDX !sprite_index
-    STZ !sprite_speed_x,x
+    LDA !sprite_blocked_status,x        ;\
+    AND #$04 : BEQ +                    ;| If grounded, set X speed to 0
+    STZ !sprite_speed_x,x               ;/
++   RTS
+
+
+;-------------------------------------------------------------------------------
+; Perform Actions
+;-------------------------------------------------------------------------------
+
+; Perform actions prompted from outside the sprite's ASM.
+; @param X Frog's sprite index.
+perform_actions:
+.check_eat
+    LDA !action,x : BIT #!action_eat : BEQ .check_die
+    AND #~!action_eat : STA !action,x
+    JSR slow_down
+    STZ !eaten_sprite,x
+    LDA #$01 : STA !has_eaten,x
+    %play_sfx(eat)
+
+.check_die
+    LDA !action,x : BIT #!action_die : BEQ .return
+    AND #~!action_die : STA !action,x
+    LDA !phase,x : CMP.b #!phase_dead : BEQ .return
+    LDY !direction,x : %kill_frog()
+    %play_sfx(death)
+
+.return
     RTS
 
 
@@ -663,20 +707,14 @@ interact_with_sprites:
     LDA !new_sprite_num,x                       ;\
     LDX !sprite_index                           ;| Remember which sprite was eaten
     STA !eaten_sprite,x                         ;/
-    LDA !has_eaten,x : BNE +                    ;\
-    LDA !jump_speed_x,x : LSR #2 : STA $01      ;|
-    LDA !jump_speed_x,x : SEC : SBC $01         ;| If it's the first time eating
-    STA !jump_speed_x,x                         ;| then reduce its jumping speed
-    LDA !jump_speed_y,x : LSR #2 : STA $01      ;| by 1/4: speed = speed - speed * 0.25
-    LDA !jump_speed_y,x : SEC : SBC $01         ;|
-    STA !jump_speed_y,x                         ;/
+    JSR slow_down
+    %play_sfx(eat)
 +   LDA $00                                     ;\ %---p---c | Transform the
     CLC : ROR A : ROR A                         ;| %c----p-- | info byte so that
     BIT #$04 : BEQ +                            ;| if p = 1  | it matches the
     ORA #$40                                    ;| %c1---1-- | format stored in
     AND #$C0                                    ;| %c1------ | `!has_eaten`
 +   ORA #$01 : STA !has_eaten,x                 ;/ %cp-----1 |
-    %play_sfx(eat)
     RTS
 
 ; Check if a sprite is deadly.
@@ -787,6 +825,23 @@ interact_with_fireballs:
 
 .return
     RTS
+
+
+;-------------------------------------------------------------------------------
+; Slow Down
+;-------------------------------------------------------------------------------
+
+; Make frog slow after eating.
+; @param X The frog sprite index.
+slow_down:
+    LDA !has_eaten,x : BNE +                ;\
+    LDA !jump_speed_x,x : LSR #2 : STA $01  ;|
+    LDA !jump_speed_x,x : SEC : SBC $01     ;| If it's the first time eating
+    STA !jump_speed_x,x                     ;| then reduce its jumping speed
+    LDA !jump_speed_y,x : LSR #2 : STA $01  ;| by 1/4: speed = speed - speed * 0.25
+    LDA !jump_speed_y,x : SEC : SBC $01     ;|
+    STA !jump_speed_y,x                     ;/
++   RTS
 
 
 ;-------------------------------------------------------------------------------
