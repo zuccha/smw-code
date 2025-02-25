@@ -6,15 +6,21 @@
 
 ; The frog is a jumping sprite that can jump back and forth or in one direction.
 ; Mario can ride the frog like a platform.
-; If the frog touches a deadly sprite (configured below) it dies (it no longer
-; jumps), but Mario can still walk on it.
+
+; If the frog touches a deadly sprite (configured below) or a deadly block
+; (check "GPS/mosa_lina-frog_deadly.asm") it dies (it no longer jumps), but
+; Mario can still walk on it.
+
 ; If the frog touches a thrown sprite (e.g., shell) or if Mario touches it while
 ; having star power or sliding down a slope, it dies for good falling offscreen.
-; If the frog touches a tasty sprite (configured below) it eats it and becomes
-; slow (it jumps about half the way). Tasty sprites can be configured to stay in
-; the frog's mouth, it will spit them out when it dies. If the frog eats more
-; than one sprite, the last one eaten is the one that counts.
-; The frog has a frail variant. frail frogs will be using a different color
+
+; If the frog touches a tasty sprite (configured below) or a tasty block (check
+; "GPS/mosa_lina-frog_deadly.asm") it eats it and becomes slow (it jumps about
+; half the way). Tasty sprites can be configured to stay in the frog's mouth,
+; the frog will spit them out when it dies. If the frog eats more sprites or
+; blocks, the last one eaten overrides the previous.
+
+; The frog has a frail variant. Frail frogs will be using a different color
 ; palette and die to cape spin, Mario's fireballs, and spin jumps. Also, frail
 ; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
 
