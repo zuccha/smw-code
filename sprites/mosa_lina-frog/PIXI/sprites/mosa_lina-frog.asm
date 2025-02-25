@@ -122,10 +122,17 @@ gfx_dead: db $48, $4A, $68, $6A ; Dead
 gfx_x_offsets: db $00, $00, $00, $00, $00
 gfx_y_offsets: db $00, $00, $04, $00, $00
 
-; Height of the "head" of the sprite. If Mario is within the head of the sprite,
-; he will be clipped to be on top of it. Needed to stabilize Mario while on top
-; of a jumping frog.
-!head_height = $06
+; Hitbox size and offsets, in pixels, for sprites and Mario interactions.
+; For object interactions, the sprite always uses a 16x16 hitbox at the center
+; of the 32x32 drawing space.
+; The offsets are applied to the 16x16 square at the center of the 32x32 drawing
+; space of the sprite.
+; In order: idle (I), preparing jump (P), jump/leap(J), landing (L), dead (D).
+;                     I    P    J    L    D
+hitbox_widths:    db $10, $10, $10, $10, $10
+hitbox_heights:   db $10, $0C, $10, $0C, $0C
+hitbox_x_offsets: db $00, $00, $00, $00, $00
+hitbox_y_offsets: db $00, $04, $04, $00, $04
 
 ; Color palettes to use for the different variants of the frog.
 ; Each variant has its base color palette and the color palette for when the
@@ -229,6 +236,25 @@ gfx_by_phase:
 ;-------------------------------------------------------------------------------
 ; Macros & Functions
 ;-------------------------------------------------------------------------------
+
+; Get clipping A for the frog, used for sprites and Mario interactions.
+; @param X The sprite index.
+; @return $04/$0A Clipping x displacement (low/high).
+; @return $05/$0B Clipping y displacement (low/high).
+; @return $06/$07 Clipping width/height.
+macro get_frog_clipping_a()
+    LDY !phase,x                            ;> Clipping data depends on the phase
+    LDA hitbox_widths,y : STA $06           ;> Width
+    LDA hitbox_heights,y : STA $07          ;> Height
+    LDA !sprite_x_low,x                     ;\
+    CLC : ADC hitbox_x_offsets,y : STA $04  ;| X displacement
+    LDA !sprite_x_high,x                    ;|
+    ADC #$00 : STA $0A                      ;/
+    LDA !sprite_y_low,x                     ;\
+    CLC : ADC hitbox_y_offsets,y : STA $05  ;| Y displacement
+    LDA !sprite_y_high,x                    ;|
+    ADC #$00 : STA $0B                      ;/
+endmacro
 
 ; Mark frog as dead and spit eaten item.
 ; @param X The sprite index.
@@ -406,17 +432,21 @@ update:
     LDA $9D : BNE .return                   ;> Return if sprites are blocked
     LDA !sprite_status,x : CMP #$08         ;\ If status is 8 the frog is alive,
     BCC .return                             ;| if it's 9 or A it has been spat
-    BEQ .check_fall                         ;/ by Yoshi
+    BEQ .check_on_screen                    ;/ by Yoshi
 
 .spat_by_yoshi
     LDA #$08 : STA !sprite_status,x         ;> Restore normal behavior
 
+.check_on_screen
+    LDA !phase,x                            ;\ Kill sprite if offscreen and not
+    CMP #!phase_dead : BEQ .handle_phase    ;| dead (also, if dead skip check
+    LDA #$00 : %SubOffScreen()              ;/ fall)
+
 .check_fall
     LDA !sprite_blocked_status,x            ;\
     AND #$04 : BNE .handle_phase            ;|
-    LDA !phase,x                            ;| If the frog is in the air, not
-    CMP.b #!phase_jump : BEQ .handle_phase  ;| jumping, and not dead, then it
-    CMP.b #!phase_dead : BEQ .handle_phase  ;| should be falling (jumping)
+    LDA !phase,x                            ;| If the frog is in the air and not
+    CMP.b #!phase_jump : BEQ .handle_phase  ;| jumping, it should be falling (jumping)
     LDA.b #!phase_jump : STA !phase,x       ;|
     STZ !bounce_count,x                     ;/
 
@@ -428,12 +458,12 @@ update:
     JSR perform_actions
 
 .interact
-    LDA #$00 : %SubOffScreen()              ;> Kill sprite if offscreen
-    JSL $03B69F|!bank                       ;> Frog clipping
+    %get_frog_clipping_a()
     JSR interact_with_player
     JSR interact_with_sprites
     JSR interact_with_fireballs
 
+.update_position
     JSL $01802A|!bank                       ;\ Update position and keep track by
     LDA $1491|!addr : STA !x_movement,x     ;/ how many pixels the sprite moved
 
