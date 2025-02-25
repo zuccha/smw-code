@@ -24,9 +24,6 @@
 ; palette and die to cape spin, Mario's fireballs, and spin jumps. Also, frail
 ; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
 
-; TODO:
-; - Feat: Add visual indicator for slow frog.
-
 
 ;-------------------------------------------------------------------------------
 ; Configuration (extra bytes)
@@ -121,12 +118,16 @@ tasty_sprites:
 !gfx_page = 1
 
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
-; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
-gfx_rest: db $20, $21, $30, $31 ; Idle
-gfx_prep: db $23, $24, $33, $34 ; Preparing jump
-gfx_jump: db $49, $4A, $69, $6A ; Jumping/leaping
-gfx_land: db $23, $24, $33, $34 ; Landing
-gfx_dead: db $26, $27, $36, $37 ; Dead
+; Tiles are in this order: top-left, top-right, bottom-left, bottom-right. For
+; each phase there are graphics for the regular and slow variant (frog that has
+; eaten a sprite/block) of the frog.
+gfxs:
+;   Regular               | Slow
+    db $20, $21, $30, $31 : db $50, $51, $60, $61 ; Idle
+    db $23, $24, $33, $34 : db $53, $54, $63, $64 ; Preparing jump
+    db $49, $4A, $69, $6A : db $4C, $4D, $6C, $6D ; Jumping/leaping
+    db $23, $24, $33, $34 : db $53, $54, $63, $64 ; Landing
+    db $26, $27, $36, $37 : db $26, $27, $36, $37 ; Dead
 
 ; The frog is drawn in a 32x32 pixels space, but has an hitbox of 16x16 pixels,
 ; which should represent the body of the frog. The hitbox is centered with
@@ -255,9 +256,6 @@ hitbox_y_offsets: db $00, $04, $04, $00, $04
 ; determined dynamically.
 !base_oam_props = %00100000|!gfx_page
 
-; Which graphics to use for each phase.
-gfxs: dw gfx_rest, gfx_prep, gfx_jump, gfx_land, gfx_dead
-
 
 ;-------------------------------------------------------------------------------
 ; Macros & Functions
@@ -378,62 +376,63 @@ main:
 ;   - $01: Position Y.
 ;   - $02: 0 = frog is alive, 1 = frog is falling offscreen.
 ;   - $03: Frog's direction.
-;   - $04-$05: Address to the table containing tile numbers for the current phase.
+;   - $04: phase * 4 (to index gfx offsets).
+;   - $05: phase * 8 + slow * 4 (to index gfx).
 ;   - $06: OAM properties.
-;   - $07: Phase * 4 (to index gfx offsets).
 render:
+.save_falling
     STZ $02 : LDA !sprite_status,x      ;\ Save whether frog is falling off
-    CMP #$02 : BNE +                    ;| screen before X is overridden
+    CMP #$02 : BNE .save_direction      ;| screen before X is overridden
     LDA #$01 : STA $02                  ;/
 
-+   LDA !direction,x : STA $03          ;> Save direction before X is overridden
+.save_direction
+    LDA !direction,x : STA $03          ;> Save direction before X is overridden
 
-    LDA !phase,x : ASL : TAY            ;\ Load the address of the correct
-    LDA gfxs,y : STA $04                ;| graphics table into $04-$05 for
-    LDA gfxs+1,y : STA $05              ;/ later use
+.save_gfx_indexes
+    LDA !phase,x : ASL #2 : STA $04     ;> $04 = phase * 4
+    ASL : STA $05                       ;\
+    LDY !has_eaten,x : BEQ .save_props  ;| $05 = phase * 8 + slow * 4
+    CLC : ADC #$04 : STA $05            ;/
 
+.save_props
     %is_frail() : LSR                   ;\
     BIT !has_eaten,x : BVC +            ;| Offset to get the correct palette:
     INC                                 ;|   2 * frail + spit_eaten_sprite
 +   TAY                                 ;/
-
     LDA.b #!base_oam_props              ;\ Preload properties
     ORA .palettes,y                     ;| Palette depends on fragile and eaten key
     LDY $03 : ORA .flip_x,y             ;| Flip X varies depending on the direction
     LDY $02 : ORA .flip_y,y             ;| Flip Y varies depending on falling off screen
     STA $06                             ;/ Save everything for later
 
+.get_draw_info
     %GetDrawInfo()
 
-    LDA !phase,x : ASL #2 : STA $07     ;> phase * 4
-    LDX #$03                            ;> Loop 4 times (sprite is split into 4 parts)
-
--   PHX                                 ;> X tracks which quarter we are drawing
-
-    PHX : TXA : CLC : ADC $07 : TAX     ;> X = phase * 4 + X
-
+.draw_quarters
+    LDX #$03                            ;> X tracks the quarter
+.draw_quarter
+    PHX : TXA : CLC : ADC $04 : TAX     ;> X = phase * 4 + quarter
     LDA $00 : CLC : ADC gfx_x_offsets,x ;\ X position
     STA !oam_pos_x,y                    ;/ The offset is based on the quarter
-
     LDA $01 : CLC : ADC gfx_y_offsets,x ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
 
-    PLX
-
-    LDA $03 : BNE +                     ;\ Invert X horizontally depending on
-    TXA : EOR #$01 : TAX                ;| direction
-+   LDA $02 : BEQ +                     ;| Invert Y vertically depending on
-    TXA : EOR #$02 : TAX                ;| falling off screen
-+   PHY : TXY : LDA ($04),y : PLY       ;| Retrieve the tile from the preloaded
-    STA !oam_tile,y                     ;/ table
+    PLA : PHA                           ;> Pull and preserve X again
+    LDX $03 : BNE +                     ;\ Invert quarter horizontally if the
+    EOR #$01                            ;/ frog is facing right
++   LDX $02 : BEQ +                     ;\ Invert quarter vertically if the frog
+    EOR #$02                            ;/ is falling offscreen
++   CLC : ADC $05 : TAX                 ;> X = phase * 8 + slow * 4 + quarter
+    LDA gfxs,x : STA !oam_tile,y
 
     LDA $06 : STA !oam_props,y          ;> Properties
 
     INY #4                              ;> Go to next OAM slot
 
-    PLX : DEX : BPL -                   ;> Loop or break if done
+    PLX : DEX : BPL .draw_quarter       ;> Loop or break if done
 
-    LDX.w !sprite_index                 ;> Restore sprite index
+.finalize
+    LDX !sprite_index                   ;> Restore sprite index
     LDY #$02                            ;> 16x16 tiles
     LDA #$03                            ;> 4 tiles
     JSL $01B7B3|!bank                   ;> Finalize OAM
