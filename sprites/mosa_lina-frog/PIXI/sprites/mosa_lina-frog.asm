@@ -104,8 +104,8 @@ tasty_sprites:
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
 gfx_rest: db $00, $02, $20, $22 ; Idle
-gfx_load: db $06, $08, $26, $28 ; Preparing jump
-gfx_leap: db $4C, $4E, $6C, $6E ; Leaping
+gfx_prep: db $06, $08, $26, $28 ; Preparing jump
+gfx_jump: db $4C, $4E, $6C, $6E ; Jumping/leaping
 gfx_land: db $06, $08, $26, $28 ; Landing
 gfx_dead: db $48, $4A, $68, $6A ; Dead
 
@@ -225,12 +225,7 @@ hitbox_y_offsets: db $00, $04, $04, $00, $04
 !base_oam_props = %00100000|!gfx_page
 
 ; Which graphics to use for each phase.
-gfx_by_phase:
-    dw gfx_rest ; Rest
-    dw gfx_load ; Load
-    dw gfx_leap ; Jump
-    dw gfx_land ; Land
-    dw gfx_dead ; Dead
+gfxs: dw gfx_rest, gfx_prep, gfx_jump, gfx_land, gfx_dead
 
 
 ;-------------------------------------------------------------------------------
@@ -362,8 +357,8 @@ render:
 +   LDA !direction,x : STA $03          ;> Save direction before X is overridden
 
     LDA !phase,x : ASL : TAY            ;\ Load the address of the correct
-    LDA gfx_by_phase,y : STA $04        ;| graphics table into $04-$05 for
-    LDA gfx_by_phase+1,y : STA $05      ;/ later use
+    LDA gfxs,y : STA $04                ;| graphics table into $04-$05 for
+    LDA gfxs+1,y : STA $05              ;/ later use
 
     %is_frail() : LSR                   ;\
     BIT !has_eaten,x : BVC +            ;| Offset to get the correct palette:
@@ -558,10 +553,10 @@ handle_jump:
 handle_land:
     LDX !sprite_index
 
-    LDA !phase_cooldown,x : BEQ .go_to_next_phase
+    LDA !phase_cooldown,x : BEQ .rest
     DEC !phase_cooldown,x : RTS
 
-.go_to_next_phase
+.rest
     LDA !bounce_count,x : CMP.b #!min_bounces+1 : BCC .keep_bouncing
     LDA !sprite_speed_x,x : BEQ .stop_bouncing
 
