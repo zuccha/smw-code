@@ -19,7 +19,6 @@
 ; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
 
 ; TODO:
-; - Feat: Kill frog when touching specific blocks.
 ; - Feat: Add visual indicator for slow frog.
 ; - Feat: Add setting to enable/disable interaction with fireballs.
 
