@@ -23,7 +23,6 @@
 ; - Feat: Eat specific blocks.
 ; - Feat: Add visual indicator for slow frog.
 ; - Feat: Add setting to enable/disable interaction with fireballs.
-; - Fix: Sliding glitch.
 
 
 ;-------------------------------------------------------------------------------
@@ -40,9 +39,9 @@
 ;       0 = don't invert direction
 ;       1 = invert direction (jump back and forth)
 
-; Extra Byte 2: Regular jump X speed. Alway positive ($00-$7F).
+; Extra Byte 2: Regular jump X speed. Always positive ($00-$7F).
 
-; Extra Byte 3: Regular jump Y speed. Alway positive ($00-$7F).
+; Extra Byte 3: Regular jump Y speed. Always positive ($00-$7F).
 
 
 ;-------------------------------------------------------------------------------
@@ -320,7 +319,6 @@ main:
 ;   - $04-$05: Address to the table containing tile numbers for the current phase.
 ;   - $06: OAM properties.
 render:
-
     STZ $02 : LDA !sprite_status,x      ;\ Save whether frog is falling off
     CMP #$02 : BNE +                    ;| screen before X is overridden
     LDA #$01 : STA $02                  ;/
@@ -401,7 +399,7 @@ update:
     BEQ .check_fall                         ;/ by Yoshi
 
 .spat_by_yoshi
-    LDA #$08 : STA !sprite_status,x
+    LDA #$08 : STA !sprite_status,x         ;> Restore normal behavior
 
 .check_fall
     LDA !sprite_blocked_status,x            ;\
@@ -440,6 +438,7 @@ handle_phase:
 ; Resting frog.
 handle_rest:
     LDX !sprite_index
+    STZ !sprite_speed_x,x
 
 .check_jump
     LDA !jump_speed_y,x                 ;\ Never jump if Y jump speed is 0
@@ -539,6 +538,7 @@ handle_land:
 ; Frog is dead.
 handle_dead:
     LDX !sprite_index
+    STZ !sprite_speed_x,x
     RTS
 
 
