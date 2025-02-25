@@ -57,8 +57,8 @@
 ;   - 0 = Don't interact, the fireballs ignore the frog.
 ;   - 1 = Frail frogs will be killed, regular frogs will survive. The fireball
 ;     will turn into a puff of smoke.
-;   - 2 = Interact, both frail and regular frog will be killed. The fireball
-;     will turn into a puff of smoke.
+;   - 2 = Both frail and regular frog will be killed. The fireball will turn
+;     into a puff of smoke.
 !mario_fireballs_interaction = 0
 
 ; Whether the frog interacts with Mario fireballs.
@@ -170,10 +170,10 @@ hitbox_y_offsets: db $00, $04, $04, $00, $04
 ; Each variant has its base color palette and the color palette for when the
 ; frog has eaten a sprite and holding it in its mouth.
 ; Valid values are any of 0-7.
-!palette_normal     = 5
-!palette_normal_eat = 2
-!palette_frail      = 4
-!palette_frail_eat  = 2
+!palette_normal      = 5
+!palette_normal_slow = 2
+!palette_frail       = 4
+!palette_frail_slow  = 2
 
 ; Different sound effects.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
@@ -442,8 +442,8 @@ render:
 .flip_x: db $40, $00
 .flip_y: db $00, $80
 .palettes:
-    db !palette_normal<<1, !palette_normal_eat<<1
-    db !palette_frail<<1,  !palette_frail_eat<<1
+    db !palette_normal<<1, !palette_normal_slow<<1
+    db !palette_frail<<1,  !palette_frail_slow<<1
 
 
 ;-------------------------------------------------------------------------------

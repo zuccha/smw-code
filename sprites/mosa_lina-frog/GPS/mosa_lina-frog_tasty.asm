@@ -20,12 +20,6 @@
 ; https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=dd11aeb933a0
 !block_after_eating = $02
 
-; Sound effect played when a frog eats this block. It should be the same as the
-; one defined in the sprite's ASM. For all possible values, check
-; https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
-!eat_sfx      = $06
-!eat_sfx_bank = $1DF9|!addr
-
 
 ;-------------------------------------------------------------------------------
 ; Defines (don't touch)
