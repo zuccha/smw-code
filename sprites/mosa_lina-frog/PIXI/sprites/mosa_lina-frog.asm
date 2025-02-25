@@ -20,7 +20,6 @@
 
 ; TODO:
 ; - Feat: Kill frog when touching specific blocks.
-; - Feat: Eat specific blocks.
 ; - Feat: Add visual indicator for slow frog.
 ; - Feat: Add setting to enable/disable interaction with fireballs.
 
