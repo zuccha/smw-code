@@ -71,8 +71,13 @@
         },
         {
           "X offset": 0,
+          "Y offset": -16,
+          "map16 tile": 294
+        },
+        {
+          "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 82
+          "map16 tile": 80
         }
       ],
       "GFXInfo": {},
@@ -87,8 +92,13 @@
       "Tiles": [
         {
           "X offset": 0,
+          "Y offset": -16,
+          "map16 tile": 295
+        },
+        {
+          "X offset": 0,
           "Y offset": 0,
-          "map16 tile": 83
+          "map16 tile": 81
         }
       ],
       "GFXInfo": {},

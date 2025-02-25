@@ -122,11 +122,11 @@ tasty_sprites:
 
 ; Graphic tiles to use for each pose of the frog. Each tile is 16x16 pixels.
 ; Tiles are in this order: top-left, top-right, bottom-left, bottom-right.
-gfx_rest: db $00, $02, $20, $22 ; Idle
-gfx_prep: db $06, $08, $26, $28 ; Preparing jump
-gfx_jump: db $4C, $4E, $6C, $6E ; Jumping/leaping
-gfx_land: db $06, $08, $26, $28 ; Landing
-gfx_dead: db $48, $4A, $68, $6A ; Dead
+gfx_rest: db $20, $21, $30, $31 ; Idle
+gfx_prep: db $23, $24, $33, $34 ; Preparing jump
+gfx_jump: db $49, $4A, $69, $6A ; Jumping/leaping
+gfx_land: db $23, $24, $33, $34 ; Landing
+gfx_dead: db $26, $27, $36, $37 ; Dead
 
 ; The frog is drawn in a 32x32 pixels space, but has an hitbox of 16x16 pixels,
 ; which should represent the body of the frog. The hitbox is centered with
@@ -134,12 +134,24 @@ gfx_dead: db $48, $4A, $68, $6A ; Dead
 ; (e.g., jump) might not have the body at the center. `gfx_x_offsets` and
 ; `gfx_y_offsets` can be used to correct the position of the graphics, allowing
 ; to center the body of the frog and align it with the hitbox.
+; All 16x16 tiles composing the frog have separate offsets, allowing overlapping
+; tiles and more compact graphics.
 ; Offsets are specified in pixels relative to the center of the 32x32 drawing
 ; space.
-; In order: idle (I), preparing jump (P), jump/leap(J), landing (L), dead (D).
-;                  I    P    J    L    D
-gfx_x_offsets: db $00, $00, $00, $00, $00
-gfx_y_offsets: db $00, $00, $04, $00, $00
+gfx_x_offsets:
+;       TL   TR   BL   BR
+    db $FC, $04, $FC, $04 ; Idle
+    db $FC, $04, $FC, $04 ; Preparing jump
+    db $FC, $04, $FC, $04 ; Jumping/leaping
+    db $FC, $04, $FC, $04 ; Landing
+    db $FC, $04, $FC, $04 ; Dead
+gfx_y_offsets:
+;       TL   TR   BL   BR
+    db $FC, $FC, $04, $04 ; Idle
+    db $FC, $FC, $04, $04 ; Preparing jump
+    db $FC, $FC, $0C, $0C ; Jumping/leaping
+    db $FC, $FC, $04, $04 ; Landing
+    db $FC, $FC, $04, $04 ; Dead
 
 ; Hitbox size and offsets, in pixels, for sprites and Mario interactions.
 ; For object interactions, the sprite always uses a 16x16 hitbox at the center
@@ -368,6 +380,7 @@ main:
 ;   - $03: Frog's direction.
 ;   - $04-$05: Address to the table containing tile numbers for the current phase.
 ;   - $06: OAM properties.
+;   - $07: Phase * 4 (to index gfx offsets).
 render:
     STZ $02 : LDA !sprite_status,x      ;\ Save whether frog is falling off
     CMP #$02 : BNE +                    ;| screen before X is overridden
@@ -392,21 +405,20 @@ render:
 
     %GetDrawInfo()
 
-    LDA !phase,x : TAX                  ;\
-    LDA $00 : CLC : ADC gfx_x_offsets,x ;| Add offsets to the graphics to align
-    STA $00                             ;| the body of the frog with its hitbox
-    LDA $01 : CLC : ADC gfx_y_offsets,x ;| (e.g., jump graphics)
-    STA $01                             ;/
-
+    LDA !phase,x : ASL #2 : STA $07     ;> phase * 4
     LDX #$03                            ;> Loop 4 times (sprite is split into 4 parts)
 
 -   PHX                                 ;> X tracks which quarter we are drawing
 
-    LDA $00 : CLC : ADC .x_offsets,x    ;\ X position
+    PHX : TXA : CLC : ADC $07 : TAX     ;> X = phase * 4 + X
+
+    LDA $00 : CLC : ADC gfx_x_offsets,x ;\ X position
     STA !oam_pos_x,y                    ;/ The offset is based on the quarter
 
-    LDA $01 : CLC : ADC .y_offsets,x    ;\ Y position
+    LDA $01 : CLC : ADC gfx_y_offsets,x ;\ Y position
     STA !oam_pos_y,y                    ;/ The offset is based on the quarter
+
+    PLX
 
     LDA $03 : BNE +                     ;\ Invert X horizontally depending on
     TXA : EOR #$01 : TAX                ;| direction
@@ -433,8 +445,6 @@ render:
 .palettes:
     db !palette_normal<<1, !palette_normal_eat<<1
     db !palette_frail<<1,  !palette_frail_eat<<1
-.x_offsets: db $F8, $08, $F8, $08
-.y_offsets: db $F8, $F8, $08, $08
 
 
 ;-------------------------------------------------------------------------------
