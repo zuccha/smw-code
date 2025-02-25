@@ -26,7 +26,6 @@
 
 ; TODO:
 ; - Feat: Add visual indicator for slow frog.
-; - Feat: Add setting to enable/disable interaction with fireballs.
 
 
 ;-------------------------------------------------------------------------------
@@ -56,6 +55,20 @@
 !phase_rest_duration = $46 ; Idle, waiting to jump
 !phase_load_duration = $28 ; Preparing to jump (the frog crouches before jumping)
 !phase_land_duration = $04 ; Landing (the frog crouches after landing)
+
+; Whether the frog interacts with Mario fireballs.
+;   - 0 = Don't interact, the fireballs ignore the frog.
+;   - 1 = Frail frogs will be killed, regular frogs will survive. The fireball
+;     will turn into a puff of smoke.
+;   - 2 = Interact, both frail and regular frog will be killed. The fireball
+;     will turn into a puff of smoke.
+!mario_fireballs_interaction = 0
+
+; Whether the frog interacts with Mario fireballs.
+;   - 0 = The fireballs ignore the frog.
+;   - 1 = Frail frogs will be killed, regular frogs will survive.
+;   - 2 = The frog will always be killed.
+!yoshi_fireballs_interaction = 0
 
 ; Minimum amount of bounces the frog should do after landing. The frog will keep
 ; bouncing if its X speed is nonzero.
@@ -462,8 +475,8 @@ update:
     %get_frog_clipping_a()
     JSR interact_with_player
     JSR interact_with_sprites
-    JSR interact_with_mario_fireballs
-    JSR interact_with_yoshi_fireballs
+    if !mario_fireballs_interaction : JSR interact_with_mario_fireballs : endif
+    if !yoshi_fireballs_interaction : JSR interact_with_yoshi_fireballs : endif
 
 .update_position
     JSL $01802A|!bank                       ;\ Update position and keep track by
@@ -800,6 +813,8 @@ is_sprite_tasty:
 ; Interact with Mario's Fireballs
 ;-------------------------------------------------------------------------------
 
+if !mario_fireballs_interaction
+
 ; Interact with fireballs shot by Mario.
 ; We need to redefine this routine because (1) the default routine that handles
 ; fireballs interaction doesn't use the custom clipping, (2) we need to kill the
@@ -818,13 +833,18 @@ interact_with_mario_fireballs:
     LDA #$01 : STA !extended_num,y              ;> Turn fireball into smoke
     LDA #$0F : STA !extended_timer,y            ;> Smoke duration timer
     LDA #$01 : STA $1DF9|!addr                  ;> Play sound effect
+    if !mario_fireballs_interaction == 1 : %is_frail() : BEQ + : endif
     JSR turn_into_coin
-    RTS
++   RTS
+
+endif
 
 
 ;-------------------------------------------------------------------------------
 ; Interact with Yoshi's Fireballs
 ;-------------------------------------------------------------------------------
+
+if !yoshi_fireballs_interaction
 
 ; Interact with fireballs shot by Yoshi.
 ; We need to redefine this routine because (1) the default routine that handles
@@ -842,13 +862,18 @@ interact_with_yoshi_fireballs:
 +   DEY : BPL -                                 ;> Go to next
     RTS
 .contact
+    if !yoshi_fireballs_interaction == 1 : %is_frail() : BEQ + : endif
     JSR turn_into_coin
-    RTS
++   RTS
+
+endif
 
 
 ;-------------------------------------------------------------------------------
 ; Check Fireball Contact
 ;-------------------------------------------------------------------------------
+
+if !mario_fireballs_interaction || !yoshi_fireballs_interaction
 
 ; Check for contact with Mario's or Yoshi's fireball.
 ; @param X Frog's sprite index.
@@ -871,6 +896,8 @@ check_fireball_contact:
     JSL $03B72B|!bank                       ;> Check for contact
     RTS
 
+endif
+
 
 ;-------------------------------------------------------------------------------
 ; Turn Into Coin
@@ -881,7 +908,6 @@ check_fireball_contact:
 ; @param X The frog sprite index.
 ; @param Y The fireball extended sprite index.
 turn_into_coin:
-    %is_frail() : BEQ .return
     LDA !extended_x_low,y                   ;\
     SEC : SBC !sprite_x_low,x               ;|
     LDA !extended_x_high,y                  ;|
@@ -897,7 +923,6 @@ turn_into_coin:
     LDA #$D0 : STA !sprite_speed_y,x        ;> Set some vertical speed
     %SubHorzPos() : TYA                     ;\ Face direction opposite of Mario
     EOR #$01 : STA !direction,x             ;/
-.return
     RTS
 
 
