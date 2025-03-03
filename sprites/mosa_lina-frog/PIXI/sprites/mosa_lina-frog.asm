@@ -22,7 +22,7 @@
 
 ; The frog has a frail variant. Frail frogs will be using a different color
 ; palette and die to cape spin, Mario's fireballs, and spin jumps. Also, frail
-; frogs are instantly swallowed by Yoshi, while normal one can be spat out.
+; frogs are instantly swallowed by Yoshi, while normal ones can be spat out.
 
 
 ;-------------------------------------------------------------------------------
@@ -31,13 +31,10 @@
 
 ; Extra bit: Frog type. 0 = regular, 1 = frail.
 
-; Extra Byte 1: The frog's behavior. The format is %------id:
-;   - d: Initial direction.
-;       0 = right
-;       1 = left
-;   - i: Controls whether the frog inverts directions after landing.
-;       0 = don't invert direction
-;       1 = invert direction (jump back and forth)
+; Extra Byte 1: The frog's direction behavior. The format is %jjjjjjjd:
+;   - d: Initial direction. 0 = right, 1 = left
+;   - jjjjjjj: How many jumps the frog makes in one direction before inverting
+;     direction. 0 means infinite (it never inverts).
 
 ; Extra Byte 2: Regular jump X speed. Always positive ($00-$7F).
 
@@ -210,6 +207,10 @@ hitbox_y_offsets: db $00, $04, $04, $00, $04
 ; Sprite direction. 0 = right, 1 = left.
 !direction = !sprite_misc_157c
 
+; Number of consecutive jumps made in one direction. When it reaches the maximum
+; set via Extra Byte 1, the frog inverts direction.
+!jumps_in_direction = !sprite_misc_1570
+
 ; Actions to perform. when one of the bits is set, the corresponding action will
 ; be performed and the bit reset. Useful to perform actions from outside the
 ; sprite's file without duplicating code (e.g., from tasty block sprites).
@@ -288,11 +289,12 @@ macro kill_frog()
     JSR spit_eaten_sprite
 endmacro
 
-; Check whether the frog should invert directions after the first landing.
+; Get the maximum number of jumps the frog can do in one direction.
 ; @param X The sprite index.
-; @return Z 1 if it should invert direction, 0 otherwise.
-macro should_invert_direction()
-    LDA !extra_byte_1,x : AND #$02
+; @return A The maximum number of jumps the frog should be allowed to do in one
+; direction before inverting it, or 0 if infinite.
+macro lda_max_jumps_in_one_direction()
+    LDA !extra_byte_1,x : LSR
 endmacro
 
 ; Check whether the frog is frail or not.
@@ -574,9 +576,13 @@ handle_jump:
 ++  STA !sprite_speed_x,x               ;/
 
     LDA !bounce_count,x : BNE +         ;\
-    %should_invert_direction() : BEQ +  ;| If it's the first landing after the
-    LDA !direction,x : EOR #$01         ;| jump and it should bounce back and
-    STA !direction,x                    ;| forth, then invert direction
+    INC !jumps_in_direction,x           ;|
+    %lda_max_jumps_in_one_direction()   ;| If it's the first landing after the
+    BEQ +                               ;| jump and the frog has reached the
+    CMP !jumps_in_direction,x : BNE +   ;| maximum number of jumps it can do in
+    STZ !jumps_in_direction,x           ;| one direction, then invert direction
+    LDA !direction,x : EOR #$01         ;|
+    STA !direction,x                    ;|
 +   INC !bounce_count,x                 ;/
 
     %play_sfx(land)
