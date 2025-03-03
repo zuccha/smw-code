@@ -53,7 +53,7 @@
 #     -i, -I      Include images and preserve image tags in HTML and markdown
 #
 #   Other:
-#     -o          Open ditribution folder after release.
+#     -o          Open distribution folder after release.
 #     -f          First release, skip some checks for files not found
 
 
@@ -367,6 +367,9 @@ else
 
   # Remove CLI custom files
   if [[ -d "$OUT_PATH/$CLI_DIR" ]]; then rm -rf "$OUT_PATH/$CLI_DIR"; fi
+
+  # Remove empty directories
+  find "$OUT_PATH" -type d -empty -delete
 
   # Create archive
   cd "$OUT_DIR"
