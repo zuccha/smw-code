@@ -322,10 +322,16 @@ macro simulate_jsl(jml_addr, rtl_addr)
 ?+  PLB
 endmacro
 
-; Draw a byte in the status bar.
-macro debug_byte(addr)
-    PHA : AND #$0F : STA <addr>+1|!addr
-    PLA : LSR #$04 : STA <addr>|!addr
+; Retrieve the sprite number, checking whether a sprite is regular or custom.
+; We need this because in some cases !new_sprite_num doesn't actually hold the
+; correct value for regular sprites. For example, the spinies tossed by the pipe
+; lakitu alternate between $00 and $80 instead of having the correct $13/$14.
+; @param X The sprite index.
+macro lda_sprite_number()
+    LDA !extra_bits,x : AND #$08 : BNE ?+
+    LDA !sprite_num,x : BRA ?++             ;> Regular
+?+  LDA !new_sprite_num,x                   ;> Custom
+?++
 endmacro
 
 
@@ -756,7 +762,7 @@ interact_with_sprites:
 
 .eat
     STZ !sprite_status,x                        ;> Kill eaten sprite
-    LDA !new_sprite_num,x                       ;\
+    %lda_sprite_number()                        ;\
     LDX !sprite_index                           ;| Remember which sprite was eaten
     STA !eaten_sprite,x                         ;/
     JSR slow_down
@@ -778,7 +784,7 @@ is_sprite_deadly:
     LDY.b #deadly_sprites_end-deadly_sprites-2  ;\
 -   BMI .not_deadly                             ;| Iterate over deadly sprites
     LDA $00 : EOR deadly_sprites+1,y : BNE +    ;| If the sprite number matches
-    LDA !new_sprite_num,x                       ;| and they are of the same type,
+    %lda_sprite_number()                        ;| and they are of the same type,
     CMP deadly_sprites,y : BEQ .deadly          ;| then it is deadly
 +   DEY #2 : BRA -                              ;/
 
@@ -804,7 +810,7 @@ is_sprite_tasty:
 -   BMI .not_tasty                              ;| Iterate over tasty sprites
     LDA tasty_sprites+1,y : AND #$01            ;| If the sprite number matches
     EOR $00 : BNE +                             ;| and they are of the same type,
-    LDA !new_sprite_num,x                       ;| then it is tasty
+    %lda_sprite_number()                        ;| then it is tasty
     CMP tasty_sprites,y : BEQ .tasty            ;|
 +   DEY #2 : BRA -                              ;/
 
