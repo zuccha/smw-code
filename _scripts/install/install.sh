@@ -8,9 +8,9 @@
 #   create a new one.
 #
 #   Args:
-#     <type>          Resource type, one of: "block", "patch", "port", "sprite", "tool", "uberasm"
+#     <type>          Resource type, one of: "block", "patch", "port", "sprite", "uberasm"
 #     <name>          Name of the resource
-#     <project_name>  Name of project where to install the resource
+#     <project_name>  Name of project where to install the resource, defaults to the resource name
 #
 #   Flags:
 #     -o              Override an existing project with a new one
@@ -52,7 +52,7 @@ done
 TYPE="${@:$OPTIND:1}"
 NAME="${@:$OPTIND+1:1}"
 PROJECT_NAME="${@:$OPTIND+2:1}"
-if [[ -z "$PROJECT_NAME" ]]; then PROJECT_NAME="test_$NAME"; fi
+if [[ -z "$PROJECT_NAME" ]]; then PROJECT_NAME="$NAME"; fi
 
 # Determine type directory name
 case $TYPE in
@@ -173,8 +173,19 @@ PROJECT_PALETTES="$PROJECT_PATH/Palettes"
 CLI_INSTALL="$SRC_PATH/.smw/install.sh"
 
 # Templates
+RESOURCES="$PROJECTS_PATH/.resources"
 TEMPLATES="$PROJECTS_PATH/.templates"
 TEMPLATE_VANILLA="$TEMPLATES/vanilla"
+TOOL_VERSIONS="$TEMPLATE_VANILLA/config_versions.bat"
+
+# Tool versions
+while IFS= read -r line; do
+  if [[ $line == set* ]]; then
+    var_name=$(echo "$line" | cut -d' ' -f2 | cut -d'=' -f1 | tr -d '"')
+    var_value=$(echo "$line" | cut -d'=' -f2- | tr -d '"' | tr -d '"' | tr -d '\r')
+    export "$var_name=$var_value"
+  fi
+done < "$TOOL_VERSIONS"
 
 
 #-------------------------------------------------------------------------------
@@ -218,6 +229,15 @@ copy_files() {
   fi
 }
 
+create_project_from_template() {
+  cp -r "$TEMPLATE_VANILLA" "$1"
+  cp -r "$RESOURCES/PIXI_$pixi_version/"* "$1/Sprites"
+  rm -rf "$1/Sprites/asm"
+  cp -r "$RESOURCES/UberASMTool_$uberasmtool_version/"* "$1/UberASM"
+  cp -r "$RESOURCES/GPS_$gps_version/routines/"* "$1/Blocks/routines"
+  cp -r "$RESOURCES/AddmusicK_$amk_version/"* "$1/Music"
+}
+
 
 #-------------------------------------------------------------------------------
 # Project Validation
@@ -238,8 +258,8 @@ if [[ ! -d "$SRC_PATH" ]]; then log_fail "Resource $SRC_PATH doesn't exist"; exi
 if [[ -d "$PROJECT_PATH" ]]; then
   if [[ $OVERRIDE == 1 ]]; then
     log_info "Create project (override)"
-    rm -rf "$PROJECT_PATH";
-    cp -r "$TEMPLATE_VANILLA" "$PROJECT_PATH"
+    rm -rf "$PROJECT_PATH"
+    create_project_from_template "$PROJECT_PATH"
     IS_NEW=1
   elif [[ $SOFT_OVERRIDE == 1 ]]; then
     log_warn "Skip create project: project already exists"
@@ -249,7 +269,7 @@ if [[ -d "$PROJECT_PATH" ]]; then
   fi
 else
   log_info "Create project"
-  cp -r "$TEMPLATE_VANILLA" "$PROJECT_PATH"
+  create_project_from_template "$PROJECT_PATH"
   IS_NEW=1
 fi
 
