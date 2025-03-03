@@ -50,7 +50,7 @@
 !phase_load_duration = $28 ; Preparing to jump (the frog crouches before jumping)
 !phase_land_duration = $04 ; Landing (the frog crouches after landing)
 
-; Whether the frog interacts with Mario fireballs.
+; Whether the frog interacts with Mario's fireballs.
 ;   - 0 = Don't interact, the fireballs ignore the frog.
 ;   - 1 = Frail frogs will be killed, regular frogs will survive. The fireball
 ;     will turn into a puff of smoke.
@@ -58,7 +58,7 @@
 ;     into a puff of smoke.
 !mario_fireballs_interaction = 0
 
-; Whether the frog interacts with Mario fireballs.
+; Whether the frog interacts with Yoshi's fireballs.
 ;   - 0 = The fireballs ignore the frog.
 ;   - 1 = Frail frogs will be killed, regular frogs will survive.
 ;   - 2 = The frog will always be killed.
@@ -68,7 +68,7 @@
 ; bouncing if its X speed is nonzero.
 !min_bounces = 1
 
-; `!damping_x` controls how fast the X speed will decrease after a jump.
+; `!damping_x` controls how quickly the X speed will decrease after a jump.
 ; Every time the frog touches the ground after landing, its X speed will be
 ; halved `!damping_x` times.
 !damping_x = 3
@@ -79,7 +79,7 @@
 ; jump.
 !damping_y = 2
 
-; List of sprites that if they get in contact with the frog, the frog dies
+; List of sprites that, if they come into contact with the frog, the frog dies
 ; (Mario can still stand on it). Add how many as you wish.
 ; The format is $-cnn:
 ;   - c: 0 = regular sprite, 1 = custom sprite.
@@ -89,8 +89,8 @@ deadly_sprites:
     dw $0013, $0014
 .end
 
-; List of sprites that if they get in contact with the frog, the frog will eat
-; them, making them disappear and becoming slow. Add how many as you wish.
+; List of sprites that, if they come into contact with the frog, the frog will
+; eat them, making them disappear and becoming slow. Add how many as you wish.
 ; The format is $pcnn:
 ;   - p: 0 = swallow sprite, 1 = preserve sprite (it will be spit out if the
 ;     frog dies).
