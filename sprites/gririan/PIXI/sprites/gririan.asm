@@ -1,49 +1,49 @@
 ;===============================================================================
-; GIRIAN AND WOO
+; GRIRIAN AND WOO
 ;===============================================================================
 
-; Girian/Woo enemy from Super Ghouls N' Ghosts.
+; Gririan/Woo enemy from Super Ghouls N' Ghosts.
 
-; The Girian/Woo can be in any of the following phases:
+; The Gririan/Woo can be in any of the following phases:
 ; - Idle: It's not moving, and turns to face the player. If it can walk, it will
-;   start walking. If the plkayer is close enough, the Girian can start spitting
+;   start walking. If the player is close enough, the Gririan can start spitting
 ;   fire/ice to the player.
-; - Walk: The Girian walks towards the player. If an obstacle is in the way, it
-;   will go back to idle. If the plkayer is close enough, the Girian can start
+; - Walk: The Gririan walks towards the player. If an obstacle is in the way, it
+;   will go back to idle. If the plkayer is close enough, the Gririan can start
 ;   spitting fire/ice to the player.
-; - Begin spitting: The Girian is preparing to spit fire/ice. In this phase it
+; - Begin spitting: The Gririan is preparing to spit fire/ice. In this phase it
 ;   doesn't walk, but it still turns to face the player.
-; - Spit: The Girian emits fire/ice projectiles in the player's direction. In
+; - Spit: The Gririan emits fire/ice projectiles in the player's direction. In
 ;   this phase it doesn't walk, but it still turns to face the player.
-; - End spitting: The Girian is cooling down after spitting fire/ice. In this
+; - End spitting: The Gririan is cooling down after spitting fire/ice. In this
 ;   phase it doesn't walk, but it still turns to face the player.
-; - Hurt: The Girian has been hurt by the player (or an object thrown by the
+; - Hurt: The Gririan has been hurt by the player (or an object thrown by the
 ;   player), it will be frozen, doesn't move, and doesn't turn to face the
 ;   player. It cannot be hurt again while in this phase, but the player can
-;   still bounce on its head (like a Chuck). After a while the Girian recovers
+;   still bounce on its head (like a Chuck). After a while the Gririan recovers
 ;   and goes back to idle.
-; - Dead: The Girian is dying and falling off screen. It doesn't interact with
+; - Dead: The Gririan is dying and falling off screen. It doesn't interact with
 ;   anything and doesn't move.
 ;
-; The Girian can be hurt by the player jumping on its head or by throwing
+; The Gririan can be hurt by the player jumping on its head or by throwing
 ; sprites at it. If hurt, it will stop doing anything and it will be stun for a
 ; while.
 ;
-; The Girian doesn't interacy with sprites, other than thrown ones.
+; The Gririan doesn't interacy with sprites, other than thrown ones.
 
 
 ;-------------------------------------------------------------------------------
 ; Configuration (extra bytes)
 ;-------------------------------------------------------------------------------
 
-; Extra bit: Girian or Woo. If set (1), use Woo (ice spitting), otherwise
-; use Girian (fire spitting).
+; Extra bit: Gririan or Woo. If set (1), use Woo (ice spitting), otherwise
+; use Gririan (fire spitting).
 
-; Extra Byte 1: Girian's behavior, determining if it moves and/or spits fire/.
+; Extra Byte 1: Gririan's behavior, determining if it moves and/or spits fire/.
 ; The format is %------MS:
-; - `M`: If 1, the Girian moves towards the player, otherwise it always stands
+; - `M`: If 1, the Gririan moves towards the player, otherwise it always stands
 ;   still.
-; - `S`: If 1, Girian spits fire/ice if the player is close enough, otherwise it
+; - `S`: If 1, Gririan spits fire/ice if the player is close enough, otherwise it
 ;   never does.
 ; - `-`: Unused and reserved for future use, should be set to 0.
 
@@ -52,29 +52,29 @@
 ; Configuration (defines)
 ;-------------------------------------------------------------------------------
 
-; Sprite number for "girian_fire.asm", as defined in PIXI's "list.txt".
+; Sprite number for "gririan_fire.asm", as defined in PIXI's "list.txt".
 !fire_sprite = $10
 
 ; Walking speed
 !walk_speed = $10
 
-; How much health the Girian/Woo has when spawned.
+; How much health the Gririan/Woo has when spawned.
 !max_health = $06                       ; $01-$80
 
-; How much damage the Girian/Woo takes.
+; How much damage the Gririan/Woo takes.
 !damage_player          = $02           ; When player jumps on its head
 !damage_sprite          = $02           ; When hit by a throwable (throw block, shell, etc.)
 !damage_yoshi_fireball  = $02           ; When hit by a fireball shot from Yoshi
 !damage_player_fireball = $01           ; When hit by a fireball shot from Fire Mario
 
-; How close (in pixels) the player must be for the Girian to begin spitting
+; How close (in pixels) the player must be for the Gririan to begin spitting
 ; fire/ice.
 !spit_radius = $0040
 
-; How often (in frames) the Girian spawns a fire/ice ball during the spit phase.
+; How often (in frames) the Gririan spawns a fire/ice ball during the spit phase.
 !spit_frequency = $08
 
-; Offset position, relative to the top-left corner of the left-facing Girian,
+; Offset position, relative to the top-left corner of the left-facing Gririan,
 ; for determining where the fire/ice should spawn from (basically, the mouths
 ; position). The code will reflect this offset automatically for when the sprite
 ; is facing right.
@@ -92,27 +92,27 @@
 ; It should be a negative value ($FF-$80, where $FF = -1 and $80 = -128).
 !bounce_speed = $B0
 
-; Sound effect played when Girian has been hurt.
+; Sound effect played when Gririan has been hurt.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 !hurt_sfx      = $28
 !hurt_sfx_bank = $1DFC
 
-; Sound effect played when Girian dies.
+; Sound effect played when Gririan dies.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 !dead_sfx      = $03
 !dead_sfx_bank = $1DF9
 
-; Sound effect played when Girian spits fire.
+; Sound effect played when Gririan spits fire.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 !fire_sfx      = $17
 !fire_sfx_bank = $1DFC
 
-; Sound effect played when Girian spits ice.
+; Sound effect played when Gririan spits ice.
 ; Check https://www.smwcentral.net/?p=memorymap&game=smw&region=ram&address=7E1DF9&context=
 !ice_sfx      = $10
 !ice_sfx_bank = $1DF9
 
-; How many score points the Girian rewards when killed. Check valid values here:
+; How many score points the Gririan rewards when killed. Check valid values here:
 ; https://www.smwcentral.net/?p=memorymap&a=detail&game=smw&region=ram&detail=befc37dd6e48
 !score_points = $00
 
@@ -125,8 +125,8 @@
 ; idle, walk, begin spitting, spit, end spitting, hurt, dead.
 phase_min_duration: db $20, $20, $40, $80, $20, $40, $80
 
-; Color palettes to use for the Girian and Woo respectively.
-!palette_girian = 3                     ; 0-7
+; Color palettes to use for the Gririan and Woo respectively.
+!palette_gririan = 3                     ; 0-7
 !palette_woo    = 7                     ; 0-7
 
 ; Controls determining from which SP slot the game will take the graphics from.
@@ -182,7 +182,7 @@ hurt_frame: db $0C, $0E, $2C, $2E
 ; Sprite index.
 !sprite_index = $15E9|!addr
 
-; Girian's behavior.
+; Gririan's behavior.
 !behavior = !extra_byte_1
 
 ; Blocked status, only updated when the sprite moves horizontally.
@@ -193,7 +193,7 @@ hurt_frame: db $0C, $0E, $2C, $2E
 !health     =  !sprite_misc_1504
 !max_health #= !max_health-1
 
-; Table for the phase in which the Girian/Woo is in and aliases for making the
+; Table for the phase in which the Gririan/Woo is in and aliases for making the
 ; code more readable.
 !phase            = !sprite_misc_1528
 !phase_idle       = 0
@@ -232,7 +232,7 @@ hurt_frame: db $0C, $0E, $2C, $2E
 ; next animation frame.
 !animation_timer = !sprite_misc_1602
 
-; Projectile tables, they should the same as those defined in "girian_fire.asm".
+; Projectile tables, they should the same as those defined in "gririan_fire.asm".
 !fire_type         = !cluster_misc_0f5e
 !fire_phase        = !cluster_misc_0f4a
 !fire_phase_timer  = !cluster_misc_0f72
@@ -307,7 +307,7 @@ render:
 
     LDA.b #!base_oam_props              ;\ Preload properties
     XBA : %load_type()                  ;| The palette varies depending on the
-    LSR #2 : TAX : XBA : ORA .palette,x ;| extra bit being set (Woo) or not (Girian)
+    LSR #2 : TAX : XBA : ORA .palette,x ;| extra bit being set (Woo) or not (Gririan)
     LDX $02 : ORA .flip_x,x : STA $03   ;/ Flip X varies depending on the direction
 
     LDX #$03                            ;> Loop 4 times (sprite is split into 4 parts)
@@ -341,7 +341,7 @@ render:
 
 .pos_x_offset: db $00, $10, $00, $10
 .pos_y_offset: db $00, $00, $10, $10
-.palette: db !palette_girian<<1, !palette_woo<<1
+.palette: db !palette_gririan<<1, !palette_woo<<1
 .flip_x: db $40, $00
 
 
@@ -475,7 +475,7 @@ update_spit_begin:
     LDX.w !sprite_index                 ;> Restore sprite index
     LDA !phase_cooldown,x : BNE +       ;\ If cooldown is over
     %load_phase(spit_shoot)             ;| then shoot fire/ice
-    %load_type() : BEQ ++               ;| and, depending on being Girian or Woo,
+    %load_type() : BEQ ++               ;| and, depending on being Gririan or Woo,
     %play_sfx(ice)                      ;| play the corresponding sound effect
     BRA update_spit_shoot               ;|
 ++  %play_sfx(fire)                     ;|
@@ -582,7 +582,7 @@ endif
 ;-------------------------------------------------------------------------------
 
 ; Spawn a contact graphic star for when the player or another sprite collides
-; with the Girian.
+; with the Gririan.
 macro spawn_star(pos_x_l, pos_x_h, pos_y_l, pos_y_h, offset_x, offset_y)
     LDA <offset_x> : STA $00            ;> X position
     LDA <offset_y> : STA $01            ;> Y position
@@ -612,7 +612,7 @@ interact_with_player:
 
 .check_star
     LDA $1490|!addr : BEQ .check_fall   ;\ If player has a star,
-    LDA $7B : BPL +                     ;\ then kill Girian, making it jump
+    LDA $7B : BPL +                     ;\ then kill Gririan, making it jump
     LDA #$F0 : BRA ++                   ;| The jump's X speed is in the
 +   LDA #$10                            ;| same direction as the player
 ++  STA $09                             ;|
@@ -647,7 +647,7 @@ interact_with_player:
 ; Interact with Sprites
 ;-------------------------------------------------------------------------------
 
-; Interact with other sprites. If then Girian is touched by a thrown sprite or
+; Interact with other sprites. If then Gririan is touched by a thrown sprite or
 ; by a fireball, it takes damage and destroys that sprite.
 ; @return C: 1 if sprite was hurt, 0 otherwise.
 interact_with_sprites:
@@ -662,7 +662,7 @@ interact_with_sprites:
     CLC : RTS                                   ;> No contact
 +   LDA #$00 : STA !sprite_status,y             ;> Destroy sprite
     %spawn_star("!sprite_x_low,y", "!sprite_x_high,y", "!sprite_y_low,y", "!sprite_y_high,y", #$00, #$00)
-    LDA !sprite_speed_x,y : BPL +               ;\ Hurt Girian, making it jump
+    LDA !sprite_speed_x,y : BPL +               ;\ Hurt Gririan, making it jump
     LDA #$F0 : BRA ++                           ;| if killed
 +   LDA #$10                                    ;| The jump's X speed is in the
 ++  STA $09                                     ;| same direction as the sprite
@@ -690,7 +690,7 @@ interact_with_yoshi_fireballs:
 ++  DEY : BPL -                                 ;/ Then go to next sprite
     CLC : RTS                                   ;> No contact
 +   LDA #$00 : STA !sprite_status,y             ;> Destroy sprite
-    STZ $09 : STZ $0A                           ;\ Hurt Girian, making it fall
+    STZ $09 : STZ $0A                           ;\ Hurt Gririan, making it fall
     LDA.b #!damage_yoshi_fireball : JSR hurt    ;/ down if killed
     SEC : RTS
 
@@ -725,13 +725,13 @@ interact_with_player_fireballs:
 ; which makes calculations easier.
 ; @return C: 1 if the player is in range, 0 otherwise.
 is_in_range:
-    %can_spit() : BNE +                 ;\ If Girian cannot spit, then player is
+    %can_spit() : BNE +                 ;\ If Gririan cannot spit, then player is
     CLC : RTS                           ;/ never in range
 
 +   JSL $03B664|!bank                   ;> Get player clipping
 
     LDA !sprite_x_high,x : XBA          ;\ X origin for the spitting range hitbox
-    LDA !sprite_x_low,x                 ;| Position of the Girian plus half its
+    LDA !sprite_x_low,x                 ;| Position of the Gririan plus half its
     REP #$20                            ;| width (to get the center), minus the
     CLC : ADC #$0010                    ;| spitting radius
     SEC : SBC.w #!spit_radius           ;|
@@ -739,7 +739,7 @@ is_in_range:
     STA $04 : XBA : STA $0A             ;/
 
     LDA !sprite_y_high,x : XBA          ;\ Y origin for the spitting range hitbox
-    LDA !sprite_y_low,x                 ;| Position of the Girian plus half its
+    LDA !sprite_y_low,x                 ;| Position of the Gririan plus half its
     REP #$20                            ;| height (to get the center), minus the
     CLC : ADC #$0010                    ;| spitting radius
     SEC : SBC.w #!spit_radius           ;|
@@ -771,7 +771,7 @@ spit:
     %SpawnCluster()
     BCS .return
 
-    %load_type() : LSR #2               ;\ 0 if no extra bit (Girian, fire)
+    %load_type() : LSR #2               ;\ 0 if no extra bit (Gririan, fire)
     STA !fire_type,y                    ;/ 1 if extra bit (Woo, ice)
 
     LDA #$00
@@ -783,12 +783,12 @@ spit:
     STZ $01                             ;> Prepare X offset high byte to 0 for 16-bit load
     REP #$20
     LDA $04                             ;\ Delta X =
-    CLC : ADC $00                       ;| (girian pos x + spit offset x) -
+    CLC : ADC $00                       ;| (gririan pos x + spit offset x) -
     SEC : SBC $94                       ;| (player pos x + half player width)
     CLC : ADC.w #$0008                  ;|
     STA $00                             ;/
     LDA $06                             ;\ Delta Y =
-    CLC : ADC.w #!spit_offset_y         ;| (girian pos y + spit offset y) -
+    CLC : ADC.w #!spit_offset_y         ;| (gririan pos y + spit offset y) -
     SEC : SBC $96                       ;| (player pos y - half player height)
     SEC : SBC.w #$0008                  ;| Not adjusted for big Mario, but who
     STA $02                             ;/ cares, it's good enough

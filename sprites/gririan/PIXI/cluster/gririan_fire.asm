@@ -1,8 +1,8 @@
 ;===============================================================================
-; GIRIAN'S AND WOO'S FIRE AND ICE
+; GRIRIAN'S AND WOO'S FIRE AND ICE
 ;===============================================================================
 
-; Fire and ice projectiles spit by Girian and Woo enemies from Super Ghouls N'
+; Fire and ice projectiles spit by Gririan and Woo enemies from Super Ghouls N'
 ; Ghosts.
 
 ; The projectile has three phases, which can be customized to have different
