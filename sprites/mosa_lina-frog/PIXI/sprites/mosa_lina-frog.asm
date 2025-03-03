@@ -32,10 +32,10 @@
 ; Extra bit: Frog type. 0 = regular, 1 = frail.
 
 ; Extra Byte 1: The frog's behavior. The format is %------id:
-; - `d`: Initial direction.
+;   - d: Initial direction.
 ;       0 = right
 ;       1 = left
-; - `i`: Controls whether the frog inverts directions after landing.
+;   - i: Controls whether the frog inverts directions after landing.
 ;       0 = don't invert direction
 ;       1 = invert direction (jump back and forth)
 
