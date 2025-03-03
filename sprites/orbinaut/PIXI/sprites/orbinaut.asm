@@ -297,7 +297,7 @@ spawn_spike_ball:
 +   PHX : TYX
     LDA.b #!ball_number                        ;\ Set sprite number
     STA !9E,x : STA !7FAB9E,x                  ;/
-    JSL $07F7D2|!addr                          ; Reset sprite tables
+    JSL $07F7D2|!bank                          ; Reset sprite tables
     JSL $0187A7|!bank                          ; Reset (other?) sprite tables
     LDA #$08 : STA !7FAB10,x                   ; Set extra bits
     LDA #$01 : STA !14C8,x                     ; Make sprite alive
@@ -305,7 +305,9 @@ spawn_spike_ball:
 
     TXA : STA !ball_orbinaut,y                 ; Save orbinaut as spike ball's parent
     LDA !sprite_x_low,x : STA !sprite_x_low,y  ; Same X position as the orbinaut
-    LDA !sprite_x_low,x : STA !sprite_x_low,y  ; Same Y position as the orbinaut
+    LDA !sprite_x_high,x : STA !sprite_x_high,y
+    LDA !sprite_y_low,x : STA !sprite_y_low,y  ; Same Y position as the orbinaut
+    LDA !sprite_y_high,x : STA !sprite_y_high,y
     LDA #$00 : STA !sprite_speed_x,y           ; X speed is zero
     STA !sprite_speed_y,y                      ; Y speed is zero
     STA !ball_eaten,y                          ; Not eaten at first

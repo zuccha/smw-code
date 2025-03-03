@@ -1,29 +1,36 @@
 # Changelog
 
+## [1.1.2] - 2025-03-03
+
+### Fixed
+
+- Set initial position for spike ball correctly after spawning.
+- Reset spike ball sprite tables correctly after spawning.
+
 ## [1.1.1] - 2024-02-10
 
 ### Fixed
 
-- Glitched graphics when killed (by MarioFanGamer).
-- Interaction with spike ball sprite when it's being eaten by Yoshi (by
+- Fix glitched graphics when killed (by MarioFanGamer).
+- Fix interaction with spike ball sprite when it's being eaten by Yoshi (by
   MarioFanGamer).
-- Documentation describing how to customize the spike ball sprite's number in
-  README and in `orbinaut.asm`.
+- Correct documentation describing how to customize the spike ball sprite's
+  number in README and in `orbinaut.asm`.
 
 ## [1.1.0] - 2023-12-24
 
 ### Added
 
-- Added palmask for Orbinaut's palette.
+- Add palmask for Orbinaut's palette.
 - Allow to configure spike ball's radius from orbinaut's center via extra byte.
 
 ### Changed
 
-- Moved Orbinaut GFX tile configuration in ASM define instead of using Extra
+- Move Orbinaut GFX tile configuration in ASM define instead of using Extra
   Property Byte 1.
-- Moved Orbinaut' Spike Ball GFX tile configuration in ASM define instead of
+- Move Orbinaut' Spike Ball GFX tile configuration in ASM define instead of
   using Extra Property Byte 1.
-- Moved Orbinaut's Spike Ball tile number configuration in ASM define instead of
+- Move Orbinaut's Spike Ball tile number configuration in ASM define instead of
   using Extra Property Byte 2.
 
 ### Fixed
