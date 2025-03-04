@@ -309,7 +309,7 @@ endmacro
 ; @param <sfx> Name of the sound effect, corresponding `!<sfx>_sfx` and
 ; `!<sfx>_sfx_bank` defines must exist.
 macro play_sfx(sfx)
-    if !<sfx>_sfx != 0 : LDA #!<sfx>_sfx : STA !<sfx>_sfx_bank|!addr
+    if !<sfx>_sfx != 0 : LDA #!<sfx>_sfx : STA !<sfx>_sfx_bank|!addr : endif
 endmacro
 
 ; Jump to a subroutine that RTSs as if it RTLs.
