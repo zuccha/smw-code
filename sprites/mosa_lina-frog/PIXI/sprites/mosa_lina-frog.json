@@ -59,20 +59,121 @@
   "Map16": "",
   "Displays": [
     {
-      "X": 0,
-      "Y": 0,
-      "Description": "Regular frog from Mosa Lina.",
+      "Value": 0,
+      "Index": 0,
+      "Description": "Regular frog from Mosa Lina. It can carry Mario on its head.",
       "ExtraBit": false,
       "Tiles": [
         {
-          "X offset": 16,
-          "Y offset": 16,
-          "map16 tile": 153
-        },
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 82
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 0,
+      "Index": 0,
+      "Description": "Red version of the frog from Mosa Lina. It can carry Mario on its head, but it will be killed by a spin-jump.",
+      "ExtraBit": true,
+      "Tiles": [
         {
           "X offset": 0,
-          "Y offset": -16,
-          "map16 tile": 294
+          "Y offset": 0,
+          "map16 tile": 83
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 1,
+      "Index": 0,
+      "Description": "Regular frog from Mosa Lina. It can carry Mario on its head.",
+      "ExtraBit": false,
+      "Tiles": [
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 80
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 1,
+      "Index": 0,
+      "Description": "Red version of the frog from Mosa Lina. It can carry Mario on its head, but it will be killed by a spin-jump.",
+      "ExtraBit": true,
+      "Tiles": [
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 81
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 2,
+      "Index": 0,
+      "Description": "Regular frog from Mosa Lina. It can carry Mario on its head. It switches directions after jumping.",
+      "ExtraBit": false,
+      "Tiles": [
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 82
+        },
+        {
+          "X offset": 4,
+          "Y offset": -8,
+          "map16 tile": 265
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 2,
+      "Index": 0,
+      "Description": "Red version of the frog from Mosa Lina. It can carry Mario on its head, but it will be killed by a spin-jump. It switches directions after jumping.",
+      "ExtraBit": true,
+      "Tiles": [
+        {
+          "X offset": 0,
+          "Y offset": 0,
+          "map16 tile": 83
+        },
+        {
+          "X offset": 4,
+          "Y offset": -8,
+          "map16 tile": 265
+        }
+      ],
+      "GFXInfo": {},
+      "DisplayText": "",
+      "UseText": false
+    },
+    {
+      "Value": 3,
+      "Index": 0,
+      "Description": "Regular frog from Mosa Lina. It can carry Mario on its head. It switches directions after jumping.",
+      "ExtraBit": false,
+      "Tiles": [
+        {
+          "X offset": 4,
+          "Y offset": -8,
+          "map16 tile": 265
         },
         {
           "X offset": 0,
@@ -85,15 +186,15 @@
       "UseText": false
     },
     {
-      "X": 0,
-      "Y": 0,
-      "Description": "Frail frog version of the normal frog from Mosa Lina.",
+      "Value": 3,
+      "Index": 0,
+      "Description": "Red version of the frog from Mosa Lina. It can carry Mario on its head, but it will be killed by a spin-jump. It switches directions after jumping.",
       "ExtraBit": true,
       "Tiles": [
         {
-          "X offset": 0,
-          "Y offset": -16,
-          "map16 tile": 295
+          "X offset": 4,
+          "Y offset": -8,
+          "map16 tile": 265
         },
         {
           "X offset": 0,
@@ -268,5 +369,5 @@
       "Extra Property Byte 12": 0
     }
   ],
-  "DisplayType": "XY"
+  "DisplayType": "ExByte"
 }
