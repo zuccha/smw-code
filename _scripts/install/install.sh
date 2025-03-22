@@ -230,12 +230,16 @@ copy_files() {
 }
 
 create_project_from_template() {
+  # $1 = project path, $2 = project name
   cp -r "$TEMPLATE_VANILLA" "$1"
   cp -r "$RESOURCES/PIXI_$pixi_version/"* "$1/Sprites"
   rm -rf "$1/Sprites/asm"
   cp -r "$RESOURCES/UberASMTool_$uberasmtool_version/"* "$1/UberASM"
   cp -r "$RESOURCES/GPS_$gps_version/routines/"* "$1/Blocks/routines"
   cp -r "$RESOURCES/AddmusicK_$amk_version/"* "$1/Music"
+  mv "$1/smw-vanilla.smc" "$1/smw-${2}-vanilla.smc"
+  mv "$1/smw-fastrom.smc" "$1/smw-${2}-fastrom.smc"
+  mv "$1/smw-sa1.smc" "$1/smw-${2}-sa1.smc"
 }
 
 
@@ -259,7 +263,7 @@ if [[ -d "$PROJECT_PATH" ]]; then
   if [[ $OVERRIDE == 1 ]]; then
     log_info "Create project (override)"
     rm -rf "$PROJECT_PATH"
-    create_project_from_template "$PROJECT_PATH"
+    create_project_from_template "$PROJECT_PATH" "$PROJECT_NAME"
     IS_NEW=1
   elif [[ $SOFT_OVERRIDE == 1 ]]; then
     log_warn "Skip create project: project already exists"
@@ -269,7 +273,7 @@ if [[ -d "$PROJECT_PATH" ]]; then
   fi
 else
   log_info "Create project"
-  create_project_from_template "$PROJECT_PATH"
+  create_project_from_template "$PROJECT_PATH" "$PROJECT_NAME"
   IS_NEW=1
 fi
 
