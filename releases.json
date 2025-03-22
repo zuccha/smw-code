@@ -27,6 +27,10 @@
     "orbinaut": {
       "name": "Orbinaut",
       "version": "1.1.2"
+    },
+    "mosa_lina-frog": {
+      "name": "Mosa Lina - Frog",
+      "version": "1.0.0"
     }
   },
   "uberasm": {

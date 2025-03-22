@@ -15,6 +15,7 @@ A collection of SMW resources.
 | [Gririan / Woo](./sprites/gririan)                                           | [v2.0.1](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgririan%2F2.0.1/gririan-2.0.1.zip)                         |
 | [Gunstar Heroes Bomb](./sprites/gunstar_heroes_bomb)                         | [v2.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fgunstar_heroes_bomb%2F2.0.0/gunstar_heroes_bomb-2.0.0.zip) |
 | [Magikoopa Shooting Bowser Statue's Fireballs](./sprites/magikoopa_fireball) | [v1.1.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fmagikoopa_fireball%2F1.1.0/magikoopa_fireball-1.1.0.zip)   |
+| [Mosa Lina - Frog](./sprites/mosa_lina-frog)                                 | [v1.0.0](https://github.com/zuccha/smw-code/releases/download/sprite%2Fmosa_lina-frog%2F1.0.0/mosa_lina-frog-1.0.0.zip)           |
 | [Orbinaut](./sprites/orbinaut)                                               | [v1.1.2](https://github.com/zuccha/smw-code/releases/download/sprite%2Forbinaut%2F1.1.2/orbinaut-1.1.2.zip)                       |
 
 ## UberASM
