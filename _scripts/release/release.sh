@@ -430,14 +430,14 @@ if [[ "$FLAG_PHASE_SUMMARY" != 1 ]]; then
   log_warn "Skip summary: disabled"
 elif [[ -z $(gh release list | grep "$GIT_TAG") ]]; then
   log_warn "Skip summary: no release for $GIT_TAG"
-elif [[ $(jq ".$TYPE_DIR.$NAME.version" "$SUMMARY_JSON") == "\"$VERSION\"" ]]; then
+elif [[ $(jq ".\"$TYPE_DIR\".\"$NAME\".version" "$SUMMARY_JSON") == "\"$VERSION\"" ]]; then
   log_warn "Skip summary: already up to date"
 else
   log_info "Update summary"
 
   # Update JSON
   GH_TITLE="$(deno run --allow-env --allow-read "$GH_GET_TITLE" "$ROOT" "$TYPE" "$NAME")"
-  jq ".$TYPE_DIR.$NAME += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" "$SUMMARY_JSON" > "$SUMMARY_JSON.temp"
+  jq ".\"$TYPE_DIR\".\"$NAME\" += {\"name\":\"$GH_TITLE\",\"version\":\"$VERSION\"}" "$SUMMARY_JSON" > "$SUMMARY_JSON.temp"
   rm "$SUMMARY_JSON"
   mv "$SUMMARY_JSON.temp" "$SUMMARY_JSON"
 
