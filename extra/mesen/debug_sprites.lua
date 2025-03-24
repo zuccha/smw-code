@@ -7,7 +7,7 @@
 
 -- Notes: 
 --   - The script requires PIXI to be installed in the ROM.
---   - The script work only for normal sprites, not cluster, extended, etc.
+--   - The script works only for normal sprites, not cluster, extended, etc.
 
 -- Features:
 --   - Draw clipping box around Mario.
@@ -472,7 +472,7 @@ MONOSPACE_FONT = {
      510761035232,    4635039744, -- &
      984247959552,    8858370048, -- '
      509713541568,    4572057600, -- (
-     986578770816,    8728485888, -- )
+     493289385408,    4364242944, -- )
       15957088224,     149039104, -- *
       15957080064,     149028864, -- +
            486108,          4352, -- ,
@@ -524,7 +524,7 @@ MONOSPACE_FONT = {
     1084407662560,   15103965184, -- Z
     1050879413184,   13162000384, -- [
      984313345191,    8862697536, -- \
-    1051003276224,   13023457280, -- ]
+     525501638112,    6511728640, -- ]
      510764515328,    4630511616, -- ^
           1034208,         14336, -- _
      986582089728,    8724152320, -- `
