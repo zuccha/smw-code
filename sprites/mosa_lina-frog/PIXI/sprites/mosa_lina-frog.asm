@@ -489,7 +489,9 @@ update:
     BEQ .check_on_screen                    ;/ by Yoshi
 
 .spat_by_yoshi
-    LDA #$08 : STA !sprite_status,x         ;> Restore normal behavior
+    LDA #$08 : STA !sprite_status,x         ;\
+    LDA #!phase_jump : STA !phase,x         ;| Make sprite fall
+    STZ !bounce_count,x                     ;/
 
 .check_on_screen
     LDA !phase,x                            ;\
@@ -516,7 +518,6 @@ update:
 
 .return
     RTS
-
 
 ;-------------------------------------------------------------------------------
 ; Handle Phases

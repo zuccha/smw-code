@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2025-03-25
+
+### Fixed
+
+- Set horizontal speed correctly when frog is spat by Yoshi.
+
 ## [1.0.0] - 2025-03-22
 
 ### Added
